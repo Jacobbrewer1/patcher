@@ -1,0 +1,4 @@
+all: true
+inpackage: true
+recursive: true
+exclude: vendor

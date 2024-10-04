@@ -1,0 +1,33 @@
+[clog]
+# A repository link with the trailing '.git' which will be used to generate
+# all commit and issue links
+repository = "https://github.com/Jacobbrewer1/vaulty.git"
+
+# A constant release title
+subtitle = "Release Changes"
+
+# specify the style of commit links to generate, defaults to "github" if omitted
+link-style = "github"
+
+# This sets an output file only! If it exists already, new changelog data will be
+# prepended, if not it will be created.
+#
+# This is useful in conjunction with the infile field if you have a separate file
+# that you would like to append after newly created clog data
+#
+# Defaults to stdout when omitted
+outfile = "changelog.md"
+
+# This sets the output format. There are two options "json" or "markdown" and
+# defaults to "markdown" when omitted
+output-format = "markdown"
+
+# If you use tags, you can set the following if you wish to only pick
+# up changes since your latest tag
+from-latest-tag = true
+
+[sections]
+Refactors = ["refactor"]
+Chores = ["chore"]
+Documentation = ["doc", "docs"]
+Features = ["feat", "feature"]

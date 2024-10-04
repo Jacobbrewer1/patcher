@@ -1,0 +1,27 @@
+name: Task
+description: An individual task to be completed
+title: "Task: "
+labels: [ "task" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this task!
+  - type: textarea
+    id: whats-the-task
+    attributes:
+      label: What is the task?
+      description: What is it that you want to do?
+      placeholder: Tell us what you want to do!
+      value: "I want to do a thing!"
+    validations:
+      required: true
+  - type: textarea
+    id: whats-the-why
+    attributes:
+      label: Why is this task important?
+      description: Why do you want to do this?
+      placeholder: Tell us why you want to do this!
+      value: "I want to do this because..."
+    validations:
+      required: true
