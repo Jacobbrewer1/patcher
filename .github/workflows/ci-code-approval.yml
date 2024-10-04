@@ -92,7 +92,7 @@ jobs:
         run: git config --global url."https://x:${GITHUB_API_TOKEN}@github.com".insteadOf "https://github.com"
 
       - name: "Run Code Generation"
-        run: make codegen
+        run: go generate ./...
 
       - name: "fmt"
         run: go fmt ./...
