@@ -57,7 +57,7 @@ func (p *PersonContactJoiner) Join() (string, []any) {
 }
 
 func main() {
-	jsonStr := `{"name": "john", "age": 25, "email": "john@exampletwo.com"}`
+	const jsonStr = `{"name": "john", "age": 25, "email": "john@exampletwo.com"}`
 
 	person := new(Person)
 	if err := json.Unmarshal([]byte(jsonStr), person); err != nil {
