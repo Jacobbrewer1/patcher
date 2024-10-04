@@ -1,0 +1,102 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: "Code Approval"
+
+on:
+  merge_group:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    types:
+      - opened
+      - reopened
+      - synchronize # source branch updated
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  golang-ci-lint:
+    name: Golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      # Sets up golang
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VERSION }}
+          cache-dependency-path: "**/*.sum"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: "Configure git for private modules"
+        env:
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git config --global url."https://x:${GITHUB_API_TOKEN}@github.com".insteadOf "https://github.com"
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          only-new-issues: true
+          args: --verbose --timeout 5m
+
+  code-approval:
+    name: "Code Approval"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VERSION }}
+          cache-dependency-path: "**/*.sum"
+
+      - name: "Configure git for private modules"
+        env:
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git config --global url."https://x:${GITHUB_API_TOKEN}@github.com".insteadOf "https://github.com"
+
+      - name: Make
+        run: make pr-approval
+
+  codegen-generation:
+    name: "Mock Generation"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VERSION }}
+          cache-dependency-path: "**/*.sum"
+
+      - name: "Configure git for private modules"
+        env:
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git config --global url."https://x:${GITHUB_API_TOKEN}@github.com".insteadOf "https://github.com"
+
+      - name: "Run Code Generation"
+        run: make codegen
+
+      - name: "fmt"
+        run: go fmt ./...
+
+      # Do not run this is the PR is created by dependabot
+      - name: "Check for changes"
+        run: git diff --exit-code

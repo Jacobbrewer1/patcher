@@ -1,0 +1,66 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: "Create Release"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to tag the release with"
+        required: true
+        type: string
+
+concurrency:
+  group: 'create-release'
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  discussions: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create Changelog
+        run: |
+          wget "https://github.com/clog-tool/clog-cli/releases/download/v0.9.3/clog-v0.9.3-x86_64-unknown-linux-gnu.tar.gz"
+          tar xvzf clog-v0.9.3-x86_64-unknown-linux-gnu.tar.gz
+          ./clog -c ./.clog.toml --setversion ${{ github.event.inputs.version }}
+
+      - name: Copy Changelog to Environment
+        run: |
+          echo 'CHANGELOG<<EOF' >> $GITHUB_ENV
+          cat changelog.md >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+
+      - name: Create tag
+        uses: actions/github-script@v5
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ github.event.inputs.version }}',
+              sha: context.sha
+            })
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.event.inputs.version }}
+          body: ${{ env.CHANGELOG }}
+          tag_name: ${{ github.event.inputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+          make_latest: true

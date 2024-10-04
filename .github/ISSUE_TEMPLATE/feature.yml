@@ -1,0 +1,27 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "Feature: "
+labels: [ "enhancement" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: Please describe the feature you would like to see added.
+      placeholder: I would like to see...
+      value: "I would like to see..."
+    validations:
+      required: true
+  - type: textarea
+    id: feature-impact
+    attributes:
+      label: Feature Impact
+      description: Please describe how you think this feature will impact the project.
+      placeholder: I think this feature will impact the project by...
+      value: "I think this feature will impact the project by..."
+    validations:
+      required: true
