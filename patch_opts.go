@@ -27,6 +27,9 @@ func WithTable(table string) PatchOpt {
 func WithWhere(where Wherer) PatchOpt {
 	return func(s *SQLPatch) {
 		fwSQL, fwArgs := where.Where()
+		if fwArgs == nil {
+			fwArgs = []any{}
+		}
 		s.where.WriteString("AND ")
 		s.where.WriteString(strings.TrimSpace(fwSQL))
 		s.where.WriteString("\n")
@@ -38,6 +41,9 @@ func WithWhere(where Wherer) PatchOpt {
 func WithJoin(join Joiner) PatchOpt {
 	return func(s *SQLPatch) {
 		fjSQL, fjArgs := join.Join()
+		if fjArgs == nil {
+			fjArgs = []any{}
+		}
 		s.joinSql.WriteString(strings.TrimSpace(fjSQL))
 		s.joinSql.WriteString("\n")
 		s.joinArgs = append(s.joinArgs, fjArgs...)
