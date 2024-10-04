@@ -72,7 +72,7 @@ jobs:
         run: make pr-approval
 
   codegen-generation:
-    name: "MocCodek Generation"
+    name: "Code Generation"
     runs-on: ubuntu-latest
     permissions:
       contents: write
