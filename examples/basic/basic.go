@@ -12,14 +12,6 @@ type Person struct {
 	Name *string `db:"name"`
 }
 
-var jsonStr = `
-{
-	"id": 1,
-	"name": null,
-	"age": 27
-}
-`
-
 type PersonWhere struct {
 	ID *int `db:"id"`
 }
@@ -35,6 +27,8 @@ func (p *PersonWhere) Where() (string, []any) {
 }
 
 func main() {
+	const jsonStr = `{"id": 1, "name": "john"}`
+
 	person := new(Person)
 	if err := json.Unmarshal([]byte(jsonStr), person); err != nil {
 		panic(err)

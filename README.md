@@ -45,7 +45,7 @@ func (p *PersonWhere) Where() (string, []any) {
 }
 
 func main() {
-	jsonStr := `{"name": "Jacob", "age": 25}`
+	const jsonStr = `{"name": "John", "age": 25}`
 
 	person := new(Person)
 	if err := json.Unmarshal([]byte(jsonStr), person); err != nil {
@@ -81,7 +81,7 @@ WHERE 1
 with the args:
 
 ```
-["Jacob", 25, 1]
+["John", 25, 1]
 ```
 
 ### Joins
