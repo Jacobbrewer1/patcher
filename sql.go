@@ -76,12 +76,13 @@ func (s *SQLPatch) patchGen(resource any) {
 		case reflect.String:
 			s.args = append(s.args, val.String())
 		case reflect.Bool:
+			boolArg := 0
 			if val.Bool() {
-				s.args = append(s.args, 1)
-			} else {
-				s.args = append(s.args, 0)
+				boolArg = 1
 			}
+			s.args = append(s.args, boolArg)
 		default:
+			// This is intentionally a panic as this is a programming error and should be fixed by the developer
 			panic("unhandled default case")
 		}
 	}
