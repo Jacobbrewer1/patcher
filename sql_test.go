@@ -129,7 +129,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 		WithWhere(mw),
 	)
 	s.NoError(err)
-	s.Equal("\n\t\tUPDATE test_table\n\t\t\n\t\tSET id = ?, name = ?\n\t\tWHERE 1\n\t\tAND age = ?\n\n\t", sqlStr)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE 1\nAND age = ?\n", sqlStr)
 	s.Equal([]any{int64(1), "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
@@ -158,7 +158,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleWhere() {
 		WithWhere(mw2),
 	)
 	s.NoError(err)
-	s.Equal("\n\t\tUPDATE test_table\n\t\t\n\t\tSET id = ?, name = ?\n\t\tWHERE 1\n\t\tAND age = ?\nAND name = ?\n\n\t", sqlStr)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE 1\nAND age = ?\nAND name = ?\n", sqlStr)
 	s.Equal([]any{int64(1), "test", 18, "john"}, args)
 
 	mw.AssertExpectations(s.T())
@@ -187,7 +187,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_withJoin() {
 		WithJoin(mj),
 	)
 	s.NoError(err)
-	s.Equal("\n\t\tUPDATE test_table\n\t\tJOIN table2 ON table1.id = table2.id\n\n\t\tSET id = ?, name = ?\n\t\tWHERE 1\n\t\tAND age = ?\n\n\t", sqlStr)
+	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE 1\nAND age = ?\n", sqlStr)
 	s.Equal([]any{int64(1), "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
@@ -220,7 +220,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleJoin() {
 		WithJoin(mj2),
 	)
 	s.NoError(err)
-	s.Equal("\n\t\tUPDATE test_table\n\t\tJOIN table2 ON table1.id = table2.id\nJOIN table3 ON table1.id = table3.id\n\n\t\tSET id = ?, name = ?\n\t\tWHERE 1\n\t\tAND age = ?\n\n\t", sqlStr)
+	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nJOIN table3 ON table1.id = table3.id\nSET id = ?, name = ?\nWHERE 1\nAND age = ?\n", sqlStr)
 	s.Equal([]any{int64(1), "test", 18}, args)
 
 	mw.AssertExpectations(s.T())

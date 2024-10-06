@@ -97,17 +97,26 @@ func (s *SQLPatch) GenerateSQL() (string, []any, error) {
 		return "", nil, fmt.Errorf("validate perform patch: %w", err)
 	}
 
-	sqlStr := fmt.Sprintf(`
-		UPDATE %s
-		%s
-		SET %s
-		WHERE 1
-		%s
-	`, s.table, s.joinSql.String(), strings.Join(s.fields, ", "), s.where.String())
+	sqlBuilder := new(strings.Builder)
+	sqlBuilder.WriteString("UPDATE ")
+	sqlBuilder.WriteString(s.table)
+	sqlBuilder.WriteString("\n")
+
+	if s.joinSql.String() != "" {
+		sqlBuilder.WriteString(s.joinSql.String())
+	}
+
+	sqlBuilder.WriteString("SET ")
+	sqlBuilder.WriteString(strings.Join(s.fields, ", "))
+	sqlBuilder.WriteString("\n")
+
+	sqlBuilder.WriteString("WHERE 1\n")
+	sqlBuilder.WriteString(s.where.String())
+
 	args := append(s.joinArgs, s.args...)
 	args = append(args, s.whereArgs...)
 
-	return sqlStr, args, nil
+	return sqlBuilder.String(), args, nil
 }
 
 func PerformPatch(resource any, opts ...PatchOpt) (sql.Result, error) {
