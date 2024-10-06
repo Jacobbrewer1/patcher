@@ -24,8 +24,11 @@ var (
 )
 
 type SQLPatch struct {
+	// fields is the fields to update in the SQL statement
 	fields []string
-	args   []any
+
+	// args is the arguments to use in the SQL statement
+	args []any
 
 	// db is the database connection to use
 	db *sql.DB
