@@ -21,18 +21,18 @@ func (s *loadDiffSuite) TestLoadDiff_Success() {
 	}
 
 	old := testStruct{
-		Name: "Jacob",
+		Name: "John",
 		Age:  25,
 	}
 
 	n := testStruct{
-		Name: "Jacob Brewer",
+		Name: "John Smith",
 		Age:  26,
 	}
 
 	err := loadDiff(&old, &n)
 	s.NoError(err)
-	s.Equal("Jacob Brewer", old.Name)
+	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
 }
 
@@ -43,18 +43,18 @@ func (s *loadDiffSuite) TestLoadDiff_Success_ZeroValue() {
 	}
 
 	old := testStruct{
-		Name: "Jacob",
+		Name: "John",
 		Age:  25,
 	}
 
 	n := testStruct{
-		Name: "Jacob Brewer",
+		Name: "John Smith",
 		Age:  0,
 	}
 
 	err := loadDiff(&old, &n)
 	s.NoError(err)
-	s.Equal("Jacob Brewer", old.Name)
+	s.Equal("John Smith", old.Name)
 	s.Equal(25, old.Age)
 }
 
@@ -65,7 +65,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_NoNewValue() {
 	}
 
 	old := testStruct{
-		Name: "Jacob",
+		Name: "John",
 		Age:  25,
 	}
 
@@ -73,7 +73,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_NoNewValue() {
 
 	err := loadDiff(&old, &n)
 	s.NoError(err)
-	s.Equal("Jacob", old.Name)
+	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
 }
 
@@ -84,7 +84,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_OneNewField() {
 	}
 
 	old := testStruct{
-		Name: "Jacob",
+		Name: "John",
 		Age:  25,
 	}
 
@@ -94,7 +94,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_OneNewField() {
 
 	err := loadDiff(&old, &n)
 	s.NoError(err)
-	s.Equal("Jacob", old.Name)
+	s.Equal("John", old.Name)
 	s.Equal(26, old.Age)
 }
 
@@ -106,7 +106,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct() {
 	}
 
 	old := testStruct{
-		Name: "Jacob",
+		Name: "John",
 		Age:  25,
 	}
 
@@ -119,7 +119,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct() {
 
 	err := loadDiff(&old, &n)
 	s.NoError(err)
-	s.Equal("Jacob", old.Name)
+	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
 	s.Equal("Sarah", old.Partner.Name)
 	s.Equal(24, old.Partner.Age)
@@ -133,12 +133,12 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStructWithNewValue() {
 	}
 
 	old := testStruct{
-		Name: "Jacob",
+		Name: "John",
 		Age:  25,
 	}
 
 	n := testStruct{
-		Name: "Jacob Brewer",
+		Name: "John Smith",
 		Partner: &testStruct{
 			Name: "Sarah",
 			Age:  24,
@@ -150,7 +150,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStructWithNewValue() {
 
 	err := loadDiff(&old, &n)
 	s.NoError(err)
-	s.Equal("Jacob Brewer", old.Name)
+	s.Equal("John Smith", old.Name)
 	s.Equal(25, old.Age)
 	s.Equal("Sarah Brewer", old.Partner.Name)
 	s.Equal(25, old.Partner.Age)
@@ -169,14 +169,14 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedInheritedStruct() {
 
 	old := testStruct2{
 		TestStruct: &TestStruct{
-			Name: "Jacob",
+			Name: "John",
 			Age:  25,
 		},
 	}
 
 	n := testStruct2{
 		TestStruct: &TestStruct{
-			Name: "Jacob Brewer",
+			Name: "John Smith",
 			Age:  26,
 		},
 		Partner: &TestStruct{
@@ -187,7 +187,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedInheritedStruct() {
 
 	err := loadDiff(&old, &n)
 	s.NoError(err)
-	s.Equal("Jacob Brewer", old.Name)
+	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
 	s.Equal("Sarah", old.Partner.Name)
 	s.Equal(24, old.Partner.Age)
@@ -200,12 +200,12 @@ func (s *loadDiffSuite) TestLoadDiff_FailureNotPointer() {
 	}
 
 	old := testStruct{
-		Name: "Jacob",
+		Name: "John",
 		Age:  25,
 	}
 
 	n := testStruct{
-		Name: "Jacob Brewer",
+		Name: "John Smith",
 		Age:  26,
 	}
 
@@ -223,7 +223,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_NilOldField() {
 	}
 
 	old := testStruct{
-		Name:    "Jacob",
+		Name:    "John",
 		Age:     25,
 		Partner: nil,
 	}
@@ -237,7 +237,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_NilOldField() {
 
 	err := loadDiff(&old, &n)
 	s.NoError(err)
-	s.Equal("Jacob", old.Name)
+	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
 	s.Equal("Sarah", old.Partner.Name)
 	s.Equal(24, old.Partner.Age)
@@ -326,16 +326,16 @@ func (s *loadDiffSuite) TestLoadDiff_Failure_UnsupportedType() {
 	}
 
 	old := testStruct{
-		Name:    "Jacob",
+		Name:    "John",
 		Updates: make(chan string),
 	}
 
 	n := testStruct{
-		Name: "Jacob Brewer",
+		Name: "John Smith",
 	}
 
 	err := loadDiff(&old, &n)
 	s.NoError(err)
-	s.Equal("Jacob Brewer", old.Name)
+	s.Equal("John Smith", old.Name)
 	s.NotNil(old.Updates) // Channel should not be nil as it started as a non-nil channel
 }
