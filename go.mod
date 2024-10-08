@@ -1,6 +1,6 @@
 module github.com/Jacobbrewer1/patcher
 
-go 1.23
+go 1.22
 
 require (
 	github.com/gorilla/mux v1.8.1
