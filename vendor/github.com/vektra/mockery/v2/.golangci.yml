@@ -13,7 +13,7 @@ linters:
     - typecheck
     - contextcheck
     - durationcheck
-    - copyloopvar
+    - exportloopref
     - gocheckcompilerdirectives
     - gosec
     - loggercheck
