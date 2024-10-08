@@ -133,7 +133,7 @@ func (s *SQLPatch) PerformPatch() (sql.Result, error) {
 	return s.db.Exec(s.GenerateSQL())
 }
 
-func NewDiffSqlPatch[T any](old, newT T, opts ...PatchOpt) (*SQLPatch, error) {
+func NewDiffSQLPatch[T any](old, newT T, opts ...PatchOpt) (*SQLPatch, error) {
 	if !isPointerToStruct(old) || !isPointerToStruct(newT) {
 		return nil, ErrInvalidType
 	}
