@@ -225,3 +225,201 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleJoin() {
 
 	mw.AssertExpectations(s.T())
 }
+
+type newDiffSqlPatchSuite struct {
+	suite.Suite
+}
+
+func TestNewDiffSqlPatchSuite(t *testing.T) {
+	suite.Run(t, new(newDiffSqlPatchSuite))
+}
+
+func (s *newDiffSqlPatchSuite) TestNewDiffSqlPatch_Success() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test"),
+	}
+
+	obj2 := testObj{
+		Id:   utils.Ptr(2),
+		Name: utils.Ptr("test2"),
+	}
+
+	patch, err := NewDiffSqlPatch(&obj, &obj2)
+	s.NoError(err)
+
+	s.NotNil(patch)
+	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
+	s.Equal([]any{int64(2), "test2"}, patch.args)
+}
+
+func (s *newDiffSqlPatchSuite) TestNewDiffSqlPatch_Success_singleFieldUpdated() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+		Desc string  `db:"desc"`
+	}
+
+	obj := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test"),
+		Desc: "desc",
+	}
+
+	obj2 := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test2"),
+		Desc: "desc",
+	}
+
+	patch, err := NewDiffSqlPatch(&obj, &obj2)
+	s.NoError(err)
+
+	s.NotNil(patch)
+	s.Equal([]string{"name = ?"}, patch.fields)
+	s.Equal([]any{"test2"}, patch.args)
+}
+
+func (s *newDiffSqlPatchSuite) TestNewDiffSqlPatch_Success_noChange() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test"),
+	}
+
+	obj2 := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test"),
+	}
+
+	patch, err := NewDiffSqlPatch(&obj, &obj2)
+	s.NoError(err)
+
+	s.NotNil(patch)
+	s.Equal([]string{}, patch.fields)
+	s.Equal([]any{}, patch.args)
+}
+
+func (s *newDiffSqlPatchSuite) TestNewDiffSqlPatch_fail_notStruct() {
+	obj := 1
+
+	_, err := NewDiffSqlPatch(obj, obj)
+	s.Error(err)
+}
+
+func (s *newDiffSqlPatchSuite) TestNewDiffSqlPatch_fail_notPointer() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test"),
+	}
+
+	_, err := NewDiffSqlPatch(obj, obj)
+	s.Error(err)
+}
+
+func (s *newDiffSqlPatchSuite) TestNewDiffSqlPatch_Success_SqlGen() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test"),
+	}
+
+	obj2 := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test2"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	patch, err := NewDiffSqlPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw))
+	s.NoError(err)
+
+	sqlStr, args, err := patch.GenerateSQL()
+	s.NoError(err)
+
+	s.Equal("UPDATE test_table\nSET name = ?\nWHERE 1\nAND age = ?\n", sqlStr)
+	s.Equal([]any{"test2", 18}, args)
+}
+
+func (s *newDiffSqlPatchSuite) TestNewDiffSqlPatch_Success_SqlGen_ValueField() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+		Desc string  `db:"desc"`
+	}
+
+	obj := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test"),
+		Desc: "desc",
+	}
+
+	obj2 := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test2"),
+		Desc: "desc",
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	patch, err := NewDiffSqlPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw))
+	s.NoError(err)
+
+	sqlStr, args, err := patch.GenerateSQL()
+	s.NoError(err)
+
+	s.Equal("UPDATE test_table\nSET name = ?\nWHERE 1\nAND age = ?\n", sqlStr)
+	s.Equal([]any{"test2", 18}, args)
+}
+
+func (s *newDiffSqlPatchSuite) TestNewDiffSqlPatch_Success_SqlGen_ValueFieldUpdated() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+		Desc string  `db:"desc"`
+	}
+
+	obj := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test"),
+		Desc: "desc",
+	}
+
+	obj2 := testObj{
+		Id:   utils.Ptr(1),
+		Name: utils.Ptr("test2"),
+		Desc: "desc2",
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	patch, err := NewDiffSqlPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw))
+	s.NoError(err)
+
+	sqlStr, args, err := patch.GenerateSQL()
+	s.NoError(err)
+
+	s.Equal("UPDATE test_table\nSET name = ?, desc = ?\nWHERE 1\nAND age = ?\n", sqlStr)
+	s.Equal([]any{"test2", "desc2", 18}, args)
+}

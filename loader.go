@@ -22,22 +22,12 @@ func LoadDiff[T any](old T, newT T) error {
 }
 
 func loadDiff[T any](old T, newT T) error {
-	orv := reflect.ValueOf(old)
-	if orv.Kind() != reflect.Ptr || orv.IsNil() {
+	if !isPointerToStruct(old) || !isPointerToStruct(newT) {
 		return ErrInvalidType
 	}
 
-	nrv := reflect.ValueOf(newT)
-	if nrv.Kind() != reflect.Ptr || nrv.IsNil() {
-		return ErrInvalidType
-	}
-
-	oElem := orv.Elem()
-	nElem := nrv.Elem()
-
-	if oElem.Kind() != reflect.Struct || nElem.Kind() != reflect.Struct {
-		return ErrInvalidFieldType
-	}
+	oElem := reflect.ValueOf(old).Elem()
+	nElem := reflect.ValueOf(newT).Elem()
 
 	for i := 0; i < oElem.NumField(); i++ {
 		// Include only exported fields
@@ -84,4 +74,13 @@ func loadDiff[T any](old T, newT T) error {
 	}
 
 	return nil
+}
+
+func isPointerToStruct[T any](t T) bool {
+	rv := reflect.ValueOf(t)
+	if rv.Kind() != reflect.Ptr || rv.IsNil() {
+		return false
+	}
+
+	return rv.Elem().Kind() == reflect.Struct
 }
