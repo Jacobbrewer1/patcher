@@ -3,7 +3,6 @@ package patcher
 import (
 	"testing"
 
-	"github.com/Jacobbrewer1/patcher/utils"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -22,8 +21,8 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success() {
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	patch := NewSQLPatch(obj)
@@ -39,8 +38,8 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_noDbTag() {
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	patch := NewSQLPatch(obj)
@@ -72,8 +71,8 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_PointedObj() {
 	}
 
 	obj := &testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	patch := NewSQLPatch(obj)
@@ -117,8 +116,8 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	mw := NewMockWherer(s.T())
@@ -142,8 +141,8 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleWhere() {
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	mw := NewMockWherer(s.T())
@@ -171,8 +170,8 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_withJoin() {
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	mw := NewMockWherer(s.T())
@@ -200,8 +199,8 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleJoin() {
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	mw := NewMockWherer(s.T())
@@ -241,13 +240,13 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success() {
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	obj2 := testObj{
-		Id:   utils.Ptr(2),
-		Name: utils.Ptr("test2"),
+		Id:   ptr(2),
+		Name: ptr("test2"),
 	}
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2)
@@ -266,14 +265,14 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_singleFieldUpdated() 
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 		Desc: "desc",
 	}
 
 	obj2 := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test2"),
+		Id:   ptr(1),
+		Name: ptr("test2"),
 		Desc: "desc",
 	}
 
@@ -292,13 +291,13 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_noChange() {
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	obj2 := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2)
@@ -323,8 +322,8 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_fail_notPointer() {
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	_, err := NewDiffSQLPatch(obj, obj)
@@ -338,13 +337,13 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen() {
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 	}
 
 	obj2 := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test2"),
+		Id:   ptr(1),
+		Name: ptr("test2"),
 	}
 
 	mw := NewMockWherer(s.T())
@@ -368,14 +367,14 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_ValueField() {
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 		Desc: "desc",
 	}
 
 	obj2 := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test2"),
+		Id:   ptr(1),
+		Name: ptr("test2"),
 		Desc: "desc",
 	}
 
@@ -400,14 +399,14 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_ValueFieldUpda
 	}
 
 	obj := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test"),
+		Id:   ptr(1),
+		Name: ptr("test"),
 		Desc: "desc",
 	}
 
 	obj2 := testObj{
-		Id:   utils.Ptr(1),
-		Name: utils.Ptr("test2"),
+		Id:   ptr(1),
+		Name: ptr("test2"),
 		Desc: "desc2",
 	}
 
