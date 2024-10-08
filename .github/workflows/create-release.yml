@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'How to bump the version'
+        description: 'What release version should be created?'
         required: true
         type: choice
         default: 'patch'
