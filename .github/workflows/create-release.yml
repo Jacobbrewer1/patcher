@@ -48,6 +48,13 @@ jobs:
           cat changelog.md >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 
+      - name: Get the new version
+        id: get_version
+        run: |
+          # Get the current version through the changelog file
+          version=$(cat changelog.md | grep "###" | head -n 1 | cut -d ' ' -f 2)
+          echo "VERSION=$version" >> $GITHUB_ENV
+
       - name: Create tag
         uses: actions/github-script@v7
         with:
@@ -55,7 +62,7 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/${{ github.event.inputs.version }}',
+              ref: 'refs/tags/${{ env.VERSION }}',
               sha: context.sha
             })
 
