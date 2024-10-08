@@ -132,3 +132,42 @@ func (s *SQLPatch) PerformPatch() (sql.Result, error) {
 
 	return s.db.Exec(s.GenerateSQL())
 }
+
+func NewDiffSqlPatch[T any](old, newT T, opts ...PatchOpt) (*SQLPatch, error) {
+	if !isPointerToStruct(old) || !isPointerToStruct(newT) {
+		return nil, ErrInvalidType
+	}
+
+	// Take a copy of the old object
+	oldCopy := reflect.New(reflect.TypeOf(old).Elem()).Interface()
+
+	// copy the old object into the copy
+	reflect.ValueOf(oldCopy).Elem().Set(reflect.ValueOf(old).Elem())
+
+	if err := LoadDiff(old, newT); err != nil {
+		return nil, fmt.Errorf("load diff: %w", err)
+	}
+
+	// For each field in the old object, compare it against the copy and if the fields are the same, set them to zero or nil.
+	for i := 0; i < reflect.ValueOf(old).Elem().NumField(); i++ {
+		oldField := reflect.ValueOf(old).Elem().Field(i)
+		copyField := reflect.ValueOf(oldCopy).Elem().Field(i)
+
+		if oldField.Kind() == reflect.Ptr && oldField.IsNil() {
+			continue
+		} else if oldField.Kind() != reflect.Ptr && oldField.IsZero() {
+			continue
+		}
+
+		if reflect.DeepEqual(oldField.Interface(), copyField.Interface()) {
+			if oldField.Kind() == reflect.Ptr {
+				oldField.Set(reflect.Zero(oldField.Type()))
+				continue
+			}
+			oldField.Set(reflect.New(oldField.Type()).Elem())
+			continue
+		}
+	}
+
+	return NewSQLPatch(old, opts...), nil
+}
