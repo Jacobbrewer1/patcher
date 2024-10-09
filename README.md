@@ -182,6 +182,11 @@ with the args:
 You can also take a look at the Loader [examples](./examples) for more examples on how to use the library for this
 approach.
 
+#### Using `OR` in the where clause
+
+If you would like to use `OR` in the where clause, you can apply the `patcher.WhereTyper` interface to your where
+struct. Please take a look at the [example here](./examples/where_type).
+
 ### Joins
 
 To generate a join, you need to create a struct that represents the join. This struct should implement
