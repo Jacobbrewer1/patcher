@@ -10,7 +10,7 @@ type MockWhereTyper struct {
 }
 
 // Where provides a mock function with given fields:
-func (_m *MockWhereTyper) Where() (string, []any) {
+func (_m *MockWhereTyper) Where() (string, []interface{}) {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
@@ -18,8 +18,8 @@ func (_m *MockWhereTyper) Where() (string, []any) {
 	}
 
 	var r0 string
-	var r1 []any
-	if rf, ok := ret.Get(0).(func() (string, []any)); ok {
+	var r1 []interface{}
+	if rf, ok := ret.Get(0).(func() (string, []interface{})); ok {
 		return rf()
 	}
 	if rf, ok := ret.Get(0).(func() string); ok {
@@ -28,11 +28,11 @@ func (_m *MockWhereTyper) Where() (string, []any) {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func() []any); ok {
+	if rf, ok := ret.Get(1).(func() []interface{}); ok {
 		r1 = rf()
 	} else {
 		if ret.Get(1) != nil {
-			r1 = ret.Get(1).([]any)
+			r1 = ret.Get(1).([]interface{})
 		}
 	}
 
