@@ -437,7 +437,7 @@ func (g *Generator) GeneratePrologueNote(note string) {
 	}
 	prologue += ". DO NOT EDIT.\n"
 
-	g.print(prologue)
+	g.printf(prologue)
 	if note != "" {
 		g.printf("\n")
 		for _, n := range strings.Split(note, "\\n") {
@@ -464,10 +464,6 @@ func (g *Generator) GenerateBuildTags(buildTags string) {
 // ErrNotInterface is returned when the given type is not an interface
 // type.
 var ErrNotInterface = errors.New("expression not an interface")
-
-func (g *Generator) print(s string) {
-	fmt.Fprint(&g.buf, s)
-}
 
 func (g *Generator) printf(s string, vals ...interface{}) {
 	fmt.Fprintf(&g.buf, s, vals...)
@@ -499,28 +495,19 @@ type namer interface {
 	Name() string
 }
 
-func (g *Generator) renderNamedType(ctx context.Context, t interface {
-	Obj() *types.TypeName
-	TypeArgs() *types.TypeList
-}) string {
-	name := g.getPackageScopedType(ctx, t.Obj())
-	if t.TypeArgs() == nil || t.TypeArgs().Len() == 0 {
-		return name
-	}
-	args := make([]string, 0, t.TypeArgs().Len())
-	for i := 0; i < t.TypeArgs().Len(); i++ {
-		arg := t.TypeArgs().At(i)
-		args = append(args, g.renderType(ctx, arg))
-	}
-	return fmt.Sprintf("%s[%s]", name, strings.Join(args, ","))
-}
-
 func (g *Generator) renderType(ctx context.Context, typ types.Type) string {
 	switch t := typ.(type) {
 	case *types.Named:
-		return g.renderNamedType(ctx, t)
-	case *types.Alias:
-		return g.renderNamedType(ctx, t)
+		name := g.getPackageScopedType(ctx, t.Obj())
+		if t.TypeArgs() == nil || t.TypeArgs().Len() == 0 {
+			return name
+		}
+		args := make([]string, 0, t.TypeArgs().Len())
+		for i := 0; i < t.TypeArgs().Len(); i++ {
+			arg := t.TypeArgs().At(i)
+			args = append(args, g.renderType(ctx, arg))
+		}
+		return fmt.Sprintf("%s[%s]", name, strings.Join(args, ","))
 	case *types.TypeParam:
 		if t.Constraint() != nil {
 			name := t.Obj().Name()
@@ -664,7 +651,7 @@ func isNillable(typ types.Type) bool {
 	switch t := typ.(type) {
 	case *types.Pointer, *types.Array, *types.Map, *types.Interface, *types.Signature, *types.Chan, *types.Slice:
 		return true
-	case *types.Named, *types.Alias:
+	case *types.Named:
 		return isNillable(t.Underlying())
 	}
 	return false
