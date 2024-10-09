@@ -7,7 +7,7 @@ import (
 
 var (
 	// ErrInvalidType is returned when the provided type is not a pointer to a struct
-	ErrInvalidType = errors.New("invalid type")
+	ErrInvalidType = errors.New("invalid type: must pointer to struct")
 )
 
 // LoadDiff inserts the fields provided in the new struct pointer into the old struct pointer and returns the result.
