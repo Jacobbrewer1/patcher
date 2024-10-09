@@ -30,7 +30,12 @@ func WithWhere(where Wherer) PatchOpt {
 		if fwArgs == nil {
 			fwArgs = []any{}
 		}
-		s.where.WriteString("AND ")
+		wtStr := WhereTypeAnd // default to AND
+		wt, ok := where.(WhereTyper)
+		if ok && wt.WhereType().IsValid() {
+			wtStr = wt.WhereType()
+		}
+		s.where.WriteString(string(wtStr) + " ")
 		s.where.WriteString(strings.TrimSpace(fwSQL))
 		s.where.WriteString("\n")
 		s.whereArgs = append(s.whereArgs, fwArgs...)

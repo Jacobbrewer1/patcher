@@ -128,7 +128,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 		WithWhere(mw),
 	)
 	s.NoError(err)
-	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE 1\nAND age = ?\n", sqlStr)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{int64(1), "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
@@ -157,7 +157,101 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleWhere() {
 		WithWhere(mw2),
 	)
 	s.NoError(err)
-	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE 1\nAND age = ?\nAND name = ?\n", sqlStr)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nAND name = ?\n)", sqlStr)
+	s.Equal([]any{int64(1), "test", 18, "john"}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_orWhere() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	mw2 := NewMockWhereTyper(s.T())
+	mw2.On("Where").Return("name = ?", []any{"john"})
+	mw2.On("WhereType").Return(WhereTypeOr)
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+		WithWhere(mw2),
+	)
+	s.NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nOR name = ?\n)", sqlStr)
+	s.Equal([]any{int64(1), "test", 18, "john"}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_andOrWhere() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	mw2 := NewMockWhereTyper(s.T())
+	mw2.On("Where").Return("name = ?", []any{"john"})
+	mw2.On("WhereType").Return(WhereTypeOr)
+
+	mw3 := NewMockWherer(s.T())
+	mw3.On("Where").Return("id = ?", []any{1})
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+		WithWhere(mw2),
+		WithWhere(mw3),
+	)
+	s.NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nOR name = ?\nAND id = ?\n)", sqlStr)
+	s.Equal([]any{int64(1), "test", 18, "john", 1}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_invalidWhereType() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	mw2 := NewMockWhereTyper(s.T())
+	mw2.On("Where").Return("name = ?", []any{"john"})
+	mw2.On("WhereType").Return(WhereType("invalid"))
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+		WithWhere(mw2),
+	)
+	s.NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nAND name = ?\n)", sqlStr)
 	s.Equal([]any{int64(1), "test", 18, "john"}, args)
 
 	mw.AssertExpectations(s.T())
@@ -186,7 +280,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_withJoin() {
 		WithJoin(mj),
 	)
 	s.NoError(err)
-	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE 1\nAND age = ?\n", sqlStr)
+	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{int64(1), "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
@@ -219,7 +313,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleJoin() {
 		WithJoin(mj2),
 	)
 	s.NoError(err)
-	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nJOIN table3 ON table1.id = table3.id\nSET id = ?, name = ?\nWHERE 1\nAND age = ?\n", sqlStr)
+	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nJOIN table3 ON table1.id = table3.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{int64(1), "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
@@ -355,7 +449,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen() {
 	sqlStr, args, err := patch.GenerateSQL()
 	s.NoError(err)
 
-	s.Equal("UPDATE test_table\nSET name = ?\nWHERE 1\nAND age = ?\n", sqlStr)
+	s.Equal("UPDATE test_table\nSET name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{"test2", 18}, args)
 }
 
@@ -387,7 +481,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_ValueField() {
 	sqlStr, args, err := patch.GenerateSQL()
 	s.NoError(err)
 
-	s.Equal("UPDATE test_table\nSET name = ?\nWHERE 1\nAND age = ?\n", sqlStr)
+	s.Equal("UPDATE test_table\nSET name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{"test2", 18}, args)
 }
 
@@ -419,6 +513,6 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_ValueFieldUpda
 	sqlStr, args, err := patch.GenerateSQL()
 	s.NoError(err)
 
-	s.Equal("UPDATE test_table\nSET name = ?, desc = ?\nWHERE 1\nAND age = ?\n", sqlStr)
+	s.Equal("UPDATE test_table\nSET name = ?, desc = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{"test2", "desc2", 18}, args)
 }

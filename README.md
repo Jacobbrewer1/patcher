@@ -76,8 +76,10 @@ This will output:
 UPDATE people
 SET name = ?,
     age  = ?
-WHERE 1
-  AND id = ?
+WHERE (1 = 1)
+  AND (
+    id = ?
+    )
 ```
 
 with the args:
@@ -165,8 +167,10 @@ This will output:
 ```sql
 UPDATE table_name
 SET pre_populated = ?
-WHERE 1
-  AND id = ?
+WHERE (1 = 1)
+  AND (
+    id = ?
+    )
 ```
 
 with the args:
@@ -177,6 +181,11 @@ with the args:
 
 You can also take a look at the Loader [examples](./examples) for more examples on how to use the library for this
 approach.
+
+#### Using `OR` in the where clause
+
+If you would like to use `OR` in the where clause, you can apply the `patcher.WhereTyper` interface to your where
+struct. Please take a look at the [example here](./examples/where_type).
 
 ### Joins
 
