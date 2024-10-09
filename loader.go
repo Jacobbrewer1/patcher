@@ -72,12 +72,3 @@ func loadDiff[T any](old T, newT T) error {
 
 	return nil
 }
-
-func isPointerToStruct[T any](t T) bool {
-	rv := reflect.ValueOf(t)
-	if rv.Kind() != reflect.Ptr || rv.IsNil() {
-		return false
-	}
-
-	return rv.Elem().Kind() == reflect.Struct
-}
