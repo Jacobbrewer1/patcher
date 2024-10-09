@@ -405,22 +405,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_noChange() {
 func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_fail_notStruct() {
 	obj := 1
 
-	_, err := NewDiffSQLPatch(obj, obj)
-	s.Error(err)
-}
-
-func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_fail_notPointer() {
-	type testObj struct {
-		Id   *int    `db:"id"`
-		Name *string `db:"name"`
-	}
-
-	obj := testObj{
-		Id:   ptr(1),
-		Name: ptr("test"),
-	}
-
-	_, err := NewDiffSQLPatch(obj, obj)
+	_, err := NewDiffSQLPatch(&obj, &obj)
 	s.Error(err)
 }
 

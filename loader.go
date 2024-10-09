@@ -10,11 +10,13 @@ var (
 	ErrInvalidType = errors.New("invalid type")
 )
 
-// LoadDiff inserts the fields provided in the new object into the old object and returns the result.
+// LoadDiff inserts the fields provided in the new struct pointer into the old struct pointer and returns the result.
+//
+// Note that it only pushes non-zero value updates, meaning you cannot set any field to zero, the empty string, etc.
 //
 // This can be if you are inserting a patch into an existing object but require a new object to be returned with
 // all fields.
-func LoadDiff[T any](old T, newT T) error {
+func LoadDiff[T any](old *T, newT *T) error {
 	return loadDiff(old, newT)
 }
 
