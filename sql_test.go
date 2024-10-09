@@ -163,6 +163,66 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleWhere() {
 	mw.AssertExpectations(s.T())
 }
 
+func (s *generateSQLSuite) TestGenerateSQL_Success_orWhere() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	mw2 := NewMockWhereTyper(s.T())
+	mw2.On("Where").Return("name = ?", []any{"john"})
+	mw2.On("WhereType").Return(WhereTypeOr)
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+		WithWhere(mw2),
+	)
+	s.NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE 1\nAND age = ?\nOR name = ?\n", sqlStr)
+	s.Equal([]any{int64(1), "test", 18, "john"}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_invalidWhereType() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	mw2 := NewMockWhereTyper(s.T())
+	mw2.On("Where").Return("name = ?", []any{"john"})
+	mw2.On("WhereType").Return(WhereType("invalid"))
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+		WithWhere(mw2),
+	)
+	s.NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE 1\nAND age = ?\nAND name = ?\n", sqlStr)
+	s.Equal([]any{int64(1), "test", 18, "john"}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
 func (s *generateSQLSuite) TestGenerateSQL_Success_withJoin() {
 	type testObj struct {
 		Id   *int    `db:"id"`
