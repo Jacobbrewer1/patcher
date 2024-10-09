@@ -76,8 +76,10 @@ This will output:
 UPDATE people
 SET name = ?,
     age  = ?
-WHERE 1
-  AND id = ?
+WHERE (1 = 1)
+  AND (
+    id = ?
+    )
 ```
 
 with the args:
@@ -165,8 +167,10 @@ This will output:
 ```sql
 UPDATE table_name
 SET pre_populated = ?
-WHERE 1
-  AND id = ?
+WHERE (1 = 1)
+  AND (
+    id = ?
+    )
 ```
 
 with the args:

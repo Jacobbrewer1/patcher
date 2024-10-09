@@ -111,8 +111,19 @@ func (s *SQLPatch) GenerateSQL() (string, []any, error) {
 	sqlBuilder.WriteString(strings.Join(s.fields, ", "))
 	sqlBuilder.WriteString("\n")
 
-	sqlBuilder.WriteString("WHERE 1\n")
-	sqlBuilder.WriteString(s.where.String())
+	sqlBuilder.WriteString("WHERE (1=1)\n")
+	sqlBuilder.WriteString("AND (\n")
+
+	// If the where clause starts with "AND" or "OR", we need to remove it
+	where := s.where.String()
+	if strings.HasPrefix(where, "AND") || strings.HasPrefix(where, "OR") {
+		where = strings.TrimPrefix(where, "AND")
+		where = strings.TrimPrefix(where, "OR")
+		where = strings.TrimSpace(where)
+	}
+
+	sqlBuilder.WriteString(strings.TrimSpace(where) + "\n")
+	sqlBuilder.WriteString(")")
 
 	args := append(s.joinArgs, s.args...)
 	args = append(args, s.whereArgs...)
