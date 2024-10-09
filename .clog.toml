@@ -4,7 +4,7 @@
 repository = "https://github.com/Jacobbrewer1/patcher"
 
 # A constant release title
-subtitle = "Release Changes"
+subtitle = "What's Changed"
 
 # specify the style of commit links to generate, defaults to "github" if omitted
 link-style = "github"
