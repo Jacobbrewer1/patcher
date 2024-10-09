@@ -1,12 +1,14 @@
 module github.com/Jacobbrewer1/patcher
 
-go 1.22
+go 1.23
+
+toolchain go1.23.1
 
 require (
 	github.com/gorilla/mux v1.8.1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/stretchr/testify v1.9.0
-	github.com/vektra/mockery/v2 v2.46.0
+	github.com/vektra/mockery/v2 v2.46.2
 )
 
 require (
