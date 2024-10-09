@@ -7,6 +7,8 @@ you.
 
 ## Usage
 
+#### Basic
+
 To use the library, you need to create a struct that represents the table you want to generate patches for. The struct
 should have the following tags:
 
@@ -83,6 +85,98 @@ with the args:
 ```
 ["John", 25, 1]
 ```
+
+#### Struct diffs
+
+If you would like to generate an update script from two structs, you can use the `NewDiffSQLPatch` function. This
+function will generate an update script from the two structs.
+
+Example:
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/Jacobbrewer1/patcher"
+)
+
+type Something struct {
+	Number       int
+	Text         string
+	PrePopulated string
+	NewText      string
+}
+
+type SomeWhere struct {
+	id int
+}
+
+func NewSomeWhere(id int) *SomeWhere {
+	return &SomeWhere{id: id}
+}
+
+func (s *SomeWhere) Where() (string, []any) {
+	return "id = ?", []any{s.id}
+}
+
+func main() {
+	s := Something{
+		Number:       5,
+		Text:         "Old Text",
+		PrePopulated: "PrePopulated",
+		NewText:      "New Text",
+	}
+
+	n := Something{
+		Number:       5,
+		Text:         "Old Text",
+		PrePopulated: "PrePopulatedDifferent",
+		NewText:      "New Text",
+	}
+
+	wherer := NewSomeWhere(5)
+
+	// The patcher.LoadDiff function will apply the changes from n to s.
+	patch, err := patcher.NewDiffSQLPatch(
+		&s,
+		&n,
+		patcher.WithTable("table_name"),
+		patcher.WithWhere(wherer),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	sqlStr, sqlArgs, err := patch.GenerateSQL()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(sqlStr)
+	fmt.Println(sqlArgs)
+}
+
+```
+
+This will output:
+
+```sql
+UPDATE table_name
+SET pre_populated = ?
+WHERE 1
+  AND id = ?
+```
+
+with the args:
+
+```
+["PrePopulatedDifferent", 5]
+```
+
+You can also take a look at the Loader [examples](./examples) for more examples on how to use the library for this
+approach.
 
 ### Joins
 
