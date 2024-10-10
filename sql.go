@@ -119,7 +119,6 @@ func (s *SQLPatch) GenerateSQL() (string, []any, error) {
 	if strings.HasPrefix(where, string(WhereTypeAnd)) || strings.HasPrefix(where, string(WhereTypeOr)) {
 		where = strings.TrimPrefix(where, string(WhereTypeAnd))
 		where = strings.TrimPrefix(where, string(WhereTypeOr))
-
 		where = strings.TrimSpace(where)
 	}
 
