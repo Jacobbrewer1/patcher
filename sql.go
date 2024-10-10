@@ -136,6 +136,15 @@ func PerformPatch(resource any, opts ...PatchOpt) (sql.Result, error) {
 	return sqlPatch.PerformPatch()
 }
 
+func PerformDiffPatch[T any](old, newT *T, opts ...PatchOpt) (sql.Result, error) {
+	sqlPatch, err := NewDiffSQLPatch(old, newT, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("new diff sql patch: %w", err)
+	}
+
+	return sqlPatch.PerformPatch()
+}
+
 func (s *SQLPatch) PerformPatch() (sql.Result, error) {
 	if err := s.validatePerformPatch(); err != nil {
 		return nil, fmt.Errorf("validate perform patch: %w", err)
