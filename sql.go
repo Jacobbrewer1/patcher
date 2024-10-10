@@ -116,9 +116,9 @@ func (s *SQLPatch) GenerateSQL() (string, []any, error) {
 
 	// If the where clause starts with "AND" or "OR", we need to remove it
 	where := s.where.String()
-	if strings.HasPrefix(where, "AND") || strings.HasPrefix(where, "OR") {
-		where = strings.TrimPrefix(where, "AND")
-		where = strings.TrimPrefix(where, "OR")
+	if strings.HasPrefix(where, string(WhereTypeAnd)) || strings.HasPrefix(where, string(WhereTypeOr)) {
+		where = strings.TrimPrefix(where, string(WhereTypeAnd))
+		where = strings.TrimPrefix(where, string(WhereTypeOr))
 		where = strings.TrimSpace(where)
 	}
 
