@@ -56,7 +56,7 @@ func (s *SQLPatch) patchGen(resource any) {
 
 		// if no tag is set, use the field name
 		if tag == "" {
-			tag = fType.Name
+			tag = strings.ToLower(fType.Name)
 		}
 		// and make the tag lowercase in the end
 		tag = strings.ToLower(tag)
@@ -150,7 +150,12 @@ func (s *SQLPatch) PerformPatch() (sql.Result, error) {
 		return nil, fmt.Errorf("validate perform patch: %w", err)
 	}
 
-	return s.db.Exec(s.GenerateSQL())
+	sqlStr, args, err := s.GenerateSQL()
+	if err != nil {
+		return nil, fmt.Errorf("generate SQL: %w", err)
+	}
+
+	return s.db.Exec(sqlStr, args...)
 }
 
 func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
