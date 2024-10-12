@@ -34,6 +34,11 @@ func (b *SQLBatch) genBatch() {
 			t = t.Elem()
 		}
 
+		// Is the type a struct?
+		if t.Kind() != reflect.Struct {
+			continue
+		}
+
 		// get the value of the resource
 		v := reflect.ValueOf(r)
 		if v.Kind() == reflect.Ptr {
@@ -95,6 +100,9 @@ func (b *SQLBatch) sqlGen() (string, []any, error) {
 }
 
 func (b *SQLBatch) Perform() (sql.Result, error) {
+	if err := b.validateSQLInsert(); err != nil {
+		return nil, fmt.Errorf("validate SQL generation: %w", err)
+	}
 
 	sqlStr, args, err := b.sqlGen()
 	if err != nil {

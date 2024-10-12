@@ -61,6 +61,12 @@ func (b *SQLBatch) validateSQLGen() error {
 	if len(b.resources) == 0 {
 		return ErrNoResources
 	}
+	if len(b.fields) == 0 {
+		return ErrNoFields
+	}
+	if len(b.args) == 0 {
+		return ErrNoArgs
+	}
 	return nil
 }
 
@@ -73,6 +79,12 @@ func (b *SQLBatch) validateSQLInsert() error {
 	}
 	if len(b.resources) == 0 {
 		return ErrNoResources
+	}
+	if len(b.fields) == 0 {
+		return ErrNoFields
+	}
+	if len(b.args) == 0 {
+		return ErrNoArgs
 	}
 	return nil
 }
