@@ -150,7 +150,12 @@ func (s *SQLPatch) PerformPatch() (sql.Result, error) {
 		return nil, fmt.Errorf("validate perform patch: %w", err)
 	}
 
-	return s.db.Exec(s.GenerateSQL())
+	sqlStr, args, err := s.GenerateSQL()
+	if err != nil {
+		return nil, fmt.Errorf("generate SQL: %w", err)
+	}
+
+	return s.db.Exec(sqlStr, args...)
 }
 
 func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
