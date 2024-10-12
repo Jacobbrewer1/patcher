@@ -56,7 +56,7 @@ func (s *SQLPatch) patchGen(resource any) {
 
 		// if no tag is set, use the field name
 		if tag == "" {
-			tag = fType.Name
+			tag = strings.ToLower(fType.Name)
 		}
 		// and make the tag lowercase in the end
 		tag = strings.ToLower(tag)
