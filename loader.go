@@ -10,7 +10,8 @@ var (
 	ErrInvalidType = errors.New("invalid type: must pointer to struct")
 )
 
-// LoadDiff inserts the fields provided in the new struct pointer into the old struct pointer and returns the result.
+// LoadDiff inserts the fields provided in the new struct pointer into the old struct pointer and injects the new
+// values into the old struct.
 //
 // Note that it only pushes non-zero value updates, meaning you cannot set any field to zero, the empty string, etc.
 //
