@@ -89,12 +89,14 @@ func (b *SQLBatch) sqlGen() (string, []any, error) {
 	sqlBuilder.WriteString(strings.Join(b.fields, ", "))
 	sqlBuilder.WriteString(") VALUES ")
 
-	// Repeat "?" for the number of fields separated by ", "
-	sqlBuilder.WriteString("(")
+	// We need to have the same number of "?" as fields and then repeat that for the number of resources
+	placeholder := strings.Repeat("?, ", len(b.fields))
+	placeholder = placeholder[:len(placeholder)-2] // Remove the trailing ", "
+	placeholder = "(" + placeholder + "), "
 
-	placeholders := strings.Repeat("?, ", len(b.args))
+	// Repeat the placeholder for the number of resources
+	placeholders := strings.Repeat(placeholder, len(b.resources))
 	sqlBuilder.WriteString(placeholders[:len(placeholders)-2]) // Remove the trailing ", " and add the closing ")"
-	sqlBuilder.WriteString(")")
 
 	return sqlBuilder.String(), b.args, nil
 }
