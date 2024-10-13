@@ -12,22 +12,22 @@ const (
 	defaultTagName = "db"
 )
 
-func NewBatch(opts ...BatchOpt) *SQLBatch {
+func NewBatch(resources []any, opts ...BatchOpt) *SQLBatch {
 	b := new(SQLBatch)
 	b.tagName = defaultTagName
 	for _, opt := range opts {
 		opt(b)
 	}
 
-	b.genBatch()
+	b.genBatch(resources)
 
 	return b
 }
 
-func (b *SQLBatch) genBatch() {
+func (b *SQLBatch) genBatch(resources []any) {
 	uniqueFields := make(map[string]struct{})
 
-	for _, r := range b.resources {
+	for _, r := range resources {
 		// get the type of the resource
 		t := reflect.TypeOf(r)
 		if t.Kind() == reflect.Ptr {
@@ -76,7 +76,7 @@ func (b *SQLBatch) genBatch() {
 	}
 }
 
-func (b *SQLBatch) sqlGen() (string, []any, error) {
+func (b *SQLBatch) GenerateSQL() (string, []any, error) {
 	if err := b.validateSQLGen(); err != nil {
 		return "", nil, err
 	}
@@ -94,8 +94,11 @@ func (b *SQLBatch) sqlGen() (string, []any, error) {
 	placeholder = placeholder[:len(placeholder)-2] // Remove the trailing ", "
 	placeholder = "(" + placeholder + "), "
 
+	// Calculate the number of placeholders needed. Args divided by fields
+	n := len(b.args) / len(b.fields)
+
 	// Repeat the placeholder for the number of resources
-	placeholders := strings.Repeat(placeholder, len(b.resources))
+	placeholders := strings.Repeat(placeholder, n)
 	sqlBuilder.WriteString(placeholders[:len(placeholders)-2]) // Remove the trailing ", " and add the closing ")"
 
 	return sqlBuilder.String(), b.args, nil
@@ -106,7 +109,7 @@ func (b *SQLBatch) Perform() (sql.Result, error) {
 		return nil, fmt.Errorf("validate SQL generation: %w", err)
 	}
 
-	sqlStr, args, err := b.sqlGen()
+	sqlStr, args, err := b.GenerateSQL()
 	if err != nil {
 		return nil, fmt.Errorf("generate SQL: %w", err)
 	}
