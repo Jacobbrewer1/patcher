@@ -24,9 +24,3 @@ func WithDB(db *sql.DB) BatchOpt {
 		b.db = db
 	}
 }
-
-func WithResources(resources []any) BatchOpt {
-	return func(b *SQLBatch) {
-		b.resources = resources
-	}
-}
