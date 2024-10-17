@@ -2,12 +2,18 @@ package patcher
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 )
 
 const tagName = "db"
+
+var (
+	// ErrNoChanges is returned when no changes are detected between the old and new objects
+	ErrNoChanges = errors.New("no changes detected between the old and new objects")
+)
 
 func NewSQLPatch(resource any, opts ...PatchOpt) *SQLPatch {
 	sqlPatch := new(SQLPatch)
@@ -171,6 +177,11 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 
 	if err := LoadDiff(old, newT); err != nil {
 		return nil, fmt.Errorf("load diff: %w", err)
+	}
+
+	// Are the old and new objects the same?
+	if reflect.DeepEqual(old, oldCopy) {
+		return nil, ErrNoChanges
 	}
 
 	// For each field in the old object, compare it against the copy and if the fields are the same, set them to zero or nil.

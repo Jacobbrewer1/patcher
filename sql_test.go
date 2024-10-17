@@ -1,6 +1,7 @@
 package patcher
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -395,11 +396,53 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_noChange() {
 	}
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2)
-	s.NoError(err)
+	s.Equal(ErrNoChanges, err)
+	s.Nil(patch)
+}
 
-	s.NotNil(patch)
-	s.Equal([]string{}, patch.fields)
-	s.Equal([]any{}, patch.args)
+func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_ignoreNoChanges() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	obj2 := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	patch, err := NewDiffSQLPatch(&obj, &obj2)
+	s.NoError(IgnoreNoChanges(err))
+	s.Nil(patch)
+}
+
+func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_ignoreNoChanges_wrapped() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	obj2 := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	patch, err := NewDiffSQLPatch(&obj, &obj2)
+	if err != nil {
+		err = IgnoreNoChanges(fmt.Errorf("wrapped: %w", err))
+	}
+	s.NoError(err)
+	s.Nil(patch)
 }
 
 func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_fail_notStruct() {
