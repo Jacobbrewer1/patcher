@@ -417,7 +417,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_ignoreNoChanges() {
 	}
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2)
-	s.NoError(IgnoreNoChanges(err))
+	s.NoError(IgnoreNoChangesErr(err))
 	s.Nil(patch)
 }
 
@@ -439,7 +439,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_ignoreNoChanges_wrapp
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2)
 	if err != nil {
-		err = IgnoreNoChanges(fmt.Errorf("wrapped: %w", err))
+		err = IgnoreNoChangesErr(fmt.Errorf("wrapped: %w", err))
 	}
 	s.NoError(err)
 	s.Nil(patch)

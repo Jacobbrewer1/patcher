@@ -19,10 +19,10 @@ func isPointerToStruct[T any](t T) bool {
 	return rv.Elem().Kind() == reflect.Struct
 }
 
-// IgnoreNoChanges ignores the ErrNoChanges error. This is useful when you want to ignore the error when no changes
+// IgnoreNoChangesErr ignores the ErrNoChanges error. This is useful when you want to ignore the error when no changes
 // were made. Please ensure that you are still handling the errors as needed. We will return a "nil" patch when there
 // are no changes as the ErrNoChanges error is returned.
-func IgnoreNoChanges(err error) error {
+func IgnoreNoChangesErr(err error) error {
 	switch {
 	case errors.Is(err, ErrNoChanges):
 		return nil
