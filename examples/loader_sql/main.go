@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/Jacobbrewer1/patcher"
+	"github.com/jacobbrewer1/patcher"
 )
 
 type Something struct {

@@ -1,4 +1,4 @@
-module github.com/Jacobbrewer1/patcher
+module github.com/jacobbrewer1/patcher
 
 go 1.22
 
