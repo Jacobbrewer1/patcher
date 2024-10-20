@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/Jacobbrewer1/patcher"
+	"github.com/jacobbrewer1/patcher"
 )
 
 type Person struct {
