@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/jacobbrewer1/patcher"
 	"github.com/gorilla/mux"
+	"github.com/jacobbrewer1/patcher"
 )
 
 type Person struct {
