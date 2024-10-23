@@ -48,6 +48,8 @@ func newLoader(opts ...LoaderOption) *loader {
 // values into the old struct
 //
 // Note that it only pushes non-zero value updates, meaning you cannot set any field to zero, the empty string, etc.
+// This is configurable by setting the includeZeroValues option to true or for nil values by setting includeNilValues.
+// Please see the LoaderOption's for more configuration options.
 //
 // This can be if you are inserting a patch into an existing object but require a new object to be returned with
 // all fields
