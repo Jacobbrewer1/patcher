@@ -1,5 +1,7 @@
 package patcher
 
+import "strings"
+
 type loaderOption func(*loader)
 
 func WithIncludeZeroValues() func(*loader) {
@@ -27,6 +29,10 @@ func WithIgnoredFields(fields ...string) func(*loader) {
 	return func(l *loader) {
 		if len(fields) == 0 {
 			return
+		}
+
+		for i := range fields {
+			fields[i] = strings.ToLower(fields[i])
 		}
 
 		l.ignoreFields = fields

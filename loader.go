@@ -3,6 +3,8 @@ package patcher
 import (
 	"errors"
 	"reflect"
+	"slices"
+	"strings"
 )
 
 var (
@@ -24,6 +26,8 @@ type loader struct {
 	ignoreFields []string
 
 	// ignoreFieldsFunc is a function that determines whether a field should be ignored
+	//
+	// This func should return true is the field is to be ignored
 	ignoreFieldsFunc func(string) bool
 }
 
@@ -45,12 +49,12 @@ func newLoader(opts ...loaderOption) *loader {
 }
 
 // LoadDiff inserts the fields provided in the new struct pointer into the old struct pointer and injects the new
-// values into the old struct.
+// values into the old struct
 //
 // Note that it only pushes non-zero value updates, meaning you cannot set any field to zero, the empty string, etc.
 //
 // This can be if you are inserting a patch into an existing object but require a new object to be returned with
-// all fields.
+// all fields
 func LoadDiff[T any](old *T, newT *T, opts ...loaderOption) error {
 	return newLoader(opts...).loadDiff(old, newT)
 }
@@ -98,14 +102,34 @@ func (l *loader) loadDiff(old, newT any) error {
 			continue
 		}
 
+		// See if the field should be ignored.
+		if l.ignoredFieldsCheck(strings.ToLower(oElem.Field(i).String())) {
+			continue
+		}
+
 		// Compare the old and new fields.
 		//
-		// New fields take priority over old fields if they are provided. We ignore zero values as they are not
-		// provided in the new object.
-		if !nElem.Field(i).IsZero() {
+		// New fields take priority over old fields if they are provided.
+		//
+		// We need to apply the logic based off the configuration provided.
+		if !nElem.Field(i).IsZero() || l.includeZeroValues {
+			oElem.Field(i).Set(nElem.Field(i))
+		} else if nElem.Field(i).IsNil() || l.includeNilValues {
 			oElem.Field(i).Set(nElem.Field(i))
 		}
 	}
 
 	return nil
+}
+
+func (l *loader) ignoredFieldsCheck(field string) bool {
+	return l.checkIgnoredFields(field) || l.checkIgnoreFunc(field)
+}
+
+func (l *loader) checkIgnoreFunc(field string) bool {
+	return l.ignoreFieldsFunc != nil && l.ignoreFieldsFunc(strings.ToLower(field))
+}
+
+func (l *loader) checkIgnoredFields(field string) bool {
+	return len(l.ignoreFields) > 0 && slices.Contains(l.ignoreFields, strings.ToLower(field))
 }
