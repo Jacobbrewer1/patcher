@@ -1,3 +1,3 @@
 package patcher
 
-//go:generate ./gen.sh
+//go:generate go run -mod=mod github.com/vektra/mockery/v2
