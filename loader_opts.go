@@ -16,12 +16,6 @@ func WithIncludeNilValues() func(*loader) {
 	}
 }
 
-func WithIncludeEmptyValues() func(*loader) {
-	return func(l *loader) {
-		l.includeEmptyValues = true
-	}
-}
-
 // WithIgnoredFields sets the fields to ignore when patching.
 //
 // This should be the actual field name, not the JSON tag name or the db tag name.
@@ -40,7 +34,7 @@ func WithIgnoredFields(fields ...string) func(*loader) {
 }
 
 // WithIgnoredFieldsFunc sets a function that determines whether a field should be ignored when patching.
-func WithIgnoredFieldsFunc(f func(string) bool) func(*loader) {
+func WithIgnoredFieldsFunc(f func(fieldName string, oldValue, newValue any) bool) func(*loader) {
 	return func(l *loader) {
 		if f == nil {
 			return

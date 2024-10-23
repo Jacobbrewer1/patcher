@@ -8,10 +8,20 @@ import (
 
 type loadDiffSuite struct {
 	suite.Suite
+
+	l *loader
 }
 
 func TestLoadDiffSuite(t *testing.T) {
 	suite.Run(t, new(loadDiffSuite))
+}
+
+func (s *loadDiffSuite) SetupTest() {
+	s.l = new(loader)
+}
+
+func (s *loadDiffSuite) TearDownTest() {
+	s.l = nil
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success() {
@@ -30,7 +40,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success() {
 		Age:  26,
 	}
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
@@ -52,7 +62,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_ZeroValue() {
 		Age:  0,
 	}
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(25, old.Age)
@@ -71,7 +81,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_NoNewValue() {
 
 	n := testStruct{}
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
@@ -92,7 +102,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_OneNewField() {
 		Age: 26,
 	}
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(26, old.Age)
@@ -117,7 +127,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct() {
 		},
 	}
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
@@ -148,7 +158,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStructWithNewValue() {
 	n.Partner.Name = "Sarah Brewer"
 	n.Partner.Age = 25
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(25, old.Age)
@@ -185,7 +195,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedInheritedStruct() {
 		},
 	}
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
@@ -209,7 +219,7 @@ func (s *loadDiffSuite) TestLoadDiff_FailureNotPointer() {
 		Age:  26,
 	}
 
-	err := loadDiff(old, n)
+	err := s.l.loadDiff(old, n)
 	s.Error(err)
 	s.Equal(ErrInvalidType, err)
 }
@@ -235,7 +245,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_NilOldField() {
 		},
 	}
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
@@ -257,7 +267,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Slice() {
 		Tags: []string{"tag3"},
 	}
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal([]string{"tag3"}, old.Tags) // New slice overwrites old one
 }
@@ -290,7 +300,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_DeeplyNestedStruct() {
 		},
 	}
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("New Value", old.Inner.InnerMost.Value)
 }
@@ -312,7 +322,7 @@ func (s *loadDiffSuite) TestLoadDiff_Failure_UnexportedField() {
 		Age:  26,
 	}
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal(26, old.Age)
 	s.Equal("OldName", old.name) // Name should remain unchanged because it's unexported
@@ -334,8 +344,199 @@ func (s *loadDiffSuite) TestLoadDiff_Failure_UnsupportedType() {
 		Name: "John Smith",
 	}
 
-	err := loadDiff(&old, &n)
+	err := s.l.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.NotNil(old.Updates) // Channel should not be nil as it started as a non-nil channel
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_Include_Zeros() {
+	l := s.l
+	l.includeZeroValues = true
+
+	type testStruct struct {
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		Name: "John Smith",
+		Age:  0,
+	}
+
+	err := l.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John Smith", old.Name)
+	s.Equal(0, old.Age)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_Include_Zeros_false() {
+	l := s.l
+	l.includeZeroValues = false
+
+	type testStruct struct {
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		Name: "John Smith",
+		Age:  0,
+	}
+
+	err := l.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John Smith", old.Name)
+	s.Equal(25, old.Age)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_Include_Nil() {
+	l := s.l
+	l.includeNilValues = true
+
+	type testStruct struct {
+		Name    string
+		Age     int
+		Partner *testStruct
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+		Partner: &testStruct{
+			Name: "Sarah",
+			Age:  24,
+		},
+	}
+
+	n := testStruct{
+		Partner: nil,
+	}
+
+	err := l.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John", old.Name)
+	s.Equal(25, old.Age)
+	s.Nil(old.Partner)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_Include_Nil_false() {
+	l := s.l
+	l.includeNilValues = false
+
+	type testStruct struct {
+		Name    string
+		Age     int
+		Partner *testStruct
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+		Partner: &testStruct{
+			Name: "Sarah",
+			Age:  24,
+		},
+	}
+
+	n := testStruct{
+		Partner: nil,
+	}
+
+	err := l.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John", old.Name)
+	s.Equal(25, old.Age)
+	s.Equal("Sarah", old.Partner.Name)
+	s.Equal(24, old.Partner.Age)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFields() {
+	l := s.l
+	l.ignoreFields = []string{"name"}
+
+	type testStruct struct {
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		Name: "John Smith",
+		Age:  26,
+	}
+
+	err := l.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John", old.Name)
+	s.Equal(26, old.Age)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFunc() {
+	l := s.l
+	l.ignoreFieldsFunc = func(fieldName string, oldValue, newValue any) bool {
+		return fieldName == "name"
+	}
+
+	type testStruct struct {
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		Name: "John Smith",
+		Age:  26,
+	}
+
+	err := l.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John", old.Name)
+	s.Equal(26, old.Age)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFuncAndIgnoreFields() {
+	l := s.l
+	l.ignoreFields = []string{"name"}
+	l.ignoreFieldsFunc = func(fieldName string, oldValue, newValue any) bool {
+		return fieldName == "name"
+	}
+
+	type testStruct struct {
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		Name: "John Smith",
+		Age:  26,
+	}
+
+	err := l.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John", old.Name)
+	s.Equal(26, old.Age)
 }

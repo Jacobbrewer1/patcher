@@ -19,26 +19,22 @@ type loader struct {
 	// includeNilValues determines whether nil values should be included in the patch
 	includeNilValues bool
 
-	// includeEmptyValues determines whether empty values should be included in the patch
-	includeEmptyValues bool
-
 	// ignoreFields is a list of fields to ignore when patching
 	ignoreFields []string
 
 	// ignoreFieldsFunc is a function that determines whether a field should be ignored
 	//
 	// This func should return true is the field is to be ignored
-	ignoreFieldsFunc func(string) bool
+	ignoreFieldsFunc func(fieldName string, oldValue, newValue any) bool
 }
 
 func newLoader(opts ...loaderOption) *loader {
 	// Default options
 	l := &loader{
-		includeZeroValues:  false,
-		includeNilValues:   false,
-		includeEmptyValues: false,
-		ignoreFields:       nil,
-		ignoreFieldsFunc:   nil,
+		includeZeroValues: false,
+		includeNilValues:  false,
+		ignoreFields:      nil,
+		ignoreFieldsFunc:  nil,
 	}
 
 	for _, opt := range opts {
@@ -103,7 +99,7 @@ func (l *loader) loadDiff(old, newT any) error {
 		}
 
 		// See if the field should be ignored.
-		if l.ignoredFieldsCheck(strings.ToLower(oElem.Field(i).String())) {
+		if l.ignoredFieldsCheck(strings.ToLower(oElem.Type().Field(i).Name), oElem.Field(i).Interface(), nElem.Field(i).Interface()) {
 			continue
 		}
 
@@ -114,7 +110,7 @@ func (l *loader) loadDiff(old, newT any) error {
 		// We need to apply the logic based off the configuration provided.
 		if !nElem.Field(i).IsZero() || l.includeZeroValues {
 			oElem.Field(i).Set(nElem.Field(i))
-		} else if nElem.Field(i).IsNil() || l.includeNilValues {
+		} else if nElem.Field(i).Kind() == reflect.Ptr && nElem.Field(i).IsNil() && l.includeNilValues {
 			oElem.Field(i).Set(nElem.Field(i))
 		}
 	}
@@ -122,12 +118,12 @@ func (l *loader) loadDiff(old, newT any) error {
 	return nil
 }
 
-func (l *loader) ignoredFieldsCheck(field string) bool {
-	return l.checkIgnoredFields(field) || l.checkIgnoreFunc(field)
+func (l *loader) ignoredFieldsCheck(field string, oldValue, newValue any) bool {
+	return l.checkIgnoredFields(field) || l.checkIgnoreFunc(field, oldValue, newValue)
 }
 
-func (l *loader) checkIgnoreFunc(field string) bool {
-	return l.ignoreFieldsFunc != nil && l.ignoreFieldsFunc(strings.ToLower(field))
+func (l *loader) checkIgnoreFunc(field string, oldValue, newValue any) bool {
+	return l.ignoreFieldsFunc != nil && l.ignoreFieldsFunc(strings.ToLower(field), oldValue, newValue)
 }
 
 func (l *loader) checkIgnoredFields(field string) bool {
