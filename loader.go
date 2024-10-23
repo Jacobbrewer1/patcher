@@ -28,7 +28,7 @@ type loader struct {
 	ignoreFieldsFunc func(fieldName string, oldValue, newValue any) bool
 }
 
-func newLoader(opts ...loaderOption) *loader {
+func newLoader(opts ...LoaderOption) *loader {
 	// Default options
 	l := &loader{
 		includeZeroValues: false,
@@ -51,7 +51,7 @@ func newLoader(opts ...loaderOption) *loader {
 //
 // This can be if you are inserting a patch into an existing object but require a new object to be returned with
 // all fields
-func LoadDiff[T any](old *T, newT *T, opts ...loaderOption) error {
+func LoadDiff[T any](old *T, newT *T, opts ...LoaderOption) error {
 	return newLoader(opts...).loadDiff(old, newT)
 }
 

@@ -2,7 +2,7 @@ package patcher
 
 import "strings"
 
-type loaderOption func(*loader)
+type LoaderOption func(*loader)
 
 func WithIncludeZeroValues() func(*loader) {
 	return func(l *loader) {
