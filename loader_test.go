@@ -540,3 +540,63 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFuncAndIgnoreFields() {
 	s.Equal("John", old.Name)
 	s.Equal(26, old.Age)
 }
+
+func (s *loadDiffSuite) TestLoadDiff_Success_Blank_Except_Id() {
+	l := s.l
+	l.includeZeroValues = true
+	l.ignoreFields = []string{"id"}
+
+	type testStruct struct {
+		ID   int
+		Name string
+		Age  *int
+	}
+
+	old := &testStruct{
+		ID:   17345,
+		Name: "some text",
+		Age:  ptr(25),
+	}
+
+	n := &testStruct{
+		ID:   0,
+		Name: "",
+		Age:  nil,
+	}
+
+	err := l.loadDiff(old, n)
+	s.NoError(err)
+	s.Equal(17345, old.ID)
+	s.Equal("", old.Name)
+	s.Nil(old.Age)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_DefaultBehaviour() {
+	type testStruct struct {
+		ID   int
+		Name string
+		Age  *int
+		Addr string
+	}
+
+	old := &testStruct{
+		ID:   17345,
+		Name: "some text",
+		Age:  ptr(25),
+		Addr: "",
+	}
+
+	n := &testStruct{
+		ID:   0,
+		Name: "John Smith",
+		Age:  nil,
+		Addr: "some address",
+	}
+
+	err := LoadDiff(old, n)
+	s.NoError(err)
+	s.Equal(17345, old.ID)
+	s.Equal("John Smith", old.Name)
+	s.Equal(25, *old.Age)
+	s.Equal("some address", old.Addr)
+}
