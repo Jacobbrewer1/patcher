@@ -17,7 +17,7 @@ func TestLoadDiffSuite(t *testing.T) {
 }
 
 func (s *loadDiffSuite) SetupTest() {
-	s.l = new(loader)
+	s.l = newLoader()
 }
 
 func (s *loadDiffSuite) TearDownTest() {
