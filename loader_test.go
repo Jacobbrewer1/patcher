@@ -222,6 +222,37 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct_NotPointed() {
 	s.Equal(24, old.Partner.Age)
 }
 
+func (s *loadDiffSuite) TestLoadDiff_Success_InheritedStruct_NotPointed() {
+	type TestEmbed struct {
+		Description string
+	}
+
+	type testStruct struct {
+		TestEmbed
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		TestEmbed: TestEmbed{
+			Description: "Some description",
+		},
+		Name: "John Smith",
+		Age:  26,
+	}
+
+	err := s.l.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John Smith", old.Name)
+	s.Equal(26, old.Age)
+	s.Equal("Some description", old.Description)
+}
+
 func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStructWithNewValue() {
 	type testStruct struct {
 		Name    string
