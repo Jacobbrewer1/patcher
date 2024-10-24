@@ -75,7 +75,7 @@ func (l *loader) loadDiff(old, newT any) error {
 		if oElem.Type().Field(i).Anonymous {
 			// If the embedded field is a pointer, dereference it
 			if oElem.Field(i).Kind() == reflect.Ptr {
-				if !oElem.Field(i).IsNil() && !nElem.Field(i).IsNil() {
+				if !oElem.Field(i).IsNil() && !nElem.Field(i).IsNil() { // If both are not nil, we need to recursively call LoadDiff
 					if err := l.loadDiff(oElem.Field(i).Interface(), nElem.Field(i).Interface()); err != nil {
 						return err
 					}
@@ -107,9 +107,7 @@ func (l *loader) loadDiff(old, newT any) error {
 
 		// Compare the old and new fields.
 		//
-		// New fields take priority over old fields if they are provided.
-		//
-		// We calculate whether we should be updating the field based off the LoaderOption's provided.
+		// New fields take priority over old fields if they are provided based on the configuration.
 		if !nElem.Field(i).IsZero() || l.includeZeroValues {
 			oElem.Field(i).Set(nElem.Field(i))
 		} else if nElem.Field(i).Kind() == reflect.Ptr && nElem.Field(i).IsNil() && l.includeNilValues {

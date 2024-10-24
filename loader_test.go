@@ -46,6 +46,30 @@ func (s *loadDiffSuite) TestLoadDiff_Success() {
 	s.Equal(26, old.Age)
 }
 
+func (s *loadDiffSuite) TestLoadDiff_Success_Pointed_Fields() {
+	s.l.includeNilValues = true
+
+	type testStruct struct {
+		Name *string
+		Age  *int
+	}
+
+	old := testStruct{
+		Name: ptr("John"),
+		Age:  ptr(25),
+	}
+
+	n := testStruct{
+		Name: ptr("John Smith"),
+		Age:  ptr(26),
+	}
+
+	err := s.l.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John Smith", *old.Name)
+	s.Equal(26, *old.Age)
+}
+
 func (s *loadDiffSuite) TestLoadDiff_Success_ZeroValue() {
 	type testStruct struct {
 		Name string
@@ -122,6 +146,69 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct() {
 
 	n := testStruct{
 		Partner: &testStruct{
+			Name: "Sarah",
+			Age:  24,
+		},
+	}
+
+	err := s.l.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John", old.Name)
+	s.Equal(25, old.Age)
+	s.Equal("Sarah", old.Partner.Name)
+	s.Equal(24, old.Partner.Age)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct_Reverse() {
+	type testStruct struct {
+		Name    string
+		Age     int
+		Partner *testStruct
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+		Partner: &testStruct{
+			Name: "Sarah",
+			Age:  24,
+		},
+	}
+
+	n := testStruct{
+		Partner: &testStruct{
+			Name: "Sarah Thompson",
+			Age:  27,
+		},
+	}
+
+	err := s.l.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John", old.Name)
+	s.Equal(25, old.Age)
+	s.Equal("Sarah Thompson", old.Partner.Name)
+	s.Equal(27, old.Partner.Age)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct_NotPointed() {
+	type testEmbed struct {
+		Name string
+		Age  int
+	}
+
+	type testStruct struct {
+		Name    string
+		Age     int
+		Partner testEmbed
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		Partner: testEmbed{
 			Name: "Sarah",
 			Age:  24,
 		},
