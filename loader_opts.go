@@ -1,6 +1,8 @@
 package patcher
 
-import "strings"
+import (
+	"strings"
+)
 
 type LoaderOption func(*loader)
 
@@ -43,10 +45,7 @@ func WithIgnoredFields(fields ...string) func(*loader) {
 }
 
 // WithIgnoredFieldsFunc sets a function that determines whether a field should be ignored when patching.
-//
-// Note. The field name is wrapped with `strings.ToLower` before being passed to this function, so please ensure that
-// the field name is in lowercase if you are comparing it with this function.
-func WithIgnoredFieldsFunc(f func(fieldName string, oldValue, newValue any) bool) func(*loader) {
+func WithIgnoredFieldsFunc(f IgnoreFieldsFunc) func(*loader) {
 	return func(l *loader) {
 		if f == nil {
 			return

@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/jacobbrewer1/patcher"
 )
@@ -16,6 +18,7 @@ type Something struct {
 	IgnoredField       string
 	IgnoredFieldTwo    string
 	IgnoredFieldByFunc string
+	IgnoredByTag       string `patcher:"-"`
 }
 
 func main() {
@@ -30,6 +33,7 @@ func main() {
 		IgnoredField:       "Ignored",
 		IgnoredFieldTwo:    "Ignored Two",
 		IgnoredFieldByFunc: "Ignored By Func",
+		IgnoredByTag:       "Ignored By Tag",
 	}
 
 	n := Something{
@@ -41,6 +45,7 @@ func main() {
 		IgnoredField:       "Diff Ignored",
 		IgnoredFieldTwo:    "Diff Ignored Two",
 		IgnoredFieldByFunc: "Diff Ignored By Func",
+		IgnoredByTag:       "Diff Ignored By Tag",
 	}
 
 	// The patcher.LoadDiff function will apply the changes from n to s.
@@ -48,8 +53,8 @@ func main() {
 		patcher.WithIncludeZeroValues(),
 		patcher.WithIncludeNilValues(),
 		patcher.WithIgnoredFields("ignoredField", "IgNoReDfIeLdTwO"),
-		patcher.WithIgnoredFieldsFunc(func(fieldName string, oldValue, newValue interface{}) bool {
-			return fieldName == "ignoredfieldbyfunc"
+		patcher.WithIgnoredFieldsFunc(func(field reflect.StructField, oldValue, newValue interface{}) bool {
+			return strings.ToLower(field.Name) == "ignoredfieldbyfunc"
 		}),
 	); err != nil {
 		panic(err)
@@ -65,6 +70,7 @@ func main() {
 	// Ignored
 	// Ignored Two
 	// Ignored By Func
+	// Ignored By Tag
 	fmt.Println(s.Number)
 	fmt.Println(s.Text)
 	fmt.Println(s.PrePopulated)
@@ -74,4 +80,5 @@ func main() {
 	fmt.Println(s.IgnoredField)
 	fmt.Println(s.IgnoredFieldTwo)
 	fmt.Println(s.IgnoredFieldByFunc)
+	fmt.Println(s.IgnoredByTag)
 }
