@@ -689,6 +689,40 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Blank_Except_Id() {
 	s.Nil(old.Age)
 }
 
+func (s *loadDiffSuite) TestLoadDiff_Success_Skip_Priority_Check() {
+	l := s.l
+	l.includeZeroValues = true
+	l.ignoreFields = []string{"id"}
+
+	type testStruct struct {
+		ID          int
+		Name        string `patcher:"-"`
+		Age         *int
+		BankBalance int
+	}
+
+	old := &testStruct{
+		ID:          17345,
+		Name:        "some text",
+		Age:         ptr(25),
+		BankBalance: 1000,
+	}
+
+	n := &testStruct{
+		ID:          0,
+		Name:        "John Smith",
+		Age:         nil,
+		BankBalance: 0,
+	}
+
+	err := l.loadDiff(old, n)
+	s.NoError(err)
+	s.Equal(17345, old.ID)
+	s.Equal("some text", old.Name)
+	s.Nil(old.Age)
+	s.Equal(0, old.BankBalance)
+}
+
 func (s *loadDiffSuite) TestLoadDiff_DefaultBehaviour() {
 	type testStruct struct {
 		ID   int

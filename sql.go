@@ -65,8 +65,8 @@ func (s *SQLPatch) patchGen(resource any) {
 
 		patcherOptsTag := fType.Tag.Get(TagOptsName)
 		if patcherOptsTag != "" {
-			patcherOpts := strings.Split(patcherOptsTag, ",")
-			if slices.Contains(patcherOpts, SkipTagValue) {
+			patcherOpts := strings.Split(patcherOptsTag, TagOptSeparator)
+			if slices.Contains(patcherOpts, TagOptSkip) {
 				continue
 			}
 		}

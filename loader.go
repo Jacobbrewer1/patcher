@@ -101,7 +101,7 @@ func (l *loader) loadDiff(old, newT any) error {
 		}
 
 		// See if the field should be ignored.
-		if l.ignoredFieldsCheck(oElem.Type().Field(i), oElem.Field(i).Interface(), nElem.Field(i).Interface()) {
+		if l.checkSkipField(oElem.Type().Field(i), oElem.Field(i).Interface(), nElem.Field(i).Interface()) {
 			continue
 		}
 
@@ -118,21 +118,27 @@ func (l *loader) loadDiff(old, newT any) error {
 	return nil
 }
 
-func (l *loader) ignoredFieldsCheck(field reflect.StructField, oldValue, newValue any) bool {
-	checkIgnores := func() bool {
-		fieldName := strings.ToLower(field.Name)
-		return l.checkIgnoredFields(fieldName) || l.checkIgnoreFunc(fieldName, oldValue, newValue)
+func (l *loader) checkSkipField(field reflect.StructField, oldValue, newValue any) bool {
+	// The ignore fields tag takes precedence over the ignore fields list
+	if l.checkSkipTag(field) {
+		return true
 	}
 
-	// Check if the field is tagged with `ignore`
-	tag, ok := field.Tag.Lookup(TagOptsName)
+	return l.ignoredFieldsCheck(strings.ToLower(field.Name), oldValue, newValue)
+}
+
+func (l *loader) checkSkipTag(field reflect.StructField) bool {
+	val, ok := field.Tag.Lookup(TagOptsName)
 	if !ok {
-		return checkIgnores()
+		return false
 	}
 
-	// Split the tag by comma and check if it contains `ignore`
-	tags := strings.Split(tag, ",")
-	return slices.Contains(tags, SkipTagValue) || checkIgnores()
+	tags := strings.Split(val, TagOptSeparator)
+	return slices.Contains(tags, TagOptSkip)
+}
+
+func (l *loader) ignoredFieldsCheck(field string, oldValue, newValue any) bool {
+	return l.checkIgnoredFields(field) || l.checkIgnoreFunc(field, oldValue, newValue)
 }
 
 func (l *loader) checkIgnoreFunc(field string, oldValue, newValue any) bool {

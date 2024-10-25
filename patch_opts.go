@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	TagOptsName  = "patcher"
-	SkipTagValue = "-"
+	TagOptsName     = "patcher"
+	TagOptSeparator = ","
+	TagOptSkip      = "-"
 )
 
 type PatchOpt func(*SQLPatch)
