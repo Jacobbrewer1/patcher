@@ -1,6 +1,8 @@
 package patcher
 
 import (
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -606,8 +608,8 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFields() {
 
 func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFunc() {
 	l := s.l
-	l.ignoreFieldsFunc = func(fieldName string, oldValue, newValue any) bool {
-		return fieldName == "name"
+	l.ignoreFieldsFunc = func(field reflect.StructField, oldValue, newValue any) bool {
+		return strings.ToLower(field.Name) == "name"
 	}
 
 	type testStruct struct {
@@ -634,8 +636,8 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFunc() {
 func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFuncAndIgnoreFields() {
 	l := s.l
 	l.ignoreFields = []string{"name"}
-	l.ignoreFieldsFunc = func(fieldName string, oldValue, newValue any) bool {
-		return fieldName == "name"
+	l.ignoreFieldsFunc = func(field reflect.StructField, oldValue, newValue any) bool {
+		return strings.ToLower(field.Name) == "name"
 	}
 
 	type testStruct struct {

@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/jacobbrewer1/patcher"
 )
@@ -48,8 +50,8 @@ func main() {
 		patcher.WithIncludeZeroValues(),
 		patcher.WithIncludeNilValues(),
 		patcher.WithIgnoredFields("ignoredField", "IgNoReDfIeLdTwO"),
-		patcher.WithIgnoredFieldsFunc(func(fieldName string, oldValue, newValue interface{}) bool {
-			return fieldName == "ignoredfieldbyfunc"
+		patcher.WithIgnoredFieldsFunc(func(field reflect.StructField, oldValue, newValue interface{}) bool {
+			return strings.ToLower(field.Name) == "ignoredfieldbyfunc"
 		}),
 	); err != nil {
 		panic(err)
