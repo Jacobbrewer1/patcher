@@ -18,6 +18,7 @@ type Something struct {
 	IgnoredField       string
 	IgnoredFieldTwo    string
 	IgnoredFieldByFunc string
+	IgnoredByTag       string `patcher:"-"`
 }
 
 func main() {
@@ -32,6 +33,7 @@ func main() {
 		IgnoredField:       "Ignored",
 		IgnoredFieldTwo:    "Ignored Two",
 		IgnoredFieldByFunc: "Ignored By Func",
+		IgnoredByTag:       "Ignored By Tag",
 	}
 
 	n := Something{
@@ -43,6 +45,7 @@ func main() {
 		IgnoredField:       "Diff Ignored",
 		IgnoredFieldTwo:    "Diff Ignored Two",
 		IgnoredFieldByFunc: "Diff Ignored By Func",
+		IgnoredByTag:       "Diff Ignored By Tag",
 	}
 
 	// The patcher.LoadDiff function will apply the changes from n to s.
@@ -67,6 +70,7 @@ func main() {
 	// Ignored
 	// Ignored Two
 	// Ignored By Func
+	// Ignored By Tag
 	fmt.Println(s.Number)
 	fmt.Println(s.Text)
 	fmt.Println(s.PrePopulated)
@@ -76,4 +80,5 @@ func main() {
 	fmt.Println(s.IgnoredField)
 	fmt.Println(s.IgnoredFieldTwo)
 	fmt.Println(s.IgnoredFieldByFunc)
+	fmt.Println(s.IgnoredByTag)
 }
