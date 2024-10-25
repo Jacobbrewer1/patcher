@@ -1,7 +1,6 @@
 package patcher
 
 import (
-	"reflect"
 	"strings"
 )
 
@@ -46,7 +45,7 @@ func WithIgnoredFields(fields ...string) func(*loader) {
 }
 
 // WithIgnoredFieldsFunc sets a function that determines whether a field should be ignored when patching.
-func WithIgnoredFieldsFunc(f func(field reflect.StructField, oldValue, newValue any) bool) func(*loader) {
+func WithIgnoredFieldsFunc(f IgnoreFieldsFunc) func(*loader) {
 	return func(l *loader) {
 		if f == nil {
 			return

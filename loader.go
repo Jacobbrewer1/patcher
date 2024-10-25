@@ -12,6 +12,8 @@ var (
 	ErrInvalidType = errors.New("invalid type: must pointer to struct")
 )
 
+type IgnoreFieldsFunc func(field reflect.StructField, oldValue, newValue any) bool
+
 type loader struct {
 	// includeZeroValues determines whether zero values should be included in the patch
 	includeZeroValues bool
@@ -25,7 +27,7 @@ type loader struct {
 	// ignoreFieldsFunc is a function that determines whether a field should be ignored
 	//
 	// This func should return true is the field is to be ignored
-	ignoreFieldsFunc func(field reflect.StructField, oldValue, newValue any) bool
+	ignoreFieldsFunc IgnoreFieldsFunc
 }
 
 func newLoader(opts ...LoaderOption) *loader {

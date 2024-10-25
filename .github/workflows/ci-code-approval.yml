@@ -100,3 +100,6 @@ jobs:
       # Do not run this is the PR is created by dependabot
       - name: "Check for changes"
         run: git diff --exit-code
+
+      - name: "Check for new files"
+        run: git diff --exit-code --name-status
