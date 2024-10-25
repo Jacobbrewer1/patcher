@@ -25,7 +25,7 @@ type loader struct {
 	// ignoreFieldsFunc is a function that determines whether a field should be ignored
 	//
 	// This func should return true is the field is to be ignored
-	ignoreFieldsFunc func(fieldName string, oldValue, newValue any) bool
+	ignoreFieldsFunc func(field reflect.StructField, oldValue, newValue any) bool
 }
 
 func newLoader(opts ...LoaderOption) *loader {
@@ -124,7 +124,7 @@ func (l *loader) checkSkipField(field reflect.StructField, oldValue, newValue an
 		return true
 	}
 
-	return l.ignoredFieldsCheck(strings.ToLower(field.Name), oldValue, newValue)
+	return l.ignoredFieldsCheck(field, oldValue, newValue)
 }
 
 func (l *loader) checkSkipTag(field reflect.StructField) bool {
@@ -137,12 +137,12 @@ func (l *loader) checkSkipTag(field reflect.StructField) bool {
 	return slices.Contains(tags, TagOptSkip)
 }
 
-func (l *loader) ignoredFieldsCheck(field string, oldValue, newValue any) bool {
-	return l.checkIgnoredFields(field) || l.checkIgnoreFunc(field, oldValue, newValue)
+func (l *loader) ignoredFieldsCheck(field reflect.StructField, oldValue, newValue any) bool {
+	return l.checkIgnoredFields(strings.ToLower(field.Name)) || l.checkIgnoreFunc(field, oldValue, newValue)
 }
 
-func (l *loader) checkIgnoreFunc(field string, oldValue, newValue any) bool {
-	return l.ignoreFieldsFunc != nil && l.ignoreFieldsFunc(strings.ToLower(field), oldValue, newValue)
+func (l *loader) checkIgnoreFunc(field reflect.StructField, oldValue, newValue any) bool {
+	return l.ignoreFieldsFunc != nil && l.ignoreFieldsFunc(field, oldValue, newValue)
 }
 
 func (l *loader) checkIgnoredFields(field string) bool {
