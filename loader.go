@@ -101,7 +101,7 @@ func (l *loader) loadDiff(old, newT any) error {
 		}
 
 		// See if the field should be ignored.
-		if l.ignoredFieldsCheck(strings.ToLower(oElem.Type().Field(i).Name), oElem.Field(i).Interface(), nElem.Field(i).Interface()) {
+		if l.checkSkipField(oElem.Type().Field(i), oElem.Field(i).Interface(), nElem.Field(i).Interface()) {
 			continue
 		}
 
@@ -116,6 +116,25 @@ func (l *loader) loadDiff(old, newT any) error {
 	}
 
 	return nil
+}
+
+func (l *loader) checkSkipField(field reflect.StructField, oldValue, newValue any) bool {
+	// The ignore fields tag takes precedence over the ignore fields list
+	if l.checkSkipTag(field) {
+		return true
+	}
+
+	return l.ignoredFieldsCheck(strings.ToLower(field.Name), oldValue, newValue)
+}
+
+func (l *loader) checkSkipTag(field reflect.StructField) bool {
+	val, ok := field.Tag.Lookup(TagOptsName)
+	if !ok {
+		return false
+	}
+
+	tags := strings.Split(val, TagOptSeparator)
+	return slices.Contains(tags, TagOptSkip)
 }
 
 func (l *loader) ignoredFieldsCheck(field string, oldValue, newValue any) bool {
