@@ -101,7 +101,7 @@ func (l *loader) loadDiff(old, newT any) error {
 		}
 
 		// See if the field should be ignored.
-		if l.ignoredFieldsCheck(strings.ToLower(oElem.Type().Field(i).Name), oElem.Field(i).Interface(), nElem.Field(i).Interface()) {
+		if l.ignoredFieldsCheck(oElem.Type().Field(i), oElem.Field(i).Interface(), nElem.Field(i).Interface()) {
 			continue
 		}
 
@@ -118,8 +118,21 @@ func (l *loader) loadDiff(old, newT any) error {
 	return nil
 }
 
-func (l *loader) ignoredFieldsCheck(field string, oldValue, newValue any) bool {
-	return l.checkIgnoredFields(field) || l.checkIgnoreFunc(field, oldValue, newValue)
+func (l *loader) ignoredFieldsCheck(field reflect.StructField, oldValue, newValue any) bool {
+	checkIgnores := func() bool {
+		fieldName := strings.ToLower(field.Name)
+		return l.checkIgnoredFields(fieldName) || l.checkIgnoreFunc(fieldName, oldValue, newValue)
+	}
+
+	// Check if the field is tagged with `ignore`
+	tag, ok := field.Tag.Lookup(TagOptsName)
+	if !ok {
+		return checkIgnores()
+	}
+
+	// Split the tag by comma and check if it contains `ignore`
+	tags := strings.Split(tag, ",")
+	return slices.Contains(tags, SkipTagValue) || checkIgnores()
 }
 
 func (l *loader) checkIgnoreFunc(field string, oldValue, newValue any) bool {

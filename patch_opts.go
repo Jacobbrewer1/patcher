@@ -7,6 +7,11 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+const (
+	TagOptsName  = "patcher"
+	SkipTagValue = "-"
+)
+
 type PatchOpt func(*SQLPatch)
 
 // WithTagName sets the tag name to look for in the struct. This is an override from the default tag "db"

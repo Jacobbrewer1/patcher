@@ -5,10 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 )
 
-const tagName = "db"
+const (
+	defaultDbTagName = "db"
+)
 
 var (
 	// ErrNoChanges is returned when no changes are detected between the old and new objects
@@ -17,7 +20,7 @@ var (
 
 func NewSQLPatch(resource any, opts ...PatchOpt) *SQLPatch {
 	sqlPatch := new(SQLPatch)
-	sqlPatch.tagName = tagName
+	sqlPatch.tagName = defaultDbTagName
 
 	for _, opt := range opts {
 		opt(sqlPatch)
@@ -58,6 +61,14 @@ func (s *SQLPatch) patchGen(resource any) {
 		} else if fVal.Kind() != reflect.Ptr && fVal.IsZero() {
 			// skip zero values for non-pointer fields as we have no way to differentiate between zero values and nil pointers
 			continue
+		}
+
+		patcherOptsTag := fType.Tag.Get(TagOptsName)
+		if patcherOptsTag != "" {
+			patcherOpts := strings.Split(patcherOptsTag, ",")
+			if slices.Contains(patcherOpts, SkipTagValue) {
+				continue
+			}
 		}
 
 		// if no tag is set, use the field name

@@ -32,6 +32,27 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success() {
 	s.Equal([]any{int64(1), "test"}, patch.args)
 }
 
+func (s *newSQLPatchSuite) TestNewSQLPatch_Skip() {
+	type testObj struct {
+		Id      *int   `db:"id_tag" patcher:"-"`
+		Name    string `db:"name_tag" patcher:"-"`
+		Deleted bool   `db:"deleted"`
+		Address string `db:"address"`
+	}
+
+	obj := testObj{
+		Id:      ptr(1),
+		Name:    "test",
+		Deleted: true,
+		Address: "1234 Main St",
+	}
+
+	patch := NewSQLPatch(obj)
+
+	s.Equal([]string{"deleted = ?", "address = ?"}, patch.fields)
+	s.Equal([]any{1, "1234 Main St"}, patch.args)
+}
+
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_noDbTag() {
 	type testObj struct {
 		Id   *int
