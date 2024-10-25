@@ -3,8 +3,6 @@ package patcher
 import (
 	"database/sql"
 	"strings"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type PatchOpt func(*SQLPatch)
@@ -59,12 +57,5 @@ func WithJoin(join Joiner) PatchOpt {
 func WithDB(db *sql.DB) PatchOpt {
 	return func(s *SQLPatch) {
 		s.db = db
-	}
-}
-
-// WithSQLxDB sets the database from an SQLx connection
-func WithSQLxDB(db *sqlx.DB) PatchOpt {
-	return func(s *SQLPatch) {
-		s.db = db.DB
 	}
 }
