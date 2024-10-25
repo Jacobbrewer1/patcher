@@ -686,7 +686,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Blank_Except_Id() {
 	s.NoError(err)
 	s.Equal(17345, old.ID)
 	s.Equal("", old.Name)
-	s.Nil(old.Age)
+	s.Equal(25, *old.Age)
 }
 
 func (s *loadDiffSuite) TestLoadDiff_DefaultBehaviour() {

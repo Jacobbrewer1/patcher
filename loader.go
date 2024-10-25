@@ -108,9 +108,9 @@ func (l *loader) loadDiff(old, newT any) error {
 		// Compare the old and new fields.
 		//
 		// New fields take priority over old fields if they are provided based on the configuration.
-		if !nElem.Field(i).IsZero() || l.includeZeroValues {
+		if nElem.Field(i).Kind() != reflect.Ptr && (!nElem.Field(i).IsZero() || l.includeZeroValues) {
 			oElem.Field(i).Set(nElem.Field(i))
-		} else if nElem.Field(i).Kind() == reflect.Ptr && nElem.Field(i).IsNil() && l.includeNilValues {
+		} else if nElem.Field(i).Kind() == reflect.Ptr && (!nElem.Field(i).IsNil() || l.includeNilValues) {
 			oElem.Field(i).Set(nElem.Field(i))
 		}
 	}
