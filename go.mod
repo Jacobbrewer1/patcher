@@ -4,7 +4,6 @@ go 1.22
 
 require (
 	github.com/gorilla/mux v1.8.1
-	github.com/jmoiron/sqlx v1.4.0
 	github.com/stretchr/testify v1.9.0
 	github.com/vektra/mockery/v2 v2.46.0
 )
