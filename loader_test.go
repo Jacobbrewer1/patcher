@@ -719,7 +719,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Skip_Priority_Check() {
 	s.NoError(err)
 	s.Equal(17345, old.ID)
 	s.Equal("some text", old.Name)
-	s.Nil(old.Age)
+	s.Equal(25, *old.Age)
 	s.Equal(0, old.BankBalance)
 }
 
