@@ -3,6 +3,8 @@ package inserter
 import (
 	"database/sql"
 	"errors"
+
+	"github.com/jacobbrewer1/patcher"
 )
 
 var (
@@ -34,6 +36,31 @@ type SQLBatch struct {
 
 	// table is the table name to use in the SQL statement
 	table string
+
+	// ignoreFields is a list of fields to ignore when patching
+	ignoreFields []string
+
+	// ignoreFieldsFunc is a function that determines whether a field should be ignored
+	//
+	// This func should return true is the field is to be ignored
+	ignoreFieldsFunc patcher.IgnoreFieldsFunc
+}
+
+// newBatchDefaults returns a new SQLBatch with default values
+func newBatchDefaults(opts ...BatchOpt) *SQLBatch {
+	b := &SQLBatch{
+		fields:  nil,
+		args:    nil,
+		db:      nil,
+		tagName: patcher.DefaultDbTagName,
+		table:   "",
+	}
+
+	for _, opt := range opts {
+		opt(b)
+	}
+
+	return b
 }
 
 func (b *SQLBatch) Fields() []string {

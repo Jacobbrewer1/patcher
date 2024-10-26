@@ -69,6 +69,32 @@ type SQLPatch struct {
 	ignoreFieldsFunc IgnoreFieldsFunc
 }
 
+// newPatchDefaults creates a new SQLPatch with default options.
+func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
+	// Default options
+	p := &SQLPatch{
+		fields:            nil,
+		args:              nil,
+		db:                nil,
+		tagName:           DefaultDbTagName,
+		table:             "",
+		whereSql:          new(strings.Builder),
+		whereArgs:         nil,
+		joinSql:           new(strings.Builder),
+		joinArgs:          nil,
+		includeZeroValues: false,
+		includeNilValues:  false,
+		ignoreFields:      nil,
+		ignoreFieldsFunc:  nil,
+	}
+
+	for _, opt := range opts {
+		opt(p)
+	}
+
+	return p
+}
+
 func (s *SQLPatch) Fields() []string {
 	return s.fields
 }

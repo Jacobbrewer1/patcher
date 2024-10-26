@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	defaultDbTagName = "db"
+	DefaultDbTagName = "db"
 )
 
 var (
@@ -49,8 +49,7 @@ func (s *SQLPatch) patchGen(resource any) {
 		tag := fType.Tag.Get(s.tagName)
 
 		// Skip unexported fields
-		if fType.PkgPath != "" {
-			// This is an unexported field
+		if !fType.IsExported() {
 			continue
 		}
 

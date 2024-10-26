@@ -12,31 +12,6 @@ var (
 	ErrInvalidType = errors.New("invalid type: must pointer to struct")
 )
 
-func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
-	// Default options
-	p := &SQLPatch{
-		fields:            nil,
-		args:              nil,
-		db:                nil,
-		tagName:           defaultDbTagName,
-		table:             "",
-		whereSql:          new(strings.Builder),
-		whereArgs:         nil,
-		joinSql:           new(strings.Builder),
-		joinArgs:          nil,
-		includeZeroValues: false,
-		includeNilValues:  false,
-		ignoreFields:      nil,
-		ignoreFieldsFunc:  nil,
-	}
-
-	for _, opt := range opts {
-		opt(p)
-	}
-
-	return p
-}
-
 // LoadDiff inserts the fields provided in the new struct pointer into the old struct pointer and injects the new
 // values into the old struct
 //

@@ -1,8 +1,11 @@
 package inserter
 
 import (
+	"reflect"
 	"testing"
 
+	"github.com/jacobbrewer1/patcher"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -219,7 +222,7 @@ func (s *generateSQLSuite) TestGenerateSQL_noDbTag() {
 	sql, args, err := NewBatch(resources, WithTable("temp")).GenerateSQL()
 	s.Require().NoError(err)
 
-	s.Require().Equal("INSERT INTO temp (id, name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
+	s.Require().Equal("INSERT INTO temp (ID, Name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
 	s.Require().Len(args, 10)
 }
 
@@ -357,9 +360,85 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_WithPointedFields() {
 	sql, args, err := NewBatch(resources, WithTable("temp"), WithTagName("db")).GenerateSQL()
 	s.Require().NoError(err)
 
-	s.Require().Equal("INSERT INTO temp (id, name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
-	s.Require().Len(args, 10)
+	s.Equal("INSERT INTO temp (id, name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
 
-	expectedArgs := []any{resources[0].(*temp).ID, resources[0].(*temp).Name, (*int)(nil), resources[1].(*temp).Name, resources[2].(*temp).ID, resources[2].(*temp).Name, resources[3].(*temp).ID, resources[3].(*temp).Name, resources[4].(*temp).ID, resources[4].(*temp).Name}
+	expectedArgs := []any{1, "test", interface{}(nil), "test2", 3, "test3", 4, "test4", 5, "test5"}
 	s.Require().Equal(expectedArgs, args)
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_WithPointedFields_noDbTag() {
+	type temp struct {
+		ID         *int
+		Name       *string
+		unexported string
+	}
+
+	resources := []any{
+		&temp{ID: ptr(1), Name: ptr("test")},
+		&temp{ID: nil, Name: ptr("test2")},
+		&temp{ID: ptr(3), Name: ptr("test3")},
+		&temp{ID: ptr(4), Name: ptr("test4")},
+		&temp{ID: ptr(5), Name: ptr("test5"), unexported: "test"},
+	}
+
+	sql, args, err := NewBatch(resources, WithTable("temp")).GenerateSQL()
+	s.Require().NoError(err)
+
+	s.Equal("INSERT INTO temp (ID, Name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
+
+	expectedArgs := []any{1, "test", interface{}(nil), "test2", 3, "test3", 4, "test4", 5, "test5"}
+	s.Require().Equal(expectedArgs, args)
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_IgnoredFields() {
+	type temp struct {
+		ID         int    `db:"id"`
+		Name       string `db:"name"`
+		unexported string `db:"unexported"`
+	}
+
+	resources := []any{
+		&temp{ID: 1, Name: "test"},
+		&temp{ID: 2, Name: "test2"},
+		&temp{ID: 3, Name: "test3"},
+		&temp{ID: 4, Name: "test4"},
+		&temp{ID: 5, Name: "test5", unexported: "test"},
+	}
+
+	b := NewBatch(resources, WithTable("temp"), WithTagName("db"), WithIgnoreFields("unexported"))
+
+	sql, args, err := b.GenerateSQL()
+	s.Require().NoError(err)
+
+	s.Equal("INSERT INTO temp (id, name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
+	s.Len(args, 10)
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_IgnoredFieldsFunc() {
+	type temp struct {
+		ID         int    `db:"id"`
+		Name       string `db:"name"`
+		unexported string `db:"unexported"`
+	}
+
+	resources := []any{
+		&temp{ID: 1, Name: "test"},
+		&temp{ID: 2, Name: "test2"},
+		&temp{ID: 3, Name: "test3"},
+		&temp{ID: 4, Name: "test4"},
+		&temp{ID: 5, Name: "test5", unexported: "test"},
+	}
+
+	mif := patcher.NewMockIgnoreFieldsFunc(s.T())
+	mif.On("Execute", mock.Anything).Return(func(f reflect.StructField) bool {
+		return f.Name == "ID"
+	})
+
+	b := NewBatch(resources, WithTable("temp"), WithTagName("db"), WithIgnoreFieldsFunc(mif.Execute))
+
+	sql, args, err := b.GenerateSQL()
+	s.Require().NoError(err)
+
+	s.Equal("INSERT INTO temp (name) VALUES (?), (?), (?), (?), (?)", sql)
+	s.Len(args, 5)
 }
