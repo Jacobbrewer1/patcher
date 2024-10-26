@@ -72,11 +72,11 @@ func (s *SQLPatch) patchGen(resource any) {
 		}
 
 		// if no tag is set, use the field name
-		if tag == "" {
-			tag = strings.ToLower(fType.Name)
+		if tag == TagOptSkip {
+			continue
+		} else if tag == "" {
+			tag = fType.Name
 		}
-		// and make the tag lowercase in the end
-		tag = strings.ToLower(tag)
 
 		addField := func() {
 			s.fields = append(s.fields, tag+" = ?")
