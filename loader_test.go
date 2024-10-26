@@ -11,7 +11,7 @@ import (
 type loadDiffSuite struct {
 	suite.Suite
 
-	l *loader
+	patch *SQLPatch
 }
 
 func TestLoadDiffSuite(t *testing.T) {
@@ -19,11 +19,11 @@ func TestLoadDiffSuite(t *testing.T) {
 }
 
 func (s *loadDiffSuite) SetupTest() {
-	s.l = newLoader()
+	s.patch = NewPatch()
 }
 
 func (s *loadDiffSuite) TearDownTest() {
-	s.l = nil
+	s.patch = nil
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success() {
@@ -42,14 +42,14 @@ func (s *loadDiffSuite) TestLoadDiff_Success() {
 		Age:  26,
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success_Pointed_Fields() {
-	s.l.includeNilValues = true
+	s.patch.includeNilValues = true
 
 	type testStruct struct {
 		Name *string
@@ -66,7 +66,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Pointed_Fields() {
 		Age:  ptr(26),
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", *old.Name)
 	s.Equal(26, *old.Age)
@@ -88,7 +88,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_ZeroValue() {
 		Age:  0,
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(25, old.Age)
@@ -107,7 +107,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_NoNewValue() {
 
 	n := testStruct{}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
@@ -128,7 +128,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_OneNewField() {
 		Age: 26,
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(26, old.Age)
@@ -153,7 +153,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct() {
 		},
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
@@ -184,7 +184,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct_Reverse() {
 		},
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
@@ -216,7 +216,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct_NotPointed() {
 		},
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
@@ -248,7 +248,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_InheritedStruct_NotPointed() {
 		Age:  26,
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
@@ -278,7 +278,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStructWithNewValue() {
 	n.Partner.Name = "Sarah Brewer"
 	n.Partner.Age = 25
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(25, old.Age)
@@ -315,7 +315,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedInheritedStruct() {
 		},
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
@@ -339,7 +339,7 @@ func (s *loadDiffSuite) TestLoadDiff_FailureNotPointer() {
 		Age:  26,
 	}
 
-	err := s.l.loadDiff(old, n)
+	err := s.patch.loadDiff(old, n)
 	s.Error(err)
 	s.Equal(ErrInvalidType, err)
 }
@@ -365,7 +365,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_NilOldField() {
 		},
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
@@ -387,7 +387,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Slice() {
 		Tags: []string{"tag3"},
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal([]string{"tag3"}, old.Tags) // New slice overwrites old one
 }
@@ -420,7 +420,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_DeeplyNestedStruct() {
 		},
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("New Value", old.Inner.InnerMost.Value)
 }
@@ -442,7 +442,7 @@ func (s *loadDiffSuite) TestLoadDiff_Failure_UnexportedField() {
 		Age:  26,
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal(26, old.Age)
 	s.Equal("OldName", old.name) // Name should remain unchanged because it's unexported
@@ -464,14 +464,14 @@ func (s *loadDiffSuite) TestLoadDiff_Failure_UnsupportedType() {
 		Name: "John Smith",
 	}
 
-	err := s.l.loadDiff(&old, &n)
+	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.NotNil(old.Updates) // Channel should not be nil as it started as a non-nil channel
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success_Include_Zeros() {
-	l := s.l
+	l := s.patch
 	l.includeZeroValues = true
 
 	type testStruct struct {
@@ -496,7 +496,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Include_Zeros() {
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success_Include_Zeros_false() {
-	l := s.l
+	l := s.patch
 	l.includeZeroValues = false
 
 	type testStruct struct {
@@ -521,7 +521,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Include_Zeros_false() {
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success_Include_Nil() {
-	l := s.l
+	l := s.patch
 	l.includeNilValues = true
 
 	type testStruct struct {
@@ -551,7 +551,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Include_Nil() {
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success_Include_Nil_false() {
-	l := s.l
+	l := s.patch
 	l.includeNilValues = false
 
 	type testStruct struct {
@@ -582,7 +582,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Include_Nil_false() {
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFields() {
-	l := s.l
+	l := s.patch
 	l.ignoreFields = []string{"name"}
 
 	type testStruct struct {
@@ -607,8 +607,8 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFields() {
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFunc() {
-	l := s.l
-	l.ignoreFieldsFunc = func(field reflect.StructField, oldValue, newValue any) bool {
+	l := s.patch
+	l.ignoreFieldsFunc = func(field reflect.StructField) bool {
 		return strings.ToLower(field.Name) == "name"
 	}
 
@@ -634,9 +634,9 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFunc() {
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFuncAndIgnoreFields() {
-	l := s.l
+	l := s.patch
 	l.ignoreFields = []string{"name"}
-	l.ignoreFieldsFunc = func(field reflect.StructField, oldValue, newValue any) bool {
+	l.ignoreFieldsFunc = func(field reflect.StructField) bool {
 		return strings.ToLower(field.Name) == "name"
 	}
 
@@ -662,7 +662,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFuncAndIgnoreFields() {
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success_Blank_Except_Id() {
-	l := s.l
+	l := s.patch
 	l.includeZeroValues = true
 	l.ignoreFields = []string{"id"}
 
@@ -692,7 +692,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Blank_Except_Id() {
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success_Skip_Priority_Check() {
-	l := s.l
+	l := s.patch
 	l.includeZeroValues = true
 	l.ignoreFields = []string{"id"}
 

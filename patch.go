@@ -3,6 +3,7 @@ package patcher
 import (
 	"database/sql"
 	"errors"
+	"reflect"
 	"strings"
 )
 
@@ -23,6 +24,8 @@ var (
 	ErrNoWhere = errors.New("no where clause set")
 )
 
+type IgnoreFieldsFunc func(field reflect.StructField) bool
+
 type SQLPatch struct {
 	// fields is the fields to update in the SQL statement
 	fields []string
@@ -40,16 +43,30 @@ type SQLPatch struct {
 	table string
 
 	// whereSql is the where clause to use in the SQL statement
-	where strings.Builder
+	where *strings.Builder
 
 	// whereArgs is the arguments to use in the where clause
 	whereArgs []any
 
 	// joinSql is the join clause to use in the SQL statement
-	joinSql strings.Builder
+	joinSql *strings.Builder
 
 	// joinArgs is the arguments to use in the join clause
 	joinArgs []any
+
+	// includeZeroValues determines whether zero values should be included in the patch
+	includeZeroValues bool
+
+	// includeNilValues determines whether nil values should be included in the patch
+	includeNilValues bool
+
+	// ignoreFields is a list of fields to ignore when patching
+	ignoreFields []string
+
+	// ignoreFieldsFunc is a function that determines whether a field should be ignored
+	//
+	// This func should return true is the field is to be ignored
+	ignoreFieldsFunc IgnoreFieldsFunc
 }
 
 func (s *SQLPatch) Fields() []string {

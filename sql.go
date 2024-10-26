@@ -19,8 +19,21 @@ var (
 )
 
 func NewSQLPatch(resource any, opts ...PatchOpt) *SQLPatch {
-	sqlPatch := new(SQLPatch)
-	sqlPatch.tagName = defaultDbTagName
+	sqlPatch := &SQLPatch{
+		fields:            nil,
+		args:              nil,
+		db:                nil,
+		tagName:           defaultDbTagName,
+		table:             "",
+		where:             new(strings.Builder),
+		whereArgs:         nil,
+		joinSql:           new(strings.Builder),
+		joinArgs:          nil,
+		includeZeroValues: false,
+		includeNilValues:  false,
+		ignoreFields:      nil,
+		ignoreFieldsFunc:  nil,
+	}
 
 	for _, opt := range opts {
 		opt(sqlPatch)
