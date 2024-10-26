@@ -57,7 +57,7 @@ func (s *SQLPatch) patchGen(resource any) {
 		// Skip fields that are to be ignored
 		if s.checkSkipField(fType) {
 			continue
-		} else if fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.includeZeroValues) {
+		} else if fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.includeNilValues) {
 			continue
 		} else if fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.includeZeroValues) {
 			continue
@@ -78,7 +78,19 @@ func (s *SQLPatch) patchGen(resource any) {
 		// and make the tag lowercase in the end
 		tag = strings.ToLower(tag)
 
-		s.fields = append(s.fields, tag+" = ?")
+		addField := func() {
+			s.fields = append(s.fields, tag+" = ?")
+		}
+
+		if fVal.Kind() == reflect.Ptr && fVal.IsNil() && s.includeNilValues {
+			s.args = append(s.args, nil)
+			addField()
+			continue
+		} else if fVal.Kind() == reflect.Ptr && fVal.IsNil() {
+			continue
+		}
+
+		addField()
 
 		var val reflect.Value
 		if fVal.Kind() == reflect.Ptr {
@@ -98,9 +110,11 @@ func (s *SQLPatch) patchGen(resource any) {
 				boolArg = 1
 			}
 			s.args = append(s.args, boolArg)
+		case reflect.Float32, reflect.Float64:
+			s.args = append(s.args, val.Float())
 		default:
 			// This is intentionally a panic as this is a programming error and should be fixed by the developer
-			panic("unhandled default case")
+			panic(fmt.Sprintf("unsupported type: %s", val.Kind()))
 		}
 	}
 }
