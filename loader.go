@@ -18,7 +18,7 @@ func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 		fields:            nil,
 		args:              nil,
 		db:                nil,
-		tagName:           "",
+		tagName:           defaultDbTagName,
 		table:             "",
 		where:             new(strings.Builder),
 		whereArgs:         nil,

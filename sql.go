@@ -19,28 +19,8 @@ var (
 )
 
 func NewSQLPatch(resource any, opts ...PatchOpt) *SQLPatch {
-	sqlPatch := &SQLPatch{
-		fields:            nil,
-		args:              nil,
-		db:                nil,
-		tagName:           defaultDbTagName,
-		table:             "",
-		where:             new(strings.Builder),
-		whereArgs:         nil,
-		joinSql:           new(strings.Builder),
-		joinArgs:          nil,
-		includeZeroValues: false,
-		includeNilValues:  false,
-		ignoreFields:      nil,
-		ignoreFieldsFunc:  nil,
-	}
-
-	for _, opt := range opts {
-		opt(sqlPatch)
-	}
-
+	sqlPatch := newPatchDefaults(opts...)
 	sqlPatch.patchGen(resource)
-
 	return sqlPatch
 }
 
@@ -199,6 +179,7 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 	// copy the old object into the copy
 	reflect.ValueOf(oldCopy).Elem().Set(reflect.ValueOf(old).Elem())
 
+	patch := newPatchDefaults(opts...)
 	if err := LoadDiff(old, newT); err != nil {
 		return nil, fmt.Errorf("load diff: %w", err)
 	}
@@ -229,5 +210,7 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 		}
 	}
 
-	return NewSQLPatch(old, opts...), nil
+	patch.patchGen(old)
+
+	return patch, nil
 }
