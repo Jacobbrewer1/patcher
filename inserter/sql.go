@@ -4,17 +4,21 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
-)
 
-const (
-	// defaultTagName is the default tag name to look for in the struct
-	defaultTagName = "db"
+	"github.com/jacobbrewer1/patcher"
 )
 
 func NewBatch(resources []any, opts ...BatchOpt) *SQLBatch {
-	b := new(SQLBatch)
-	b.tagName = defaultTagName
+	b := &SQLBatch{
+		fields:  nil,
+		args:    nil,
+		db:      nil,
+		tagName: patcher.DefaultDbTagName,
+		table:   "",
+	}
+
 	for _, opt := range opts {
 		opt(b)
 	}
@@ -49,20 +53,34 @@ func (b *SQLBatch) genBatch(resources []any) {
 		for i := 0; i < t.NumField(); i++ {
 			f := t.Field(i)
 			tag := f.Tag.Get(b.tagName)
-			if tag == "-" {
+			if tag == patcher.TagOptSkip {
 				continue
 			}
 
+			// Skip unexported fields
 			if !f.IsExported() {
 				continue
 			}
 
-			// if no tag is set, use the field name
-			if tag == "" {
-				tag = strings.ToLower(f.Name)
+			// Skip fields that are to be ignored
+			if b.checkSkipField(f) {
+				continue
 			}
 
-			b.args = append(b.args, v.Field(i).Interface())
+			patcherOptsTag := f.Tag.Get(patcher.TagOptsName)
+			if patcherOptsTag != "" {
+				patcherOpts := strings.Split(patcherOptsTag, patcher.TagOptSeparator)
+				if slices.Contains(patcherOpts, patcher.TagOptSkip) {
+					continue
+				}
+			}
+
+			// if no tag is set, use the field name
+			if tag == "" {
+				tag = f.Name
+			}
+
+			b.args = append(b.args, b.getFieldValue(v.Field(i), f))
 
 			// if the field is not unique, skip it
 			if _, ok := uniqueFields[tag]; ok {
@@ -74,6 +92,17 @@ func (b *SQLBatch) genBatch(resources []any) {
 			uniqueFields[tag] = struct{}{}
 		}
 	}
+}
+
+func (b *SQLBatch) getFieldValue(v reflect.Value, f reflect.StructField) any {
+	if f.Type.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		return v.Elem().Interface()
+	}
+
+	return v.Interface()
 }
 
 func (b *SQLBatch) GenerateSQL() (string, []any, error) {
@@ -115,4 +144,35 @@ func (b *SQLBatch) Perform() (sql.Result, error) {
 	}
 
 	return b.db.Exec(sqlStr, args...)
+}
+
+func (b *SQLBatch) checkSkipField(field reflect.StructField) bool {
+	// The ignore fields tag takes precedence over the ignore fields list
+	if b.checkSkipTag(field) {
+		return true
+	}
+
+	return b.ignoredFieldsCheck(field)
+}
+
+func (b *SQLBatch) checkSkipTag(field reflect.StructField) bool {
+	val, ok := field.Tag.Lookup(patcher.TagOptsName)
+	if !ok {
+		return false
+	}
+
+	tags := strings.Split(val, patcher.TagOptSeparator)
+	return slices.Contains(tags, patcher.TagOptSkip)
+}
+
+func (b *SQLBatch) ignoredFieldsCheck(field reflect.StructField) bool {
+	return b.checkIgnoredFields(strings.ToLower(field.Name)) || b.checkIgnoreFunc(field)
+}
+
+func (b *SQLBatch) checkIgnoreFunc(field reflect.StructField) bool {
+	return b.ignoreFieldsFunc != nil && b.ignoreFieldsFunc(field)
+}
+
+func (b *SQLBatch) checkIgnoredFields(field string) bool {
+	return len(b.ignoreFields) > 0 && slices.Contains(b.ignoreFields, strings.ToLower(field))
 }
