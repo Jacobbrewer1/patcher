@@ -8,7 +8,7 @@ import (
 )
 
 type Person struct {
-	ID   *int    `db:"id"`
+	ID   *int    `db:"-"`
 	Name *string `db:"name"`
 }
 
