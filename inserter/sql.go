@@ -11,13 +11,7 @@ import (
 )
 
 func NewBatch(resources []any, opts ...BatchOpt) *SQLBatch {
-	b := &SQLBatch{
-		fields:  nil,
-		args:    nil,
-		db:      nil,
-		tagName: patcher.DefaultDbTagName,
-		table:   "",
-	}
+	b := newBatchDefaults(opts...)
 
 	for _, opt := range opts {
 		opt(b)
