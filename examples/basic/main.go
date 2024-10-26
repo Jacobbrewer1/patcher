@@ -8,7 +8,7 @@ import (
 )
 
 type Person struct {
-	ID   *int    `db:"id"`
+	ID   *int    `db:"-"`
 	Name *string `db:"name"`
 }
 
@@ -45,6 +45,16 @@ func main() {
 		panic(err)
 	}
 
+	// Output:
+	// UPDATE people
+	// SET name = ?
+	// WHERE (1 = 1)
+	//   AND (
+	//     id = ?
+	//     )
 	fmt.Println(sqlStr)
+
+	// Output:
+	// ["John", 1]
 	fmt.Println(args)
 }

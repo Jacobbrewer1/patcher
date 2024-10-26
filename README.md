@@ -27,9 +27,8 @@ import (
 )
 
 type Person struct {
-	ID   *int    `db:"id"`
+	ID   *int    `db:"-"`
 	Name *string `db:"name"`
-	Age  *int    `db:"age"`
 }
 
 type PersonWhere struct {
@@ -47,14 +46,14 @@ func (p *PersonWhere) Where() (string, []any) {
 }
 
 func main() {
-	const jsonStr = `{"name": "John", "age": 25}`
+	const jsonStr = `{"id": 1, "name": "john"}`
 
 	person := new(Person)
 	if err := json.Unmarshal([]byte(jsonStr), person); err != nil {
 		panic(err)
 	}
 
-	condition := NewPersonWhere(1)
+	condition := NewPersonWhere(*person.ID)
 
 	sqlStr, args, err := patcher.GenerateSQL(
 		person,
@@ -65,9 +64,20 @@ func main() {
 		panic(err)
 	}
 
+	// Output:
+	// UPDATE people
+	// SET name = ?
+	// WHERE (1 = 1)
+	//   AND (
+	//     id = ?
+	//     )
 	fmt.Println(sqlStr)
+	
+	// Output:
+	// ["John", 1]
 	fmt.Println(args)
 }
+
 ```
 
 This will output:

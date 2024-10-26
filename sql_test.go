@@ -67,7 +67,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_noDbTag() {
 
 	patch := NewSQLPatch(obj)
 
-	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
+	s.Equal([]string{"Id = ?", "Name = ?"}, patch.fields)
 	s.Equal([]any{int64(1), "test"}, patch.args)
 }
 
