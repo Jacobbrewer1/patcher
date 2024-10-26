@@ -20,7 +20,7 @@ func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 		db:                nil,
 		tagName:           defaultDbTagName,
 		table:             "",
-		where:             new(strings.Builder),
+		whereSql:          new(strings.Builder),
 		whereArgs:         nil,
 		joinSql:           new(strings.Builder),
 		joinArgs:          nil,

@@ -43,7 +43,7 @@ type SQLPatch struct {
 	table string
 
 	// whereSql is the where clause to use in the SQL statement
-	where *strings.Builder
+	whereSql *strings.Builder
 
 	// whereArgs is the arguments to use in the where clause
 	whereArgs []any
@@ -86,7 +86,7 @@ func (s *SQLPatch) validatePerformPatch() error {
 		return ErrNoFields
 	} else if len(s.args) == 0 {
 		return ErrNoArgs
-	} else if s.where.String() == "" {
+	} else if s.whereSql.String() == "" {
 		return ErrNoWhere
 	}
 
@@ -100,7 +100,7 @@ func (s *SQLPatch) validateSQLGen() error {
 		return ErrNoFields
 	} else if len(s.args) == 0 {
 		return ErrNoArgs
-	} else if s.where.String() == "" {
+	} else if s.whereSql.String() == "" {
 		return ErrNoWhere
 	}
 

@@ -30,8 +30,8 @@ func WithTable(table string) PatchOpt {
 // WithWhere sets the where clause to use in the SQL statement
 func WithWhere(where Wherer) PatchOpt {
 	return func(s *SQLPatch) {
-		if s.where == nil {
-			s.where = new(strings.Builder)
+		if s.whereSql == nil {
+			s.whereSql = new(strings.Builder)
 		}
 		fwSQL, fwArgs := where.Where()
 		if fwArgs == nil {
@@ -42,9 +42,9 @@ func WithWhere(where Wherer) PatchOpt {
 		if ok && wt.WhereType().IsValid() {
 			wtStr = wt.WhereType()
 		}
-		s.where.WriteString(string(wtStr) + " ")
-		s.where.WriteString(strings.TrimSpace(fwSQL))
-		s.where.WriteString("\n")
+		s.whereSql.WriteString(string(wtStr) + " ")
+		s.whereSql.WriteString(strings.TrimSpace(fwSQL))
+		s.whereSql.WriteString("\n")
 		s.whereArgs = append(s.whereArgs, fwArgs...)
 	}
 }
