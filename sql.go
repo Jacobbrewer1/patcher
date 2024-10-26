@@ -48,11 +48,18 @@ func (s *SQLPatch) patchGen(resource any) {
 		fVal := rVal.Field(i)
 		tag := fType.Tag.Get(s.tagName)
 
-		// skip nil properties (not going to be patched), skip unexported fields, skip fields to be skipped for SQL
-		if fVal.Kind() == reflect.Ptr && (fVal.IsNil() || fType.PkgPath != "" || tag == "-") {
+		// Skip unexported fields
+		if fType.PkgPath != "" {
+			// This is an unexported field
 			continue
-		} else if fVal.Kind() != reflect.Ptr && fVal.IsZero() {
-			// skip zero values for non-pointer fields as we have no way to differentiate between zero values and nil pointers
+		}
+
+		// Skip fields that are to be ignored
+		if s.checkSkipField(fType) {
+			continue
+		} else if fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.includeZeroValues) {
+			continue
+		} else if fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.includeZeroValues) {
 			continue
 		}
 
@@ -180,7 +187,7 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 	reflect.ValueOf(oldCopy).Elem().Set(reflect.ValueOf(old).Elem())
 
 	patch := newPatchDefaults(opts...)
-	if err := LoadDiff(old, newT); err != nil {
+	if err := patch.loadDiff(old, newT); err != nil {
 		return nil, fmt.Errorf("load diff: %w", err)
 	}
 
@@ -194,18 +201,18 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 		oldField := reflect.ValueOf(old).Elem().Field(i)
 		copyField := reflect.ValueOf(oldCopy).Elem().Field(i)
 
-		if oldField.Kind() == reflect.Ptr && oldField.IsNil() {
+		if oldField.Kind() == reflect.Ptr && (oldField.IsNil() && copyField.IsNil() && !patch.includeZeroValues) {
 			continue
-		} else if oldField.Kind() != reflect.Ptr && oldField.IsZero() {
+		} else if oldField.Kind() != reflect.Ptr && (oldField.IsZero() && copyField.IsZero() && !patch.includeZeroValues) {
 			continue
 		}
 
 		if reflect.DeepEqual(oldField.Interface(), copyField.Interface()) {
-			if oldField.Kind() == reflect.Ptr {
-				oldField.Set(reflect.Zero(oldField.Type()))
-				continue
+			// Field is the same, set it to zero or nil. Add it to be ignored in the patch
+			if patch.ignoreFields == nil {
+				patch.ignoreFields = make([]string, 0)
 			}
-			oldField.Set(reflect.New(oldField.Type()).Elem())
+			patch.ignoreFields = append(patch.ignoreFields, strings.ToLower(reflect.ValueOf(old).Elem().Type().Field(i).Name))
 			continue
 		}
 	}
