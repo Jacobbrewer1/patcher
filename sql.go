@@ -19,15 +19,8 @@ var (
 )
 
 func NewSQLPatch(resource any, opts ...PatchOpt) *SQLPatch {
-	sqlPatch := new(SQLPatch)
-	sqlPatch.tagName = defaultDbTagName
-
-	for _, opt := range opts {
-		opt(sqlPatch)
-	}
-
+	sqlPatch := newPatchDefaults(opts...)
 	sqlPatch.patchGen(resource)
-
 	return sqlPatch
 }
 
@@ -186,6 +179,7 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 	// copy the old object into the copy
 	reflect.ValueOf(oldCopy).Elem().Set(reflect.ValueOf(old).Elem())
 
+	patch := newPatchDefaults(opts...)
 	if err := LoadDiff(old, newT); err != nil {
 		return nil, fmt.Errorf("load diff: %w", err)
 	}
@@ -216,5 +210,7 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 		}
 	}
 
-	return NewSQLPatch(old, opts...), nil
+	patch.patchGen(old)
+
+	return patch, nil
 }

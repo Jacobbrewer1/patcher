@@ -53,7 +53,7 @@ func main() {
 		patcher.WithIncludeZeroValues(),
 		patcher.WithIncludeNilValues(),
 		patcher.WithIgnoredFields("ignoredField", "IgNoReDfIeLdTwO"),
-		patcher.WithIgnoredFieldsFunc(func(field reflect.StructField, oldValue, newValue interface{}) bool {
+		patcher.WithIgnoredFieldsFunc(func(field reflect.StructField) bool {
 			return strings.ToLower(field.Name) == "ignoredfieldbyfunc"
 		}),
 	); err != nil {

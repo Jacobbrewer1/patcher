@@ -12,27 +12,18 @@ var (
 	ErrInvalidType = errors.New("invalid type: must pointer to struct")
 )
 
-type IgnoreFieldsFunc func(field reflect.StructField, oldValue, newValue any) bool
-
-type loader struct {
-	// includeZeroValues determines whether zero values should be included in the patch
-	includeZeroValues bool
-
-	// includeNilValues determines whether nil values should be included in the patch
-	includeNilValues bool
-
-	// ignoreFields is a list of fields to ignore when patching
-	ignoreFields []string
-
-	// ignoreFieldsFunc is a function that determines whether a field should be ignored
-	//
-	// This func should return true is the field is to be ignored
-	ignoreFieldsFunc IgnoreFieldsFunc
-}
-
-func newLoader(opts ...LoaderOption) *loader {
+func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 	// Default options
-	l := &loader{
+	p := &SQLPatch{
+		fields:            nil,
+		args:              nil,
+		db:                nil,
+		tagName:           defaultDbTagName,
+		table:             "",
+		where:             new(strings.Builder),
+		whereArgs:         nil,
+		joinSql:           new(strings.Builder),
+		joinArgs:          nil,
 		includeZeroValues: false,
 		includeNilValues:  false,
 		ignoreFields:      nil,
@@ -40,10 +31,10 @@ func newLoader(opts ...LoaderOption) *loader {
 	}
 
 	for _, opt := range opts {
-		opt(l)
+		opt(p)
 	}
 
-	return l
+	return p
 }
 
 // LoadDiff inserts the fields provided in the new struct pointer into the old struct pointer and injects the new
@@ -55,11 +46,11 @@ func newLoader(opts ...LoaderOption) *loader {
 //
 // This can be if you are inserting a patch into an existing object but require a new object to be returned with
 // all fields
-func LoadDiff[T any](old *T, newT *T, opts ...LoaderOption) error {
-	return newLoader(opts...).loadDiff(old, newT)
+func LoadDiff[T any](old *T, newT *T, opts ...PatchOpt) error {
+	return newPatchDefaults(opts...).loadDiff(old, newT)
 }
 
-func (l *loader) loadDiff(old, newT any) error {
+func (s *SQLPatch) loadDiff(old, newT any) error {
 	if !isPointerToStruct(old) || !isPointerToStruct(newT) {
 		return ErrInvalidType
 	}
@@ -78,7 +69,7 @@ func (l *loader) loadDiff(old, newT any) error {
 			// If the embedded field is a pointer, dereference it
 			if oElem.Field(i).Kind() == reflect.Ptr {
 				if !oElem.Field(i).IsNil() && !nElem.Field(i).IsNil() { // If both are not nil, we need to recursively call LoadDiff
-					if err := l.loadDiff(oElem.Field(i).Interface(), nElem.Field(i).Interface()); err != nil {
+					if err := s.loadDiff(oElem.Field(i).Interface(), nElem.Field(i).Interface()); err != nil {
 						return err
 					}
 				} else if nElem.Field(i).IsValid() && !nElem.Field(i).IsNil() {
@@ -88,7 +79,7 @@ func (l *loader) loadDiff(old, newT any) error {
 				continue
 			}
 
-			if err := l.loadDiff(oElem.Field(i).Addr().Interface(), nElem.Field(i).Addr().Interface()); err != nil {
+			if err := s.loadDiff(oElem.Field(i).Addr().Interface(), nElem.Field(i).Addr().Interface()); err != nil {
 				return err
 			}
 			continue
@@ -96,23 +87,23 @@ func (l *loader) loadDiff(old, newT any) error {
 
 		// If the field is a struct, we need to recursively call LoadDiff
 		if oElem.Field(i).Kind() == reflect.Struct {
-			if err := l.loadDiff(oElem.Field(i).Addr().Interface(), nElem.Field(i).Addr().Interface()); err != nil {
+			if err := s.loadDiff(oElem.Field(i).Addr().Interface(), nElem.Field(i).Addr().Interface()); err != nil {
 				return err
 			}
 			continue
 		}
 
 		// See if the field should be ignored.
-		if l.checkSkipField(oElem.Type().Field(i), oElem.Field(i).Interface(), nElem.Field(i).Interface()) {
+		if s.checkSkipField(oElem.Type().Field(i)) {
 			continue
 		}
 
 		// Compare the old and new fields.
 		//
 		// New fields take priority over old fields if they are provided based on the configuration.
-		if nElem.Field(i).Kind() != reflect.Ptr && (!nElem.Field(i).IsZero() || l.includeZeroValues) {
+		if nElem.Field(i).Kind() != reflect.Ptr && (!nElem.Field(i).IsZero() || s.includeZeroValues) {
 			oElem.Field(i).Set(nElem.Field(i))
-		} else if nElem.Field(i).Kind() == reflect.Ptr && (!nElem.Field(i).IsNil() || l.includeNilValues) {
+		} else if nElem.Field(i).Kind() == reflect.Ptr && (!nElem.Field(i).IsNil() || s.includeNilValues) {
 			oElem.Field(i).Set(nElem.Field(i))
 		}
 	}
@@ -120,16 +111,16 @@ func (l *loader) loadDiff(old, newT any) error {
 	return nil
 }
 
-func (l *loader) checkSkipField(field reflect.StructField, oldValue, newValue any) bool {
+func (s *SQLPatch) checkSkipField(field reflect.StructField) bool {
 	// The ignore fields tag takes precedence over the ignore fields list
-	if l.checkSkipTag(field) {
+	if s.checkSkipTag(field) {
 		return true
 	}
 
-	return l.ignoredFieldsCheck(field, oldValue, newValue)
+	return s.ignoredFieldsCheck(field)
 }
 
-func (l *loader) checkSkipTag(field reflect.StructField) bool {
+func (s *SQLPatch) checkSkipTag(field reflect.StructField) bool {
 	val, ok := field.Tag.Lookup(TagOptsName)
 	if !ok {
 		return false
@@ -139,14 +130,14 @@ func (l *loader) checkSkipTag(field reflect.StructField) bool {
 	return slices.Contains(tags, TagOptSkip)
 }
 
-func (l *loader) ignoredFieldsCheck(field reflect.StructField, oldValue, newValue any) bool {
-	return l.checkIgnoredFields(strings.ToLower(field.Name)) || l.checkIgnoreFunc(field, oldValue, newValue)
+func (s *SQLPatch) ignoredFieldsCheck(field reflect.StructField) bool {
+	return s.checkIgnoredFields(strings.ToLower(field.Name)) || s.checkIgnoreFunc(field)
 }
 
-func (l *loader) checkIgnoreFunc(field reflect.StructField, oldValue, newValue any) bool {
-	return l.ignoreFieldsFunc != nil && l.ignoreFieldsFunc(field, oldValue, newValue)
+func (s *SQLPatch) checkIgnoreFunc(field reflect.StructField) bool {
+	return s.ignoreFieldsFunc != nil && s.ignoreFieldsFunc(field)
 }
 
-func (l *loader) checkIgnoredFields(field string) bool {
-	return len(l.ignoreFields) > 0 && slices.Contains(l.ignoreFields, strings.ToLower(field))
+func (s *SQLPatch) checkIgnoredFields(field string) bool {
+	return len(s.ignoreFields) > 0 && slices.Contains(s.ignoreFields, strings.ToLower(field))
 }
