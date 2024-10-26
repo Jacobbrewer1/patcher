@@ -12,7 +12,7 @@ var (
 	ErrInvalidType = errors.New("invalid type: must pointer to struct")
 )
 
-func NewPatch(opts ...PatchOpt) *SQLPatch {
+func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 	// Default options
 	p := &SQLPatch{
 		fields:            nil,
@@ -47,7 +47,7 @@ func NewPatch(opts ...PatchOpt) *SQLPatch {
 // This can be if you are inserting a patch into an existing object but require a new object to be returned with
 // all fields
 func LoadDiff[T any](old *T, newT *T, opts ...PatchOpt) error {
-	return NewPatch(opts...).loadDiff(old, newT)
+	return newPatchDefaults(opts...).loadDiff(old, newT)
 }
 
 func (s *SQLPatch) loadDiff(old, newT any) error {

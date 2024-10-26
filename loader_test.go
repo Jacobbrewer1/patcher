@@ -19,7 +19,7 @@ func TestLoadDiffSuite(t *testing.T) {
 }
 
 func (s *loadDiffSuite) SetupTest() {
-	s.patch = NewPatch()
+	s.patch = newPatchDefaults()
 }
 
 func (s *loadDiffSuite) TearDownTest() {
