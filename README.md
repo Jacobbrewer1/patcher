@@ -64,17 +64,8 @@ func main() {
 		panic(err)
 	}
 
-	// Output:
-	// UPDATE people
-	// SET name = ?
-	// WHERE (1 = 1)
-	//   AND (
-	//     id = ?
-	//     )
 	fmt.Println(sqlStr)
-	
-	// Output:
-	// ["John", 1]
+
 	fmt.Println(args)
 }
 
@@ -84,8 +75,7 @@ This will output:
 
 ```sql
 UPDATE people
-SET name = ?,
-    age  = ?
+SET name = ?
 WHERE (1 = 1)
   AND (
     id = ?
@@ -95,7 +85,7 @@ WHERE (1 = 1)
 with the args:
 
 ```
-["John", 25, 1]
+["john", 1]
 ```
 
 #### Struct diffs
@@ -142,17 +132,21 @@ func main() {
 		panic(err)
 	}
 
-	// Output:
-	// 6
-	// Old Text
-	// PrePopulated
-	// New Text
 	fmt.Println(s.Number)
 	fmt.Println(s.Text)
 	fmt.Println(s.PrePopulated)
 	fmt.Println(s.NewText)
 }
 
+```
+
+This will output:
+
+```
+6
+Hello
+PrePopulated
+New Text
 ```
 
 If you would like to generate an update script from two structs, you can use the `NewDiffSQLPatch` function. This
