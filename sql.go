@@ -70,10 +70,8 @@ func (s *SQLPatch) patchGen(resource any) {
 			}
 		}
 
-		// if no tag is set, use the field name
-		if tag == TagOptSkip {
-			continue
-		} else if tag == "" {
+		// If no tag is set, use the field name
+		if tag == "" {
 			tag = fType.Name
 		}
 
@@ -209,10 +207,13 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 		return nil, ErrNoChanges
 	}
 
+	oldElem := reflect.ValueOf(old).Elem()
+	oldCopyElem := reflect.ValueOf(oldCopy).Elem()
+
 	// For each field in the old object, compare it against the copy and if the fields are the same, set them to zero or nil.
 	for i := 0; i < reflect.ValueOf(old).Elem().NumField(); i++ {
-		oldField := reflect.ValueOf(old).Elem().Field(i)
-		copyField := reflect.ValueOf(oldCopy).Elem().Field(i)
+		oldField := oldElem.Field(i)
+		copyField := oldCopyElem.Field(i)
 
 		if oldField.Kind() == reflect.Ptr && (oldField.IsNil() && copyField.IsNil() && !patch.includeZeroValues) {
 			continue
@@ -225,7 +226,7 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 			if patch.ignoreFields == nil {
 				patch.ignoreFields = make([]string, 0)
 			}
-			patch.ignoreFields = append(patch.ignoreFields, strings.ToLower(reflect.ValueOf(old).Elem().Type().Field(i).Name))
+			patch.ignoreFields = append(patch.ignoreFields, strings.ToLower(oldElem.Type().Field(i).Name))
 			continue
 		}
 	}
