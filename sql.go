@@ -53,16 +53,17 @@ func (s *SQLPatch) patchGen(resource any) {
 			continue
 		}
 
+		patcherOptsTag := fType.Tag.Get(TagOptsName)
+
 		// Skip fields that are to be ignored
 		if s.checkSkipField(fType) {
 			continue
-		} else if fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.includeNilValues) {
+		} else if fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.shouldIncludeNil(patcherOptsTag)) {
 			continue
-		} else if fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.includeZeroValues) {
+		} else if fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.shouldIncludeZero(patcherOptsTag)) {
 			continue
 		}
 
-		patcherOptsTag := fType.Tag.Get(TagOptsName)
 		if patcherOptsTag != "" {
 			patcherOpts := strings.Split(patcherOptsTag, TagOptSeparator)
 			if slices.Contains(patcherOpts, TagOptSkip) {
@@ -79,7 +80,7 @@ func (s *SQLPatch) patchGen(resource any) {
 			s.fields = append(s.fields, tag+" = ?")
 		}
 
-		if fVal.Kind() == reflect.Ptr && fVal.IsNil() && s.includeNilValues {
+		if fVal.Kind() == reflect.Ptr && fVal.IsNil() && s.shouldIncludeNil(patcherOptsTag) {
 			s.args = append(s.args, nil)
 			addField()
 			continue
@@ -215,9 +216,11 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 		oldField := oldElem.Field(i)
 		copyField := oldCopyElem.Field(i)
 
-		if oldField.Kind() == reflect.Ptr && (oldField.IsNil() && copyField.IsNil() && !patch.includeZeroValues) {
+		patcherOptsTag := oldElem.Type().Field(i).Tag.Get(TagOptsName)
+
+		if oldField.Kind() == reflect.Ptr && (oldField.IsNil() && copyField.IsNil() && !patch.shouldIncludeNil(patcherOptsTag)) {
 			continue
-		} else if oldField.Kind() != reflect.Ptr && (oldField.IsZero() && copyField.IsZero() && !patch.includeZeroValues) {
+		} else if oldField.Kind() != reflect.Ptr && (oldField.IsZero() && copyField.IsZero() && !patch.shouldIncludeZero(patcherOptsTag)) {
 			continue
 		}
 

@@ -33,6 +33,40 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success() {
 	s.Equal([]any{int64(1), "test"}, patch.args)
 }
 
+func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Struct_opt_IncludeNilFields() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag" patcher:"nil"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: nil,
+	}
+
+	patch := NewSQLPatch(obj)
+
+	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
+	s.Equal([]any{int64(1), nil}, patch.args)
+}
+
+func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Struct_opt_IncludeZeroFields() {
+	type testObj struct {
+		Id   int    `db:"id_tag"`
+		Name string `db:"name_tag" patcher:"zero"`
+	}
+
+	obj := testObj{
+		Id:   1,
+		Name: "",
+	}
+
+	patch := NewSQLPatch(obj)
+
+	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
+	s.Equal([]any{int64(1), ""}, patch.args)
+}
+
 func (s *newSQLPatchSuite) TestNewSQLPatch_Skip() {
 	type testObj struct {
 		Id      *int   `db:"id_tag" patcher:"-"`
@@ -344,6 +378,56 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{int64(1), "test", 18}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_Stuct_opt_IncludeNilFields() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name" patcher:"nil"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: nil,
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+	)
+	s.NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
+	s.Equal([]any{int64(1), nil, 18}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_Struct_opt_IncludeZeroFields() {
+	type testObj struct {
+		Id   int    `db:"id"`
+		Name string `db:"name" patcher:"zero"`
+	}
+
+	obj := testObj{
+		Id:   1,
+		Name: "",
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+	)
+	s.NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
+	s.Equal([]any{int64(1), "", 18}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -914,6 +998,54 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success() {
 	s.NotNil(patch)
 	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
 	s.Equal([]any{int64(2), "test2"}, patch.args)
+}
+
+func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_StructOpt_IncludeNilFields() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name" patcher:"nil"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	obj2 := testObj{
+		Id:   ptr(2),
+		Name: nil,
+	}
+
+	patch, err := NewDiffSQLPatch(&obj, &obj2)
+	s.NoError(err)
+
+	s.NotNil(patch)
+	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
+	s.Equal([]any{int64(2), nil}, patch.args)
+}
+
+func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_StructOpt_IncludeZeroFields() {
+	type testObj struct {
+		Id   int    `db:"id"`
+		Name string `db:"name" patcher:"zero"`
+	}
+
+	obj := testObj{
+		Id:   1,
+		Name: "test",
+	}
+
+	obj2 := testObj{
+		Id:   2,
+		Name: "",
+	}
+
+	patch, err := NewDiffSQLPatch(&obj, &obj2)
+	s.NoError(err)
+
+	s.NotNil(patch)
+	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
+	s.Equal([]any{int64(2), ""}, patch.args)
 }
 
 func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_singleFieldUpdated() {

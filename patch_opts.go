@@ -9,6 +9,8 @@ const (
 	TagOptsName     = "patcher"
 	TagOptSeparator = ","
 	TagOptSkip      = "-"
+	TagOptAllowNil  = "nil"
+	TagOptAllowZero = "zero"
 )
 
 type PatchOpt func(*SQLPatch)

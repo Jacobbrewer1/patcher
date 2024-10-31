@@ -34,35 +34,38 @@ func (s *SQLPatch) loadDiff(old, newT any) error {
 	nElem := reflect.ValueOf(newT).Elem()
 
 	for i := 0; i < oElem.NumField(); i++ {
+		oField := oElem.Field(i)
+		nField := nElem.Field(i)
+
 		// Include only exported fields
-		if !oElem.Field(i).CanSet() || !nElem.Field(i).CanSet() {
+		if !oField.CanSet() || !nField.CanSet() {
 			continue
 		}
 
 		// Handle embedded structs (Anonymous fields)
 		if oElem.Type().Field(i).Anonymous {
 			// If the embedded field is a pointer, dereference it
-			if oElem.Field(i).Kind() == reflect.Ptr {
-				if !oElem.Field(i).IsNil() && !nElem.Field(i).IsNil() { // If both are not nil, we need to recursively call LoadDiff
-					if err := s.loadDiff(oElem.Field(i).Interface(), nElem.Field(i).Interface()); err != nil {
+			if oField.Kind() == reflect.Ptr {
+				if !oField.IsNil() && !nField.IsNil() { // If both are not nil, we need to recursively call LoadDiff
+					if err := s.loadDiff(oField.Interface(), nField.Interface()); err != nil {
 						return err
 					}
-				} else if nElem.Field(i).IsValid() && !nElem.Field(i).IsNil() {
-					oElem.Field(i).Set(nElem.Field(i))
+				} else if nElem.Field(i).IsValid() && !nField.IsNil() {
+					oField.Set(nField)
 				}
 
 				continue
 			}
 
-			if err := s.loadDiff(oElem.Field(i).Addr().Interface(), nElem.Field(i).Addr().Interface()); err != nil {
+			if err := s.loadDiff(oField.Addr().Interface(), nField.Addr().Interface()); err != nil {
 				return err
 			}
 			continue
 		}
 
 		// If the field is a struct, we need to recursively call LoadDiff
-		if oElem.Field(i).Kind() == reflect.Struct {
-			if err := s.loadDiff(oElem.Field(i).Addr().Interface(), nElem.Field(i).Addr().Interface()); err != nil {
+		if oField.Kind() == reflect.Struct {
+			if err := s.loadDiff(oField.Addr().Interface(), nField.Addr().Interface()); err != nil {
 				return err
 			}
 			continue
@@ -73,13 +76,15 @@ func (s *SQLPatch) loadDiff(old, newT any) error {
 			continue
 		}
 
+		patcherOptsTag := oElem.Type().Field(i).Tag.Get(TagOptsName)
+
 		// Compare the old and new fields.
 		//
 		// New fields take priority over old fields if they are provided based on the configuration.
-		if nElem.Field(i).Kind() != reflect.Ptr && (!nElem.Field(i).IsZero() || s.includeZeroValues) {
+		if nElem.Field(i).Kind() != reflect.Ptr && (!nField.IsZero() || s.shouldIncludeZero(patcherOptsTag)) {
 			oElem.Field(i).Set(nElem.Field(i))
-		} else if nElem.Field(i).Kind() == reflect.Ptr && (!nElem.Field(i).IsNil() || s.includeNilValues) {
-			oElem.Field(i).Set(nElem.Field(i))
+		} else if nElem.Field(i).Kind() == reflect.Ptr && (!nField.IsNil() || s.shouldIncludeNil(patcherOptsTag)) {
+			oField.Set(nElem.Field(i))
 		}
 	}
 

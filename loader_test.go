@@ -48,28 +48,92 @@ func (s *loadDiffSuite) TestLoadDiff_Success() {
 	s.Equal(26, old.Age)
 }
 
-func (s *loadDiffSuite) TestLoadDiff_Success_Pointed_Fields() {
-	s.patch.includeNilValues = true
-
+func (s *loadDiffSuite) TestLoadDiff_Success_StructOpt_IncludeNilField() {
 	type testStruct struct {
-		Name *string
-		Age  *int
+		Name string
+		Age  *int `patcher:"nil"`
 	}
 
 	old := testStruct{
-		Name: ptr("John"),
+		Name: "John",
 		Age:  ptr(25),
 	}
 
 	n := testStruct{
-		Name: ptr("John Smith"),
-		Age:  ptr(26),
+		Name: "John Smith",
+		Age:  nil,
 	}
 
 	err := s.patch.loadDiff(&old, &n)
 	s.NoError(err)
-	s.Equal("John Smith", *old.Name)
-	s.Equal(26, *old.Age)
+	s.Equal("John Smith", old.Name)
+	s.Nil(old.Age)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_StructOpt_IncludeZeroField() {
+	type testStruct struct {
+		Name string
+		Age  int `patcher:"zero"`
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		Name: "John Smith",
+		Age:  0,
+	}
+
+	err := s.patch.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John Smith", old.Name)
+	s.Equal(0, old.Age)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_NoStructOpts() {
+	type testStruct struct {
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		Name: "John Smith",
+		Age:  0,
+	}
+
+	err := s.patch.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John Smith", old.Name)
+	s.Equal(25, old.Age)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_Pointed_Fields() {
+	type testStruct struct {
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		Name: "John Smith",
+		Age:  0,
+	}
+
+	err := s.patch.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John Smith", old.Name)
+	s.Equal(25, old.Age)
 }
 
 func (s *loadDiffSuite) TestLoadDiff_Success_ZeroValue() {

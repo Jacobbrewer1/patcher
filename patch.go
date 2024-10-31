@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"reflect"
+	"slices"
 	"strings"
 )
 
@@ -131,4 +132,34 @@ func (s *SQLPatch) validateSQLGen() error {
 	}
 
 	return nil
+}
+
+func (s *SQLPatch) shouldIncludeNil(tag string) bool {
+	if s.includeNilValues {
+		return true
+	}
+
+	if tag != "" {
+		tags := strings.Split(tag, TagOptSeparator)
+		if slices.Contains(tags, TagOptAllowNil) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (s *SQLPatch) shouldIncludeZero(tag string) bool {
+	if s.includeZeroValues {
+		return true
+	}
+
+	if tag != "" {
+		tagOpts := strings.Split(tag, TagOptSeparator)
+		if slices.Contains(tagOpts, TagOptAllowZero) {
+			return true
+		}
+	}
+
+	return false
 }
