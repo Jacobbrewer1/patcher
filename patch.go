@@ -74,8 +74,8 @@ type SQLPatch struct {
 func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 	// Default options
 	p := &SQLPatch{
-		fields:            nil,
-		args:              nil,
+		fields:            make([]string, 0),
+		args:              make([]any, 0),
 		db:                nil,
 		tagName:           DefaultDbTagName,
 		table:             "",
