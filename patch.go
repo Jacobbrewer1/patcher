@@ -74,8 +74,8 @@ type SQLPatch struct {
 func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 	// Default options
 	p := &SQLPatch{
-		fields:            nil,
-		args:              nil,
+		fields:            make([]string, 0),
+		args:              make([]any, 0),
 		db:                nil,
 		tagName:           DefaultDbTagName,
 		table:             "",
@@ -97,10 +97,18 @@ func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 }
 
 func (s *SQLPatch) Fields() []string {
+	if len(s.fields) == 0 {
+		// Default behaviour is to return nil if there are no fields
+		return nil
+	}
 	return s.fields
 }
 
 func (s *SQLPatch) Args() []any {
+	if len(s.args) == 0 {
+		// Default behaviour is to return nil if there are no args
+		return nil
+	}
 	return s.args
 }
 
