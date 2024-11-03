@@ -49,8 +49,8 @@ type SQLBatch struct {
 // newBatchDefaults returns a new SQLBatch with default values
 func newBatchDefaults(opts ...BatchOpt) *SQLBatch {
 	b := &SQLBatch{
-		fields:  nil,
-		args:    nil,
+		fields:  make([]string, 0),
+		args:    make([]any, 0),
 		db:      nil,
 		tagName: patcher.DefaultDbTagName,
 		table:   "",
