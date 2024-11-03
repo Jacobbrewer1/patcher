@@ -97,10 +97,18 @@ func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 }
 
 func (s *SQLPatch) Fields() []string {
+	if len(s.fields) == 0 {
+		// Default behaviour is to return nil if there are no fields
+		return nil
+	}
 	return s.fields
 }
 
 func (s *SQLPatch) Args() []any {
+	if len(s.args) == 0 {
+		// Default behaviour is to return nil if there are no args
+		return nil
+	}
 	return s.args
 }
 
