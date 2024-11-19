@@ -7,7 +7,7 @@ toolchain go1.23.2
 require (
 	github.com/gorilla/mux v1.8.1
 	github.com/stretchr/testify v1.9.0
-	github.com/vektra/mockery/v2 v2.46.3
+	github.com/vektra/mockery/v2 v2.47.0
 )
 
 require (
@@ -41,6 +41,5 @@ require (
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/tools v0.17.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

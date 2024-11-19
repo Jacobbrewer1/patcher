@@ -502,7 +502,8 @@ type namer interface {
 func (g *Generator) renderNamedType(ctx context.Context, t interface {
 	Obj() *types.TypeName
 	TypeArgs() *types.TypeList
-}) string {
+},
+) string {
 	name := g.getPackageScopedType(ctx, t.Obj())
 	if t.TypeArgs() == nil || t.TypeArgs().Len() == 0 {
 		return name
@@ -664,7 +665,7 @@ func isNillable(typ types.Type) bool {
 	switch t := typ.(type) {
 	case *types.Pointer, *types.Array, *types.Map, *types.Interface, *types.Signature, *types.Chan, *types.Slice:
 		return true
-	case *types.Named, *types.Alias:
+	case *types.Named, *types.Alias, *types.TypeParam:
 		return isNillable(t.Underlying())
 	}
 	return false
