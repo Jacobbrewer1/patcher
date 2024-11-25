@@ -332,17 +332,19 @@ func (m *Outputter) Generate(ctx context.Context, iface *Interface) error {
 			DisableVersionString: interfaceConfig.DisableVersionString,
 			Exported:             interfaceConfig.Exported,
 			InPackage:            interfaceConfig.InPackage,
+			Issue845Fix:          interfaceConfig.Issue845Fix,
 			KeepTree:             interfaceConfig.KeepTree,
 			Note:                 interfaceConfig.Note,
 			MockBuildTags:        interfaceConfig.MockBuildTags,
-			PackageName:          interfaceConfig.Outpkg,
+			Outpkg:               interfaceConfig.Outpkg,
 			PackageNamePrefix:    interfaceConfig.Packageprefix,
 			StructName:           interfaceConfig.MockName,
 			UnrollVariadic:       interfaceConfig.UnrollVariadic,
 			WithExpecter:         interfaceConfig.WithExpecter,
 			ReplaceType:          interfaceConfig.ReplaceType,
+			ResolveTypeAlias:     interfaceConfig.ResolveTypeAlias,
 		}
-		generator := NewGenerator(ctx, g, iface, "")
+		generator := NewGenerator(ctx, g, iface, interfaceConfig.Outpkg)
 
 		log.Debug().Msg("generating mock in-memory")
 		if err := generator.GenerateAll(ctx); err != nil {

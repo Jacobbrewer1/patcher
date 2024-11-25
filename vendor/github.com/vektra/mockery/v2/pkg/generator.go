@@ -55,15 +55,17 @@ type GeneratorConfig struct {
 	DisableVersionString bool
 	Exported             bool
 	InPackage            bool
+	Issue845Fix          bool
 	KeepTree             bool
 	Note                 string
 	MockBuildTags        string
-	PackageName          string
+	Outpkg               string
 	PackageNamePrefix    string
 	StructName           string
 	UnrollVariadic       bool
 	WithExpecter         bool
 	ReplaceType          []string
+	ResolveTypeAlias     bool
 }
 
 // Generator is responsible for generating the string containing
@@ -84,12 +86,14 @@ type Generator struct {
 
 // NewGenerator builds a Generator.
 func NewGenerator(ctx context.Context, c GeneratorConfig, iface *Interface, pkg string) *Generator {
-	if pkg == "" {
+	if c.Issue845Fix {
+		pkg = c.Outpkg
+	} else if pkg == "" {
 		pkg = DetermineOutputPackageName(
 			iface.FileName,
 			iface.Pkg.Name(),
 			c.PackageNamePrefix,
-			c.PackageName,
+			c.Outpkg,
 			c.KeepTree,
 			c.InPackage,
 		)
@@ -418,8 +422,20 @@ func (g *Generator) generateImports(ctx context.Context) {
 // GeneratePrologue generates the prologue of the mock.
 func (g *Generator) GeneratePrologue(ctx context.Context, pkg string) {
 	g.populateImports(ctx)
-	if g.config.InPackage {
-		g.printf("package %s\n\n", g.iface.Pkg.Name())
+
+	if !g.config.Issue845Fix {
+		logging.WarnDeprecated(
+			ctx,
+			"issue-845-fix must be set to True to remove this warning. Visit the link for more details.",
+			map[string]any{
+				"url": logging.DocsURL("/deprecations/#issue-845-fix"),
+			},
+		)
+		if g.config.InPackage {
+			g.printf("package %s\n\n", g.iface.Pkg.Name())
+		} else {
+			g.printf("package %v\n\n", pkg)
+		}
 	} else {
 		g.printf("package %v\n\n", pkg)
 	}
@@ -517,10 +533,24 @@ func (g *Generator) renderNamedType(ctx context.Context, t interface {
 }
 
 func (g *Generator) renderType(ctx context.Context, typ types.Type) string {
+	log := zerolog.Ctx(ctx)
 	switch t := typ.(type) {
 	case *types.Named:
 		return g.renderNamedType(ctx, t)
 	case *types.Alias:
+		log.Debug().Msg("found type alias")
+		if g.config.ResolveTypeAlias {
+			logging.WarnDeprecated(
+				ctx,
+				"resolve-type-alias will be permanently set to False in v3. Please modify your config to set the parameter to False.",
+				map[string]any{
+					"url": logging.DocsURL("/deprecations/#resolve-type-alias"),
+				},
+			)
+			log.Debug().Msg("resolving type alias to underlying type")
+			return g.renderType(ctx, t.Underlying())
+		}
+		log.Debug().Msg("not resolving type alias to underlying type")
 		return g.renderNamedType(ctx, t)
 	case *types.TypeParam:
 		if t.Constraint() != nil {
