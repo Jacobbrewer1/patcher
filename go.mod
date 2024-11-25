@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/gorilla/mux v1.8.1
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/vektra/mockery/v2 v2.47.0
 )
 
