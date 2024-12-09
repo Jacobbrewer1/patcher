@@ -358,6 +358,7 @@ func (nv *NodeVisitor) DeclaredInterfaces() []string {
 func (nv *NodeVisitor) add(ctx context.Context, n *ast.TypeSpec) {
 	log := zerolog.Ctx(ctx)
 	log.Debug().
+		Str("node-name", n.Name.Name).
 		Str("node-type", fmt.Sprintf("%T", n.Type)).
 		Msg("found node with acceptable type for mocking")
 	nv.declaredInterfaces = append(nv.declaredInterfaces, n.Name.Name)
@@ -379,10 +380,10 @@ func (nv *NodeVisitor) Visit(node ast.Node) ast.Visitor {
 				break
 			}
 			nv.add(nv.ctx, n)
-		case *ast.InterfaceType, *ast.IndexExpr:
+		case *ast.InterfaceType, *ast.IndexExpr, *ast.IndexListExpr:
 			nv.add(nv.ctx, n)
 		default:
-			log.Debug().Msg("Found node with unacceptable type for mocking. Rejecting.")
+			log.Debug().Msg("found node with unacceptable type for mocking. Rejecting.")
 		}
 	}
 	return nv
