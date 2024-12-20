@@ -9,7 +9,7 @@ type MockWherer struct {
 	mock.Mock
 }
 
-// Where provides a mock function with no fields
+// Where provides a mock function with given fields:
 func (_m *MockWherer) Where() (string, []interface{}) {
 	ret := _m.Called()
 

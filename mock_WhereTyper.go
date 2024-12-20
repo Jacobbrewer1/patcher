@@ -9,7 +9,7 @@ type MockWhereTyper struct {
 	mock.Mock
 }
 
-// Where provides a mock function with no fields
+// Where provides a mock function with given fields:
 func (_m *MockWhereTyper) Where() (string, []interface{}) {
 	ret := _m.Called()
 
@@ -39,7 +39,7 @@ func (_m *MockWhereTyper) Where() (string, []interface{}) {
 	return r0, r1
 }
 
-// WhereType provides a mock function with no fields
+// WhereType provides a mock function with given fields:
 func (_m *MockWhereTyper) WhereType() WhereType {
 	ret := _m.Called()
 
