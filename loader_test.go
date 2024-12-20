@@ -51,7 +51,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success() {
 func (s *loadDiffSuite) TestLoadDiff_Success_StructOpt_IncludeNilField() {
 	type testStruct struct {
 		Name string
-		Age  *int `patcher:"nil"`
+		Age  *int `patcher:"omitempty"`
 	}
 
 	old := testStruct{
@@ -73,7 +73,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_StructOpt_IncludeNilField() {
 func (s *loadDiffSuite) TestLoadDiff_Success_StructOpt_IncludeZeroField() {
 	type testStruct struct {
 		Name string
-		Age  int `patcher:"zero"`
+		Age  int `patcher:"omitempty"`
 	}
 
 	old := testStruct{
