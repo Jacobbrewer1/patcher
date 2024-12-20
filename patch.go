@@ -147,14 +147,7 @@ func (s *SQLPatch) shouldIncludeNil(tag string) bool {
 		return true
 	}
 
-	if tag != "" {
-		tags := strings.Split(tag, TagOptSeparator)
-		if slices.Contains(tags, TagOptAllowNil) {
-			return true
-		}
-	}
-
-	return false
+	return s.shouldOmitEmpty(tag)
 }
 
 func (s *SQLPatch) shouldIncludeZero(tag string) bool {
@@ -162,9 +155,13 @@ func (s *SQLPatch) shouldIncludeZero(tag string) bool {
 		return true
 	}
 
+	return s.shouldOmitEmpty(tag)
+}
+
+func (s *SQLPatch) shouldOmitEmpty(tag string) bool {
 	if tag != "" {
-		tagOpts := strings.Split(tag, TagOptSeparator)
-		if slices.Contains(tagOpts, TagOptAllowZero) {
+		tags := strings.Split(tag, TagOptSeparator)
+		if slices.Contains(tags, TagOptAllowOmitempty) {
 			return true
 		}
 	}

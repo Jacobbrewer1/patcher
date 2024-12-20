@@ -36,7 +36,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success() {
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Struct_opt_IncludeNilFields() {
 	type testObj struct {
 		Id   *int    `db:"id_tag"`
-		Name *string `db:"name_tag" patcher:"nil"`
+		Name *string `db:"name_tag" patcher:"omitempty"`
 	}
 
 	obj := testObj{
@@ -53,7 +53,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Struct_opt_IncludeNilFields()
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Struct_opt_IncludeZeroFields() {
 	type testObj struct {
 		Id   int    `db:"id_tag"`
-		Name string `db:"name_tag" patcher:"zero"`
+		Name string `db:"name_tag" patcher:"omitempty"`
 	}
 
 	obj := testObj{
@@ -385,7 +385,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 func (s *generateSQLSuite) TestGenerateSQL_Success_Stuct_opt_IncludeNilFields() {
 	type testObj struct {
 		Id   *int    `db:"id"`
-		Name *string `db:"name" patcher:"nil"`
+		Name *string `db:"name" patcher:"omitempty"`
 	}
 
 	obj := testObj{
@@ -410,7 +410,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_Stuct_opt_IncludeNilFields() 
 func (s *generateSQLSuite) TestGenerateSQL_Success_Struct_opt_IncludeZeroFields() {
 	type testObj struct {
 		Id   int    `db:"id"`
-		Name string `db:"name" patcher:"zero"`
+		Name string `db:"name" patcher:"omitempty"`
 	}
 
 	obj := testObj{
@@ -1003,7 +1003,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success() {
 func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_StructOpt_IncludeNilFields() {
 	type testObj struct {
 		Id   *int    `db:"id"`
-		Name *string `db:"name" patcher:"nil"`
+		Name *string `db:"name" patcher:"omitempty"`
 	}
 
 	obj := testObj{
@@ -1027,7 +1027,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_StructOpt_IncludeNilF
 func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_StructOpt_IncludeZeroFields() {
 	type testObj struct {
 		Id   int    `db:"id"`
-		Name string `db:"name" patcher:"zero"`
+		Name string `db:"name" patcher:"omitempty"`
 	}
 
 	obj := testObj{
