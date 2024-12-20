@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	TagOptsName          = "patcher"
-	TagOptSeparator      = ","
-	TagOptSkip           = "-"
-	TagOptAllowOmitempty = "omitempty"
+	TagOptsName     = "patcher"
+	TagOptSeparator = ","
+	TagOptSkip      = "-"
+	TagOptOmitempty = "omitempty"
 )
 
 type PatchOpt func(*SQLPatch)

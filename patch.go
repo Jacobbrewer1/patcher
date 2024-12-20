@@ -161,7 +161,7 @@ func (s *SQLPatch) shouldIncludeZero(tag string) bool {
 func (s *SQLPatch) shouldOmitEmpty(tag string) bool {
 	if tag != "" {
 		tags := strings.Split(tag, TagOptSeparator)
-		if slices.Contains(tags, TagOptAllowOmitempty) {
+		if slices.Contains(tags, TagOptOmitempty) {
 			return true
 		}
 	}
