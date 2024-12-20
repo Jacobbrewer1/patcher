@@ -9,7 +9,7 @@ type MockJoiner struct {
 	mock.Mock
 }
 
-// Join provides a mock function with no fields
+// Join provides a mock function with given fields:
 func (_m *MockJoiner) Join() (string, []interface{}) {
 	ret := _m.Called()
 

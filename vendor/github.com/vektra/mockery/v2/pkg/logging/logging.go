@@ -1,7 +1,6 @@
 package logging
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -24,13 +23,11 @@ const (
 	LogKeyPath          = "path"
 	LogKeyQualifiedName = "qualified-name"
 	LogKeyPackageName   = "package-name"
-
-	defaultSemVer = "v0.0.0-dev"
+	_defaultSemVer      = "v0.0.0-dev"
 )
 
 // SemVer is the version of mockery at build time.
 var SemVer = ""
-
 var ErrPkgNotExist = errors.New("package does not exist")
 
 func GetSemverInfo() string {
@@ -41,7 +38,7 @@ func GetSemverInfo() string {
 	if ok && version.Main.Version != "(devel)" && version.Main.Version != "" {
 		return version.Main.Version
 	}
-	return defaultSemVer
+	return _defaultSemVer
 }
 
 func getMinorSemver(semver string) string {
@@ -77,7 +74,7 @@ func GetLogger(levelStr string) (zerolog.Logger, error) {
 		Out:        out,
 		TimeFormat: time.RFC822,
 	}
-	if !term.IsTerminal(int(out.Fd())) || os.Getenv("TERM") == "dumb" { //nolint:gosec
+	if !term.IsTerminal(int(out.Fd())) || os.Getenv("TERM") == "dumb" {
 		writer.NoColor = true
 	}
 	log := zerolog.New(writer).
@@ -88,26 +85,4 @@ func GetLogger(levelStr string) (zerolog.Logger, error) {
 		Logger()
 
 	return log, nil
-}
-
-func Warn(ctx context.Context, prefix string, message string, fields map[string]any) {
-	log := zerolog.Ctx(ctx)
-	event := log.Warn()
-	if fields != nil {
-		event = event.Fields(fields)
-	}
-	event.Msgf("%s: %s", prefix, message)
-}
-
-func Info(ctx context.Context, prefix string, message string, fields map[string]any) {
-	log := zerolog.Ctx(ctx)
-	event := log.Info()
-	if fields != nil {
-		event = event.Fields(fields)
-	}
-	event.Msgf("%s: %s", prefix, message)
-}
-
-func WarnDeprecated(ctx context.Context, message string, fields map[string]any) {
-	Warn(ctx, "DEPRECATION", message, fields)
 }

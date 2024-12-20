@@ -1,6 +1,6 @@
 FROM golang:1.23-alpine as builder
 
-RUN apk --update add --no-cache gcc musl-dev git openssh
+RUN apk --update add --no-cache gcc musl-dev
 
 COPY mockery /usr/local/bin
 
