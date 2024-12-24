@@ -74,6 +74,11 @@ func (b *SQLBatch) genBatch(resources []any) {
 				tag = f.Name
 			}
 
+			tags := strings.Split(tag, patcher.TagOptSeparator)
+			if slices.Contains(tags, patcher.DBTagPrimaryKey) {
+				continue
+			}
+
 			b.args = append(b.args, b.getFieldValue(v.Field(i), f))
 
 			// if the field is not unique, skip it
