@@ -11,6 +11,7 @@ import (
 
 const (
 	DefaultDbTagName = "db"
+	DBTagPrimaryKey  = "pk"
 )
 
 var (
