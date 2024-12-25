@@ -44,16 +44,20 @@ type SQLBatch struct {
 	//
 	// This func should return true is the field is to be ignored
 	ignoreFieldsFunc patcher.IgnoreFieldsFunc
+
+	// includePrimaryKey determines whether the primary key should be included in the insert
+	includePrimaryKey bool
 }
 
 // newBatchDefaults returns a new SQLBatch with default values
 func newBatchDefaults(opts ...BatchOpt) *SQLBatch {
 	b := &SQLBatch{
-		fields:  make([]string, 0),
-		args:    make([]any, 0),
-		db:      nil,
-		tagName: patcher.DefaultDbTagName,
-		table:   "",
+		fields:            make([]string, 0),
+		args:              make([]any, 0),
+		db:                nil,
+		tagName:           patcher.DefaultDbTagName,
+		table:             "",
+		includePrimaryKey: false,
 	}
 
 	for _, opt := range opts {

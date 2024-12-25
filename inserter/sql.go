@@ -51,6 +51,11 @@ func (b *SQLBatch) genBatch(resources []any) {
 				continue
 			}
 
+			tags := strings.Split(tag, patcher.TagOptSeparator)
+			if len(tags) > 1 {
+				tag = tags[0]
+			}
+
 			// Skip unexported fields
 			if !f.IsExported() {
 				continue
@@ -72,11 +77,6 @@ func (b *SQLBatch) genBatch(resources []any) {
 			// if no tag is set, use the field name
 			if tag == "" {
 				tag = f.Name
-			}
-
-			tags := strings.Split(tag, patcher.TagOptSeparator)
-			if slices.Contains(tags, patcher.DBTagPrimaryKey) {
-				continue
 			}
 
 			b.args = append(b.args, b.getFieldValue(v.Field(i), f))
@@ -151,6 +151,11 @@ func (b *SQLBatch) checkSkipField(field reflect.StructField) bool {
 		return true
 	}
 
+	// Check if the field is a primary key, we don't want to include the primary key in the insert unless specified
+	if b.checkPrimaryKey(field) {
+		return true
+	}
+
 	return b.ignoredFieldsCheck(field)
 }
 
@@ -162,6 +167,21 @@ func (b *SQLBatch) checkSkipTag(field reflect.StructField) bool {
 
 	tags := strings.Split(val, patcher.TagOptSeparator)
 	return slices.Contains(tags, patcher.TagOptSkip)
+}
+
+func (b *SQLBatch) checkPrimaryKey(field reflect.StructField) bool {
+	// If we are including the primary key, we can immediately return false
+	if b.includePrimaryKey {
+		return false
+	}
+
+	val, ok := field.Tag.Lookup(patcher.DefaultDbTagName)
+	if !ok {
+		return false
+	}
+
+	tags := strings.Split(val, patcher.TagOptSeparator)
+	return slices.Contains(tags, patcher.DBTagPrimaryKey)
 }
 
 func (b *SQLBatch) ignoredFieldsCheck(field reflect.StructField) bool {

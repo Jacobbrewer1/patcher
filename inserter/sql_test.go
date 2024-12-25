@@ -73,6 +73,29 @@ func (s *newBatchSuite) TestNewBatch_Success_IgnorePK() {
 	})
 }
 
+func (s *newBatchSuite) TestNewBatch_Success_IncludePK() {
+	type temp struct {
+		ID         int    `db:"id,pk"`
+		Name       string `db:"name"`
+		unexported string `db:"unexported"`
+	}
+
+	resources := []any{
+		&temp{ID: 1, Name: "test"},
+		&temp{ID: 2, Name: "test2"},
+		&temp{ID: 3, Name: "test3"},
+		&temp{ID: 4, Name: "test4"},
+		&temp{ID: 5, Name: "test5", unexported: "test"},
+	}
+
+	b := NewBatch(resources, WithTable("temp"), WithTagName("db"), WithIncludePrimaryKey())
+
+	s.Require().Len(b.Fields(), 2)
+	s.Require().Len(b.Args(), 10)
+
+	s.Contains(b.Fields(), "id")
+}
+
 func (s *newBatchSuite) TestNewBatch_Success_WithPointedFields() {
 	type temp struct {
 		ID         *int    `db:"id"`

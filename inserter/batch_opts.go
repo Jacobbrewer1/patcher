@@ -42,3 +42,10 @@ func WithIgnoreFieldsFunc(f patcher.IgnoreFieldsFunc) BatchOpt {
 		b.ignoreFieldsFunc = f
 	}
 }
+
+// WithIncludePrimaryKey determines whether the primary key should be included in the insert
+func WithIncludePrimaryKey() BatchOpt {
+	return func(b *SQLBatch) {
+		b.includePrimaryKey = true
+	}
+}
