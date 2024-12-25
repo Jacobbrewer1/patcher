@@ -33,6 +33,23 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success() {
 	s.Equal([]any{int64(1), "test"}, patch.args)
 }
 
+func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultipleTags() {
+	type testObj struct {
+		Id   *int    `db:"id_tag,pk"`
+		Name *string `db:"name_tag,unique"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	patch := NewSQLPatch(obj)
+
+	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
+	s.Equal([]any{int64(1), "test"}, patch.args)
+}
+
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Struct_opt_IncludeNilFields() {
 	type testObj struct {
 		Id   *int    `db:"id_tag"`

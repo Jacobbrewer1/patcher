@@ -54,6 +54,11 @@ func (s *SQLPatch) patchGen(resource any) {
 			continue
 		}
 
+		tags := strings.Split(tag, TagOptSeparator)
+		if len(tags) > 1 {
+			tag = tags[0]
+		}
+
 		patcherOptsTag := fType.Tag.Get(TagOptsName)
 
 		// Skip fields that are to be ignored
