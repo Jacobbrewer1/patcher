@@ -1,5 +1,9 @@
 # Patcher
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/Jacobbrewer1/patcher.svg)](https://pkg.go.dev/github.com/Jacobbrewer1/patcher)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jacobbrewer1/patcher)](https://goreportcard.com/report/github.com/jacobbrewer1/patcher)
+
+
 Patcher is a GO library that provides a simple way to generate and SQL patches from structs. The library was built out
 of the need to generate patches for a database; when a new field is added to a struct, this would result in a bunch of
 new `if` checks to be created in the codebase. This library aims to solve that problem by generating the SQL patches for

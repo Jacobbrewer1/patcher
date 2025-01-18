@@ -1,8 +1,5 @@
 # Inserter Package
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/Jacobbrewer1/patcher.svg)](https://pkg.go.dev/github.com/Jacobbrewer1/patcher)
-[![Go Report Card](https://goreportcard.com/badge/github.com/jacobbrewer1/patcher)](https://goreportcard.com/report/github.com/jacobbrewer1/patcher)
-
 The `inserter` package provides functionality to insert data into a database using Go. It is designed to be flexible and easy to use.
 
 ## Installation
