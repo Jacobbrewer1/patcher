@@ -102,11 +102,9 @@ func (s *SQLPatch) patchGen(resource any) {
 
 		addField()
 
-		var val reflect.Value
+		val := fVal
 		if fVal.Kind() == reflect.Ptr {
 			val = fVal.Elem()
-		} else {
-			val = fVal
 		}
 
 		switch val.Kind() {
