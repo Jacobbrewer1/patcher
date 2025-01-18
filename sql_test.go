@@ -33,6 +33,64 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success() {
 	s.Equal([]any{int64(1), "test"}, patch.args)
 }
 
+func (s *newSQLPatchSuite) TestPatchGen_AllTypes() {
+	type testObj struct {
+		IntVal        int
+		Int8Val       int8
+		Int16Val      int16
+		Int32Val      int32
+		Int64Val      int64
+		UintVal       uint
+		Uint8Val      uint8
+		Uint16Val     uint16
+		Uint32Val     uint32
+		Uint64Val     uint64
+		UintptrVal    uintptr
+		Float32Val    float32
+		Float64Val    float64
+		Complex64Val  complex64
+		Complex128Val complex128
+		StringVal     string
+		BoolVal       bool
+	}
+
+	obj := testObj{
+		IntVal:        1,
+		Int8Val:       2,
+		Int16Val:      3,
+		Int32Val:      4,
+		Int64Val:      5,
+		UintVal:       6,
+		Uint8Val:      7,
+		Uint16Val:     8,
+		Uint32Val:     9,
+		Uint64Val:     10,
+		UintptrVal:    11,
+		Float32Val:    12.34,
+		Float64Val:    56.78,
+		Complex64Val:  complex(1, 2),
+		Complex128Val: complex(3, 4),
+		StringVal:     "test",
+		BoolVal:       true,
+	}
+
+	patch := NewSQLPatch(obj)
+
+	expectedFields := []string{
+		"IntVal = ?", "Int8Val = ?", "Int16Val = ?", "Int32Val = ?", "Int64Val = ?",
+		"UintVal = ?", "Uint8Val = ?", "Uint16Val = ?", "Uint32Val = ?", "Uint64Val = ?", "UintptrVal = ?",
+		"Float32Val = ?", "Float64Val = ?", "Complex64Val = ?", "Complex128Val = ?", "StringVal = ?", "BoolVal = ?",
+	}
+	expectedArgs := []any{
+		int64(1), int64(2), int64(3), int64(4), int64(5),
+		uint64(6), uint64(7), uint64(8), uint64(9), uint64(10), uint64(11),
+		12.34000015258789, 56.78, complex(1, 2), complex(3, 4), "test", 1,
+	}
+
+	s.Equal(expectedFields, patch.fields)
+	s.Equal(expectedArgs, patch.args)
+}
+
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultipleTags() {
 	type testObj struct {
 		Id   *int    `db:"id_tag,pk"`
