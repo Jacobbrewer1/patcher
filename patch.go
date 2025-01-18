@@ -96,6 +96,7 @@ func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 	return p
 }
 
+// Fields returns the fields to update in the SQL statement
 func (s *SQLPatch) Fields() []string {
 	if len(s.fields) == 0 {
 		// Default behaviour is to return nil if there are no fields
@@ -104,6 +105,7 @@ func (s *SQLPatch) Fields() []string {
 	return s.fields
 }
 
+// Args returns the arguments to use in the SQL statement
 func (s *SQLPatch) Args() []any {
 	if len(s.args) == 0 {
 		// Default behaviour is to return nil if there are no args
@@ -112,6 +114,7 @@ func (s *SQLPatch) Args() []any {
 	return s.args
 }
 
+// validatePerformPatch validates the SQLPatch for the PerformPatch method
 func (s *SQLPatch) validatePerformPatch() error {
 	if s.db == nil {
 		return ErrNoDatabaseConnection
@@ -128,6 +131,7 @@ func (s *SQLPatch) validatePerformPatch() error {
 	return nil
 }
 
+// validateSQLGen validates the SQLPatch for the SQLGen method
 func (s *SQLPatch) validateSQLGen() error {
 	if s.table == "" {
 		return ErrNoTable
@@ -142,6 +146,7 @@ func (s *SQLPatch) validateSQLGen() error {
 	return nil
 }
 
+// shouldIncludeNil determines whether the field should be included in the patch
 func (s *SQLPatch) shouldIncludeNil(tag string) bool {
 	if s.includeNilValues {
 		return true
@@ -150,6 +155,7 @@ func (s *SQLPatch) shouldIncludeNil(tag string) bool {
 	return s.shouldOmitEmpty(tag)
 }
 
+// shouldIncludeZero determines whether zero values should be included in the patch
 func (s *SQLPatch) shouldIncludeZero(tag string) bool {
 	if s.includeZeroValues {
 		return true
@@ -158,6 +164,7 @@ func (s *SQLPatch) shouldIncludeZero(tag string) bool {
 	return s.shouldOmitEmpty(tag)
 }
 
+// shouldOmitEmpty determines whether the field should be omitted if it is empty
 func (s *SQLPatch) shouldOmitEmpty(tag string) bool {
 	if tag != "" {
 		tags := strings.Split(tag, TagOptSeparator)

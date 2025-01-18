@@ -19,12 +19,18 @@ var (
 	ErrNoChanges = errors.New("no changes detected between the old and new objects")
 )
 
+// NewSQLPatch creates a new SQLPatch instance with the given resource and options.
+// It initializes the SQLPatch with default settings and generates the SQL patch
+// for the provided resource by processing its fields and applying the necessary tags and options.
 func NewSQLPatch(resource any, opts ...PatchOpt) *SQLPatch {
 	sqlPatch := newPatchDefaults(opts...)
 	sqlPatch.patchGen(resource)
 	return sqlPatch
 }
 
+// patchGen generates the SQL patch for the given resource.
+// It processes the fields of the struct, applying the necessary tags and options,
+// and prepares the SQL update statement components (fields and arguments).
 func (s *SQLPatch) patchGen(resource any) {
 	// If the resource is a pointer, we need to dereference it to get the value
 	if reflect.TypeOf(resource).Kind() == reflect.Ptr {
@@ -123,11 +129,17 @@ func (s *SQLPatch) patchGen(resource any) {
 	}
 }
 
+// GenerateSQL generates the SQL update statement and its arguments for the given resource.
+// It creates a new SQLPatch instance with the provided options, processes the resource's fields,
+// and constructs the SQL update statement along with the necessary arguments.
 func GenerateSQL(resource any, opts ...PatchOpt) (string, []any, error) {
-	sqlPatch := NewSQLPatch(resource, opts...)
-	return sqlPatch.GenerateSQL()
+	return NewSQLPatch(resource, opts...).GenerateSQL()
 }
 
+// GenerateSQL constructs the SQL update statement and its arguments.
+// It validates the SQL generation process, builds the SQL update statement
+// with the table name, join clauses, set clauses, and where clauses,
+// and returns the final SQL string along with the arguments.
 func (s *SQLPatch) GenerateSQL() (string, []any, error) {
 	if err := s.validateSQLGen(); err != nil {
 		return "", nil, fmt.Errorf("validate perform patch: %w", err)
@@ -166,11 +178,16 @@ func (s *SQLPatch) GenerateSQL() (string, []any, error) {
 	return sqlBuilder.String(), args, nil
 }
 
+// PerformPatch executes the SQL update statement for the given resource.
+// It creates a new SQLPatch instance with the provided options, generates the SQL update statement,
+// and executes it using the database connection.
 func PerformPatch(resource any, opts ...PatchOpt) (sql.Result, error) {
-	sqlPatch := NewSQLPatch(resource, opts...)
-	return sqlPatch.PerformPatch()
+	return NewSQLPatch(resource, opts...).PerformPatch()
 }
 
+// PerformDiffPatch executes the SQL update statement for the differences between the old and new resources.
+// It creates a new SQLPatch instance by comparing the old and new resources, generates the SQL update statement,
+// and executes it using the database connection.
 func PerformDiffPatch[T any](old, newT *T, opts ...PatchOpt) (sql.Result, error) {
 	sqlPatch, err := NewDiffSQLPatch(old, newT, opts...)
 	if err != nil {
@@ -180,6 +197,10 @@ func PerformDiffPatch[T any](old, newT *T, opts ...PatchOpt) (sql.Result, error)
 	return sqlPatch.PerformPatch()
 }
 
+// PerformPatch executes the SQL update statement for the current SQLPatch instance.
+// It validates the SQL generation process, constructs the SQL update statement and its arguments,
+// and executes the statement using the database connection.
+// It returns the result of the SQL execution or an error if the process fails.
 func (s *SQLPatch) PerformPatch() (sql.Result, error) {
 	if err := s.validatePerformPatch(); err != nil {
 		return nil, fmt.Errorf("validate perform patch: %w", err)
@@ -193,6 +214,9 @@ func (s *SQLPatch) PerformPatch() (sql.Result, error) {
 	return s.db.Exec(sqlStr, args...)
 }
 
+// NewDiffSQLPatch creates a new SQLPatch instance by comparing the old and new resources.
+// It initializes the SQLPatch with default settings, loads the differences between the old and new resources,
+// and prepares the SQL update statement components (fields and arguments) for the differences.
 func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 	if !isPointerToStruct(old) || !isPointerToStruct(newT) {
 		return nil, ErrInvalidType
