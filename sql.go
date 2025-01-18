@@ -110,6 +110,12 @@ func (s *SQLPatch) patchGen(resource any) {
 		switch val.Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			s.args = append(s.args, val.Int())
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+			s.args = append(s.args, val.Uint())
+		case reflect.Float32, reflect.Float64:
+			s.args = append(s.args, val.Float())
+		case reflect.Complex64, reflect.Complex128:
+			s.args = append(s.args, val.Complex())
 		case reflect.String:
 			s.args = append(s.args, val.String())
 		case reflect.Bool:
@@ -118,8 +124,6 @@ func (s *SQLPatch) patchGen(resource any) {
 				boolArg = 1
 			}
 			s.args = append(s.args, boolArg)
-		case reflect.Float32, reflect.Float64:
-			s.args = append(s.args, val.Float())
 		default:
 			// This is intentionally a panic as this is a programming error and should be fixed by the developer
 			panic(fmt.Sprintf("unsupported type: %s", val.Kind()))
