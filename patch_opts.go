@@ -31,9 +31,6 @@ func WithTable(table string) PatchOpt {
 // WithWhere sets the where clause to use in the SQL statement
 func WithWhere(where Wherer) PatchOpt {
 	return func(s *SQLPatch) {
-		if s.whereSql == nil {
-			s.whereSql = new(strings.Builder)
-		}
 		fwSQL, fwArgs := where.Where()
 		if fwArgs == nil {
 			fwArgs = make([]any, 0)
@@ -53,9 +50,6 @@ func WithWhere(where Wherer) PatchOpt {
 // WithJoin sets the join clause to use in the SQL statement
 func WithJoin(join Joiner) PatchOpt {
 	return func(s *SQLPatch) {
-		if s.joinSql == nil {
-			s.joinSql = new(strings.Builder)
-		}
 		fjSQL, fjArgs := join.Join()
 		if fjArgs == nil {
 			fjArgs = make([]any, 0)
