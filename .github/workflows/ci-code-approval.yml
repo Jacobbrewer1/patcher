@@ -38,11 +38,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: "Configure git for private modules"
-        env:
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: git config --global url."https://x:${GITHUB_API_TOKEN}@github.com".insteadOf "https://github.com"
-
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
@@ -63,11 +58,6 @@ jobs:
           go-version: ${{ vars.GO_VERSION }}
           cache-dependency-path: "**/*.sum"
 
-      - name: "Configure git for private modules"
-        env:
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: git config --global url."https://x:${GITHUB_API_TOKEN}@github.com".insteadOf "https://github.com"
-
       - name: Make
         run: make pr-approval
 
@@ -85,11 +75,6 @@ jobs:
         with:
           go-version: ${{ vars.GO_VERSION }}
           cache-dependency-path: "**/*.sum"
-
-      - name: "Configure git for private modules"
-        env:
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: git config --global url."https://x:${GITHUB_API_TOKEN}@github.com".insteadOf "https://github.com"
 
       - name: "Run Code Generation"
         run: go generate ./...
