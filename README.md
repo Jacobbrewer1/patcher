@@ -1,6 +1,6 @@
 # Patcher
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/Jacobbrewer1/patcher.svg)](https://pkg.go.dev/github.com/Jacobbrewer1/patcher)
+[![Go Reference](https://pkg.go.dev/badge/github.com/jacobbrewer1/patcher.svg)](https://pkg.go.dev/github.com/jacobbrewer1/patcher)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jacobbrewer1/patcher)](https://goreportcard.com/report/github.com/jacobbrewer1/patcher)
 
 
