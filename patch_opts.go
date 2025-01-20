@@ -90,7 +90,7 @@ func WithIncludeNilValues() PatchOpt {
 // This should be the actual field name, not the JSON tag name or the db tag name.
 //
 // Note. When we parse the slice of strings, we convert them to lowercase to ensure that the comparison is
-// case-insensitive.
+// case-sensitive.
 func WithIgnoredFields(fields ...string) PatchOpt {
 	return func(s *SQLPatch) {
 		for i := range fields {
