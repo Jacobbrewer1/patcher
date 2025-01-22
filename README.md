@@ -33,8 +33,7 @@ you.
 * **Supports Joins**: It supports generating SQL joins by creating structs that implement the Joiner interface, making
   it easier to manage related data across multiple tables.
 * **Flexible Configuration**: It provides flexible configuration options to customize the SQL generation process, such
-  as
-  including zero or nil values in the diff.
+  as including zero or nil values in the diff.
 * **Easy Integration**: It is easy to integrate into existing projects and can be used with any Go project that needs to
   generate SQL queries from structs.
 * **Open Source**: It is open-source and available under the Apache 2.0 license.
