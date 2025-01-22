@@ -8,6 +8,9 @@ type Joiner interface {
 }
 
 func appendJoin(join Joiner, builder *strings.Builder, args *[]any) {
+	if join == nil {
+		return
+	}
 	jSQL, jArgs := join.Join()
 	if jArgs == nil {
 		jArgs = make([]any, 0)
