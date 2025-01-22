@@ -3,7 +3,6 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/jacobbrewer1/patcher.svg)](https://pkg.go.dev/github.com/jacobbrewer1/patcher)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jacobbrewer1/patcher)](https://goreportcard.com/report/github.com/jacobbrewer1/patcher)
 
-
 Patcher is a GO library that provides a simple way to generate and SQL patches from structs. The library was built out
 of the need to generate patches for a database; when a new field is added to a struct, this would result in a bunch of
 new `if` checks to be created in the codebase. This library aims to solve that problem by generating the SQL patches for
@@ -32,9 +31,11 @@ you.
   required to handle different struct fields, making the code easier to read and maintain.
 * **Streamlines Data Synchronization**: It streamlines the process of synchronizing data changes by allowing you to
   inject changes from one struct to another and generate update scripts based on differences.
-* **Supports Joins**: It supports generating SQL joins by creating structs that implement the Joiner interface, making it
+* **Supports Joins**: It supports generating SQL joins by creating structs that implement the Joiner interface, making
+  it
   easier to manage related data across multiple tables.
-* **Flexible Configuration**: It provides flexible configuration options to customize the SQL generation process, such as
+* **Flexible Configuration**: It provides flexible configuration options to customize the SQL generation process, such
+  as
   including zero or nil values in the diff.
 * **Easy Integration**: It is easy to integrate into existing projects and can be used with any Go project that needs to
   generate SQL queries from structs.
@@ -58,7 +59,9 @@ you.
 #### GenerateSQL Options
 
 * `WithTable(tableName string)`: Specify the table name for the SQL query.
-* `WithWhere(whereClause WhereTyper)`: Provide a where clause for the SQL query.
+* `WithWhere(whereClause Wherer)`: Provide a where clause for the SQL query.
+    * You can pass a struct that implements the `WhereTyper` interface to use `OR` in the where clause. Patcher will
+      default to `AND` if the `WhereTyper` interface is not implemented.
 * `WithJoin(joinClause Joiner)`: Add join clauses to the SQL query.
 * `includeZeroValues`: Set to true to include zero values in the diff. (Only for NewDiffSQLPatch)
 * `includeNilValues`: Set to true to include nil values in the diff. (Only for NewDiffSQLPatch)
