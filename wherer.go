@@ -32,6 +32,9 @@ func (w WhereType) IsValid() bool {
 }
 
 func appendWhere(where Wherer, builder *strings.Builder, args *[]any) {
+	if where == nil {
+		return
+	}
 	wSQL, fwArgs := where.Where()
 	if fwArgs == nil {
 		fwArgs = make([]any, 0)
