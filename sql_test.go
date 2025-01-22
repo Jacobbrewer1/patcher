@@ -36,6 +36,26 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success() {
 	s.Equal([]any{int64(1), "test"}, patch.args)
 }
 
+func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mf := NewMockMultiFilter(s.T())
+	mf.On("Where").Return("where", []any{"arg1", "arg2"})
+
+	patch := NewSQLPatch(obj, WithWhere(mf))
+
+	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
+	s.Equal([]any{int64(1), "test"}, patch.args)
+}
+
 func (s *newSQLPatchSuite) TestNewSQLPatch_Fields_Args_Getters() {
 	type testObj struct {
 		Id   *int    `db:"id_tag"`
