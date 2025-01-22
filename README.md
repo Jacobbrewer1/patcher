@@ -18,8 +18,7 @@ you.
 * **Struct Diffs**: It allows injecting changes from one struct to another and generating update scripts based on
   differences, streamlining the process of synchronizing data changes.
 * **Join Support**: It supports generating SQL joins by creating structs that implement the Joiner interface,
-  simplifying
-  the process of managing related data across multiple tables.
+  simplifying the process of managing related data across multiple tables.
 
 ## Why Use Patcher?
 
@@ -32,8 +31,7 @@ you.
 * **Streamlines Data Synchronization**: It streamlines the process of synchronizing data changes by allowing you to
   inject changes from one struct to another and generate update scripts based on differences.
 * **Supports Joins**: It supports generating SQL joins by creating structs that implement the Joiner interface, making
-  it
-  easier to manage related data across multiple tables.
+  it easier to manage related data across multiple tables.
 * **Flexible Configuration**: It provides flexible configuration options to customize the SQL generation process, such
   as
   including zero or nil values in the diff.
