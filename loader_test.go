@@ -647,7 +647,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Include_Nil_false() {
 
 func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFields() {
 	l := s.patch
-	l.ignoreFields = []string{"name"}
+	l.ignoreFields = []string{"Name"}
 
 	type testStruct struct {
 		Name string
@@ -728,7 +728,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFuncAndIgnoreFields() {
 func (s *loadDiffSuite) TestLoadDiff_Success_Blank_Except_Id() {
 	l := s.patch
 	l.includeZeroValues = true
-	l.ignoreFields = []string{"id"}
+	l.ignoreFields = []string{"ID"}
 
 	type testStruct struct {
 		ID   int
@@ -758,7 +758,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Blank_Except_Id() {
 func (s *loadDiffSuite) TestLoadDiff_Success_Skip_Priority_Check() {
 	l := s.patch
 	l.includeZeroValues = true
-	l.ignoreFields = []string{"id"}
+	l.ignoreFields = []string{"ID"}
 
 	type testStruct struct {
 		ID          int
