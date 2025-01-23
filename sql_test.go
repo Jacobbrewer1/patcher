@@ -518,7 +518,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IgnoredFields() {
 		Description: nil,
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeNilValues(), WithIncludeZeroValues(), WithIgnoredFields("id", "description"))
+	patch := NewSQLPatch(obj, WithIncludeNilValues(), WithIncludeZeroValues(), WithIgnoredFields("Id", "Description"))
 
 	s.Equal([]string{"name = ?"}, patch.fields)
 	s.Equal([]any{""}, patch.args)

@@ -261,7 +261,7 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 			if patch.ignoreFields == nil {
 				patch.ignoreFields = make([]string, 0)
 			}
-			patch.ignoreFields = append(patch.ignoreFields, strings.ToLower(oldElem.Type().Field(i).Name))
+			patch.ignoreFields = append(patch.ignoreFields, oldElem.Type().Field(i).Name)
 			continue
 		}
 	}

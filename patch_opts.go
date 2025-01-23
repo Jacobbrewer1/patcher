@@ -2,7 +2,6 @@ package patcher
 
 import (
 	"database/sql"
-	"strings"
 )
 
 const (
@@ -75,10 +74,6 @@ func WithIncludeNilValues() PatchOpt {
 // case-sensitive.
 func WithIgnoredFields(fields ...string) PatchOpt {
 	return func(s *SQLPatch) {
-		for i := range fields {
-			fields[i] = strings.ToLower(fields[i])
-		}
-
 		s.ignoreFields = fields
 	}
 }

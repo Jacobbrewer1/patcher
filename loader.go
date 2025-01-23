@@ -114,7 +114,7 @@ func (s *SQLPatch) checkSkipTag(field reflect.StructField) bool {
 }
 
 func (s *SQLPatch) ignoredFieldsCheck(field reflect.StructField) bool {
-	return s.checkIgnoredFields(strings.ToLower(field.Name)) || s.checkIgnoreFunc(field)
+	return s.checkIgnoredFields(field.Name) || s.checkIgnoreFunc(field)
 }
 
 func (s *SQLPatch) checkIgnoreFunc(field reflect.StructField) bool {
@@ -122,5 +122,5 @@ func (s *SQLPatch) checkIgnoreFunc(field reflect.StructField) bool {
 }
 
 func (s *SQLPatch) checkIgnoredFields(field string) bool {
-	return len(s.ignoreFields) > 0 && slices.Contains(s.ignoreFields, strings.ToLower(field))
+	return len(s.ignoreFields) > 0 && slices.Contains(s.ignoreFields, field)
 }
