@@ -652,13 +652,19 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_JoinString() {
 		Name: ptr("test"),
 	}
 
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
 		WithJoinStr("JOIN table2 ON table1.id = table2.id"),
+		WithWhere(mw),
 	)
 	s.NoError(err)
-	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nJOIN table2 ON table1.id = table2.id\n", sqlStr)
-	s.Equal([]any{int64(1), "test"}, args)
+	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
+	s.Equal([]any{int64(1), "test", 18}, args)
+
+	mw.AssertExpectations(s.T())
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_NoWhereArgs() {
