@@ -144,7 +144,7 @@ func GenerateSQL(resource any, opts ...PatchOpt) (string, []any, error) {
 // and returns the final SQL string along with the arguments.
 func (s *SQLPatch) GenerateSQL() (string, []any, error) {
 	if err := s.validateSQLGen(); err != nil {
-		return "", nil, fmt.Errorf("validate perform patch: %w", err)
+		return "", nil, fmt.Errorf("validate SQL generation: %w", err)
 	}
 
 	sqlBuilder := new(strings.Builder)

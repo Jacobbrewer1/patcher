@@ -34,10 +34,38 @@ func WithWhere(where Wherer) PatchOpt {
 	}
 }
 
+// WithWhereStr takes a string and args to set the where clause to use in the SQL statement. This is useful when you
+// want to use a simple where clause.
+//
+// Note. The where string should not contain the "WHERE" keyword. We recommend using the WhereTyper interface if you
+// want to specify the WHERE type or do a more complex WHERE clause.
+func WithWhereStr(where string, args ...any) PatchOpt {
+	return func(s *SQLPatch) {
+		appendWhere(&whereStringOption{
+			where: where,
+			args:  args,
+		}, s.whereSql, &s.whereArgs)
+	}
+}
+
 // WithJoin sets the join clause to use in the SQL statement
 func WithJoin(join Joiner) PatchOpt {
 	return func(s *SQLPatch) {
 		appendJoin(join, s.joinSql, &s.joinArgs)
+	}
+}
+
+// WithJoinStr takes a string and args to set the join clause to use in the SQL statement. This is useful when you
+// want to use a simple join clause.
+//
+// Note. The join string should not contain the "JOIN" keyword. We recommend using the Joiner interface if you
+// want to specify the JOIN type or do a more complex JOIN clause.
+func WithJoinStr(join string, args ...any) PatchOpt {
+	return func(s *SQLPatch) {
+		appendJoin(&joinStringOption{
+			join: join,
+			args: args,
+		}, s.joinSql, &s.joinArgs)
 	}
 }
 

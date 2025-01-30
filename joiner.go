@@ -19,3 +19,12 @@ func appendJoin(join Joiner, builder *strings.Builder, args *[]any) {
 	builder.WriteString("\n")
 	*args = append(*args, jArgs...)
 }
+
+type joinStringOption struct {
+	join string
+	args []any
+}
+
+func (j *joinStringOption) Join() (string, []any) {
+	return j.join, j.args
+}
