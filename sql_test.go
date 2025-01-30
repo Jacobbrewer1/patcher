@@ -56,6 +56,46 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter() {
 	s.Equal([]any{int64(1), "test"}, patch.args)
 }
 
+func (s *newSQLPatchSuite) TestNewSQLPatch_WhereString() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	patch := NewSQLPatch(obj, WithWhereStr("age = ?", 18))
+
+	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
+	s.Equal([]any{int64(1), "test"}, patch.args)
+
+	s.Equal("AND age = ?\n", patch.whereSql.String())
+	s.Equal([]any{18}, patch.whereArgs)
+}
+
+func (s *newSQLPatchSuite) TestNewSQLPatch_JoinString() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	patch := NewSQLPatch(obj, WithJoinStr("JOIN table2 ON table1.id = table2.id"))
+
+	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
+	s.Equal([]any{int64(1), "test"}, patch.args)
+
+	s.Equal("JOIN table2 ON table1.id = table2.id\n", patch.joinSql.String())
+	s.Empty(patch.joinArgs)
+}
+
 func (s *newSQLPatchSuite) TestNewSQLPatch_Fields_Args_Getters() {
 	type testObj struct {
 		Id   *int    `db:"id_tag"`
@@ -579,6 +619,46 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 	s.Equal([]any{int64(1), "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_WhereString() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhereStr("age = ?", 18),
+	)
+	s.NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
+	s.Equal([]any{int64(1), "test", 18}, args)
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_JoinString() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithJoinStr("JOIN table2 ON table1.id = table2.id"),
+	)
+	s.NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nJOIN table2 ON table1.id = table2.id\n", sqlStr)
+	s.Equal([]any{int64(1), "test"}, args)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_NoWhereArgs() {

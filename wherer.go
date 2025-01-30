@@ -49,3 +49,12 @@ func appendWhere(where Wherer, builder *strings.Builder, args *[]any) {
 	builder.WriteString("\n")
 	*args = append(*args, fwArgs...)
 }
+
+type whereStringOption struct {
+	where string
+	args  []any
+}
+
+func (w *whereStringOption) Where() (string, []any) {
+	return w.where, w.args
+}
