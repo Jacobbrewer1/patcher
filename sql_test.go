@@ -621,6 +621,36 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 	mw.AssertExpectations(s.T())
 }
 
+type testFilter struct{}
+
+func (f *testFilter) Where() (string, []any) {
+	return "age = ?", []any{18}
+}
+
+func (f *testFilter) Join() (string, []any) {
+	return "JOIN table2 ON table1.id = table2.id", nil
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_WhereAndJoin() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithFilter(new(testFilter)),
+	)
+	s.NoError(err)
+	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
+	s.Equal([]any{int64(1), "test", 18}, args)
+}
+
 func (s *generateSQLSuite) TestGenerateSQL_Success_WhereString() {
 	type testObj struct {
 		Id   *int    `db:"id"`
