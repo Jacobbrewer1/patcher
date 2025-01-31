@@ -27,6 +27,19 @@ func WithTable(table string) PatchOpt {
 	}
 }
 
+// WithFilter takes in either a Wherer or a Joiner to set the filter to use in the SQL statement
+func WithFilter(filter any) PatchOpt {
+	return func(s *SQLPatch) {
+		if join, ok := filter.(Joiner); ok {
+			WithJoin(join)(s)
+		}
+
+		if where, ok := filter.(Wherer); ok {
+			WithWhere(where)(s)
+		}
+	}
+}
+
 // WithWhere sets the where clause to use in the SQL statement
 func WithWhere(where Wherer) PatchOpt {
 	return func(s *SQLPatch) {
