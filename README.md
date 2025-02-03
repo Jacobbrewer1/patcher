@@ -37,12 +37,8 @@ you.
 * **Easy Integration**: It is easy to integrate into existing projects and can be used with any Go project that needs to
   generate SQL queries from structs.
 * **Open Source**: It is open-source and available under the Apache 2.0 license.
-* **Actively Maintained**: It is actively maintained and updated to support the latest Go versions and best practices,
-  ensuring compatibility and reliability.
 * **Comprehensive Documentation**: It has comprehensive documentation and examples to help you get started quickly and
   understand how to use the library effectively.
-* **Tested and Reliable**: It is thoroughly tested and reliable, ensuring that it works as expected and meets the
-  requirements of your project.
 
 ## Usage
 
