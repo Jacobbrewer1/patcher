@@ -61,3 +61,54 @@ func (s *multiFilterSuite) TestNewMultiFilter_Add_WhereTyper() {
 	s.Equal("AND where\nOR whereTwo\n", sql)
 	s.Equal([]any{"arg1", "arg2", "arg3", "arg4"}, args)
 }
+
+func (s *multiFilterSuite) TestNewMultiFilter_Add_Joiner() {
+	mf := NewMultiFilter()
+	s.NotNil(mf)
+
+	mj := NewMockJoiner(s.T())
+	mj.On("Join").Return("join", []any{"arg1", "arg2"})
+	mf.Add(mj)
+
+	sql, args := mf.Join()
+	s.Equal("join\n", sql)
+	s.Equal([]any{"arg1", "arg2"}, args)
+}
+
+func (s *multiFilterSuite) TestNewMultiFilter_Add_MultiJoiner() {
+	mf := NewMultiFilter()
+	s.NotNil(mf)
+
+	mj := NewMockJoiner(s.T())
+	mj.On("Join").Return("join", []any{"arg1", "arg2"})
+	mf.Add(mj)
+
+	mjTwo := NewMockJoiner(s.T())
+	mjTwo.On("Join").Return("joinTwo", []any{"arg3", "arg4"})
+	mf.Add(mjTwo)
+
+	sql, args := mf.Join()
+	s.Equal("join\njoinTwo\n", sql)
+	s.Equal([]any{"arg1", "arg2", "arg3", "arg4"}, args)
+}
+
+func (s *multiFilterSuite) TestNewMultiFilter_Add_JoinerAndWherer() {
+	mf := NewMultiFilter()
+	s.NotNil(mf)
+
+	mj := NewMockJoiner(s.T())
+	mj.On("Join").Return("join", []any{"arg1", "arg2"})
+	mf.Add(mj)
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("where", []any{"arg3", "arg4"})
+	mf.Add(mw)
+
+	sql, args := mf.Join()
+	s.Equal("join\n", sql)
+	s.Equal([]any{"arg1", "arg2"}, args)
+
+	sql, args = mf.Where()
+	s.Equal("AND where\n", sql)
+	s.Equal([]any{"arg3", "arg4"}, args)
+}

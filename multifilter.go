@@ -3,26 +3,41 @@ package patcher
 import "strings"
 
 type MultiFilter interface {
+	Joiner
 	Wherer
-	Add(where Wherer)
+	Add(where any)
 }
 
 type multiFilter struct {
+	joinSql   *strings.Builder
+	joinArgs  []any
 	whereSql  *strings.Builder
 	whereArgs []any
 }
 
-func NewMultiFilter() MultiFilter {
-	return &multiFilter{
-		whereSql:  new(strings.Builder),
-		whereArgs: nil,
-	}
-}
-
-func (m *multiFilter) Add(where Wherer) {
-	appendWhere(where, m.whereSql, &m.whereArgs)
+func (m *multiFilter) Join() (string, []any) {
+	return m.joinSql.String(), m.joinArgs
 }
 
 func (m *multiFilter) Where() (string, []any) {
 	return m.whereSql.String(), m.whereArgs
+}
+
+func (m *multiFilter) Add(filter any) {
+	if joiner, ok := filter.(Joiner); ok {
+		appendJoin(joiner, m.joinSql, &m.joinArgs)
+	}
+
+	if wherer, ok := filter.(Wherer); ok {
+		appendWhere(wherer, m.whereSql, &m.whereArgs)
+	}
+}
+
+func NewMultiFilter() MultiFilter {
+	return &multiFilter{
+		joinSql:   new(strings.Builder),
+		joinArgs:  nil,
+		whereSql:  new(strings.Builder),
+		whereArgs: nil,
+	}
 }
