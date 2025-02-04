@@ -63,7 +63,7 @@ jobs:
         
       - name: Check code coverage
         run: |
-          go test -coverprofile=coverage.out $(go list ./... | grep -v /examples)
+          go test -coverprofile=coverage.out -coverpkg=$(go list ./... | grep -v /examples | grep -v 'mock_') $(go list ./... | grep -v /examples)
           coverage=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
           if (( $(echo "$coverage < 80" | bc -l) )); then
             echo "Code coverage is below 80%: $coverage%"
