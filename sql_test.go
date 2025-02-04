@@ -56,6 +56,47 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter() {
 	s.Equal([]any{int64(1), "test"}, patch.args)
 }
 
+func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter_Joiner() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mf := NewMockMultiFilter(s.T())
+	mf.On("Join").Return("JOIN table2 ON table1.id = table2.id", nil)
+
+	patch := NewSQLPatch(obj, WithJoin(mf))
+
+	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
+	s.Equal([]any{int64(1), "test"}, patch.args)
+}
+
+func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter_JoinerAndWhere() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mf := NewMockMultiFilter(s.T())
+	mf.On("Join").Return("JOIN table2 ON table1.id = table2.id", nil)
+	mf.On("Where").Return("where", []any{"arg1", "arg2"})
+
+	patch := NewSQLPatch(obj, WithJoin(mf), WithWhere(mf))
+
+	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
+	s.Equal([]any{int64(1), "test"}, patch.args)
+}
+
 func (s *newSQLPatchSuite) TestNewSQLPatch_WhereString() {
 	type testObj struct {
 		Id   *int    `db:"id_tag"`
