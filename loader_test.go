@@ -672,8 +672,8 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFields() {
 
 func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFunc() {
 	l := s.patch
-	l.ignoreFieldsFunc = func(field reflect.StructField) bool {
-		return strings.ToLower(field.Name) == "name"
+	l.ignoreFieldsFunc = func(field *reflect.StructField) bool {
+		return strings.EqualFold(field.Name, "name")
 	}
 
 	type testStruct struct {
@@ -700,8 +700,8 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFunc() {
 func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFuncAndIgnoreFields() {
 	l := s.patch
 	l.ignoreFields = []string{"name"}
-	l.ignoreFieldsFunc = func(field reflect.StructField) bool {
-		return strings.ToLower(field.Name) == "name"
+	l.ignoreFieldsFunc = func(field *reflect.StructField) bool {
+		return strings.EqualFold(field.Name, "name")
 	}
 
 	type testStruct struct {

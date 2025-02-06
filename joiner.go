@@ -25,6 +25,6 @@ type joinStringOption struct {
 	args []any
 }
 
-func (j *joinStringOption) Join() (string, []any) {
+func (j *joinStringOption) Join() (sqlStr string, args []any) {
 	return j.join, j.args
 }
