@@ -484,7 +484,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IgnoredFieldsFunc() {
 	}
 
 	mif := patcher.NewMockIgnoreFieldsFunc(s.T())
-	mif.On("Execute", mock.Anything).Return(func(f reflect.StructField) bool {
+	mif.On("Execute", mock.AnythingOfType("*reflect.StructField")).Return(func(f *reflect.StructField) bool {
 		return f.Name == "ID"
 	})
 

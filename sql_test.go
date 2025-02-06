@@ -619,7 +619,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IgnoredFieldsFunc() {
 	}
 
 	ignoreFunc := NewMockIgnoreFieldsFunc(s.T())
-	ignoreFunc.On("Execute", mock.AnythingOfType("reflect.StructField")).Return(func(field *reflect.StructField) bool {
+	ignoreFunc.On("Execute", mock.AnythingOfType("*reflect.StructField")).Return(func(field *reflect.StructField) bool {
 		return field.Name == "Id" || field.Name == "Description"
 	})
 
