@@ -62,15 +62,7 @@ func (s *newBatchSuite) TestNewBatch_Success_IgnorePK() {
 	s.Require().Len(b.Fields(), 1)
 	s.Require().Len(b.Args(), 5)
 
-	s.Condition(func() bool {
-		for _, f := range b.Fields() {
-			if f == "id" {
-				return false
-			}
-		}
-
-		return true
-	})
+	s.NotContains(b.Fields(), "id")
 }
 
 func (s *newBatchSuite) TestNewBatch_Success_IncludePK() {
