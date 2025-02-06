@@ -55,6 +55,6 @@ type whereStringOption struct {
 	args  []any
 }
 
-func (w *whereStringOption) Where() (string, []any) {
+func (w *whereStringOption) Where() (sqlStr string, args []any) {
 	return w.where, w.args
 }

@@ -25,7 +25,7 @@ var (
 	ErrNoWhere = errors.New("no where clause set")
 )
 
-type IgnoreFieldsFunc func(field reflect.StructField) bool
+type IgnoreFieldsFunc func(field *reflect.StructField) bool
 
 type SQLPatch struct {
 	// fields is the fields to update in the SQL statement
@@ -116,34 +116,36 @@ func (s *SQLPatch) Args() []any {
 
 // validatePerformPatch validates the SQLPatch for the PerformPatch method
 func (s *SQLPatch) validatePerformPatch() error {
-	if s.db == nil {
+	switch {
+	case s.db == nil:
 		return ErrNoDatabaseConnection
-	} else if s.table == "" {
+	case s.table == "":
 		return ErrNoTable
-	} else if len(s.fields) == 0 {
+	case len(s.fields) == 0:
 		return ErrNoFields
-	} else if len(s.args) == 0 {
+	case len(s.args) == 0:
 		return ErrNoArgs
-	} else if s.whereSql.String() == "" {
+	case s.whereSql.String() == "":
 		return ErrNoWhere
+	default:
+		return nil
 	}
-
-	return nil
 }
 
 // validateSQLGen validates the SQLPatch for the SQLGen method
 func (s *SQLPatch) validateSQLGen() error {
-	if s.table == "" {
+	switch {
+	case s.table == "":
 		return ErrNoTable
-	} else if len(s.fields) == 0 {
+	case len(s.fields) == 0:
 		return ErrNoFields
-	} else if len(s.args) == 0 {
+	case len(s.args) == 0:
 		return ErrNoArgs
-	} else if s.whereSql.String() == "" {
+	case s.whereSql.String() == "":
 		return ErrNoWhere
+	default:
+		return nil
 	}
-
-	return nil
 }
 
 // shouldIncludeNil determines whether the field should be included in the patch

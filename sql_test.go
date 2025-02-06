@@ -619,7 +619,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IgnoredFieldsFunc() {
 	}
 
 	ignoreFunc := NewMockIgnoreFieldsFunc(s.T())
-	ignoreFunc.On("Execute", mock.AnythingOfType("reflect.StructField")).Return(func(field reflect.StructField) bool {
+	ignoreFunc.On("Execute", mock.AnythingOfType("*reflect.StructField")).Return(func(field *reflect.StructField) bool {
 		return field.Name == "Id" || field.Name == "Description"
 	})
 
@@ -664,11 +664,11 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 
 type testFilter struct{}
 
-func (f *testFilter) Where() (string, []any) {
+func (f *testFilter) Where() (sqlStr string, args []any) {
 	return "age = ?", []any{18}
 }
 
-func (f *testFilter) Join() (string, []any) {
+func (f *testFilter) Join() (sqlStr string, args []any) {
 	return "JOIN table2 ON table1.id = table2.id", nil
 }
 

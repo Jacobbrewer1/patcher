@@ -14,7 +14,7 @@ type MockIgnoreFieldsFunc struct {
 }
 
 // Execute provides a mock function with given fields: field
-func (_m *MockIgnoreFieldsFunc) Execute(field reflect.StructField) bool {
+func (_m *MockIgnoreFieldsFunc) Execute(field *reflect.StructField) bool {
 	ret := _m.Called(field)
 
 	if len(ret) == 0 {
@@ -22,7 +22,7 @@ func (_m *MockIgnoreFieldsFunc) Execute(field reflect.StructField) bool {
 	}
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(reflect.StructField) bool); ok {
+	if rf, ok := ret.Get(0).(func(*reflect.StructField) bool); ok {
 		r0 = rf(field)
 	} else {
 		r0 = ret.Get(0).(bool)
