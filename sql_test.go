@@ -384,7 +384,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeZeroValue() {
 		Description: "",
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeZeroValues())
+	patch := NewSQLPatch(obj, WithIncludeZeroValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
 	s.Equal([]any{int64(73), "test", ""}, patch.args)
@@ -403,7 +403,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeZeroValue_Pointer() {
 		Description: ptr(""),
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeZeroValues())
+	patch := NewSQLPatch(obj, WithIncludeZeroValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
 	s.Equal([]any{int64(73), "test", ""}, patch.args)
@@ -422,7 +422,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeZeroValue_PointerNil()
 		Description: nil,
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeZeroValues())
+	patch := NewSQLPatch(obj, WithIncludeZeroValues(true))
 
 	// Nothing should be included as we are including zero values and all fields are nil
 	s.Empty(patch.fields)
@@ -442,7 +442,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue() {
 		Description: nil,
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeNilValues())
+	patch := NewSQLPatch(obj, WithIncludeNilValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
 	s.Equal([]any{nil, nil, nil}, patch.args)
@@ -461,7 +461,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_Pointer() {
 		Description: nil,
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeNilValues())
+	patch := NewSQLPatch(obj, WithIncludeNilValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
 	s.Equal([]any{nil, nil, nil}, patch.args)
@@ -480,7 +480,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_PointerWithVa
 		Description: nil,
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeNilValues())
+	patch := NewSQLPatch(obj, WithIncludeNilValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
 	s.Equal([]any{int64(73), "test", nil}, patch.args)
@@ -499,7 +499,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_PointerWithZe
 		Description: nil,
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeNilValues())
+	patch := NewSQLPatch(obj, WithIncludeNilValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
 	s.Equal([]any{int64(0), "test", nil}, patch.args)
@@ -518,7 +518,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_PointerWithZe
 		Description: nil,
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeNilValues())
+	patch := NewSQLPatch(obj, WithIncludeNilValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
 	s.Equal([]any{int64(0), nil, nil}, patch.args)
@@ -537,7 +537,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_PointerWithZe
 		Description: ptr("desc"),
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeNilValues())
+	patch := NewSQLPatch(obj, WithIncludeNilValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
 	s.Equal([]any{int64(0), nil, "desc"}, patch.args)
@@ -556,7 +556,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_IncludeZeroVa
 		Description: nil,
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeNilValues(), WithIncludeZeroValues())
+	patch := NewSQLPatch(obj, WithIncludeNilValues(true), WithIncludeZeroValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
 	s.Equal([]any{nil, "", nil}, patch.args)
@@ -578,7 +578,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_WithDB() {
 	// Setup mock database
 	db := &sql.DB{}
 
-	patch := NewSQLPatch(obj, WithDB(db), WithIncludeNilValues(), WithIncludeZeroValues())
+	patch := NewSQLPatch(obj, WithDB(db), WithIncludeNilValues(true), WithIncludeZeroValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
 	s.Equal([]any{nil, "", nil}, patch.args)
@@ -599,7 +599,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IgnoredFields() {
 		Description: nil,
 	}
 
-	patch := NewSQLPatch(obj, WithIncludeNilValues(), WithIncludeZeroValues(), WithIgnoredFields("Id", "Description"))
+	patch := NewSQLPatch(obj, WithIncludeNilValues(true), WithIncludeZeroValues(true), WithIgnoredFields("Id", "Description"))
 
 	s.Equal([]string{"name = ?"}, patch.fields)
 	s.Equal([]any{""}, patch.args)
@@ -623,7 +623,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IgnoredFieldsFunc() {
 		return field.Name == "Id" || field.Name == "Description"
 	})
 
-	patch := NewSQLPatch(obj, WithIncludeNilValues(), WithIncludeZeroValues(), WithIgnoredFieldsFunc(ignoreFunc.Execute))
+	patch := NewSQLPatch(obj, WithIncludeNilValues(true), WithIncludeZeroValues(true), WithIgnoredFieldsFunc(ignoreFunc.Execute))
 
 	s.Equal([]string{"name = ?"}, patch.fields)
 	s.Equal([]any{""}, patch.args)
@@ -1080,7 +1080,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesZeroValues() {
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
-		WithIncludeZeroValues(),
+		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
 	s.NoError(err)
@@ -1106,7 +1106,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesZeroValues_Pointer() 
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
-		WithIncludeZeroValues(),
+		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
 	s.NoError(err)
@@ -1132,7 +1132,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesZeroValues_PointerNil
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
-		WithIncludeZeroValues(),
+		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
 	s.True(errors.Is(err, ErrNoFields))
@@ -1158,7 +1158,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues() {
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
-		WithIncludeNilValues(),
+		WithIncludeNilValues(true),
 		WithWhere(mw),
 	)
 	s.NoError(err)
@@ -1184,7 +1184,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_Pointer() {
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
-		WithIncludeNilValues(),
+		WithIncludeNilValues(true),
 		WithWhere(mw),
 	)
 	s.NoError(err)
@@ -1210,7 +1210,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_PointerWith
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
-		WithIncludeNilValues(),
+		WithIncludeNilValues(true),
 		WithWhere(mw),
 	)
 	s.NoError(err)
@@ -1236,7 +1236,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_PointerWith
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
-		WithIncludeNilValues(),
+		WithIncludeNilValues(true),
 		WithWhere(mw),
 	)
 	s.NoError(err)
@@ -1262,7 +1262,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_PointerWith
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
-		WithIncludeNilValues(),
+		WithIncludeNilValues(true),
 		WithWhere(mw),
 	)
 	s.NoError(err)
@@ -1288,8 +1288,8 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_IncludesZer
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
-		WithIncludeNilValues(),
-		WithIncludeZeroValues(),
+		WithIncludeNilValues(true),
+		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
 	s.NoError(err)
@@ -1315,8 +1315,8 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_IncludesZer
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
-		WithIncludeNilValues(),
-		WithIncludeZeroValues(),
+		WithIncludeNilValues(true),
+		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
 	s.NoError(err)
@@ -1342,8 +1342,8 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_IncludesZer
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
-		WithIncludeNilValues(),
-		WithIncludeZeroValues(),
+		WithIncludeNilValues(true),
+		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
 	s.NoError(err)
@@ -1670,7 +1670,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeZeroVal
 	mw := NewMockWherer(s.T())
 	mw.On("Where").Return("id = ?", []any{73})
 
-	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeZeroValues())
+	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeZeroValues(true))
 	s.NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
@@ -1705,7 +1705,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeZeroVal
 	mw := NewMockWherer(s.T())
 	mw.On("Where").Return("id = ?", []any{73})
 
-	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeZeroValues())
+	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeZeroValues(true))
 	s.NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
@@ -1737,7 +1737,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeZeroVal
 	mw := NewMockWherer(s.T())
 	mw.On("Where").Return("id = ?", []any{1})
 
-	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeZeroValues())
+	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeZeroValues(true))
 	s.True(errors.Is(err, ErrNoChanges))
 	s.Nil(patch)
 }
@@ -1764,7 +1764,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeNilValu
 	mw := NewMockWherer(s.T())
 	mw.On("Where").Return("id = ?", []any{1})
 
-	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues())
+	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues(true))
 	s.NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
@@ -1796,7 +1796,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeNilValu
 	mw := NewMockWherer(s.T())
 	mw.On("Where").Return("id = ?", []any{1})
 
-	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues())
+	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues(true))
 	s.NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
@@ -1828,7 +1828,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeNilValu
 	mw := NewMockWherer(s.T())
 	mw.On("Where").Return("id = ?", []any{1})
 
-	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues())
+	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues(true))
 	s.NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
@@ -1863,7 +1863,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeNilValu
 	mw := NewMockWherer(s.T())
 	mw.On("Where").Return("id = ?", []any{1})
 
-	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues(), WithIncludeZeroValues())
+	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues(true), WithIncludeZeroValues(true))
 	s.NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()

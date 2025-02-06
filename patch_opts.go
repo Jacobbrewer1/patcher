@@ -92,18 +92,18 @@ func WithDB(db *sql.DB) PatchOpt {
 // WithIncludeZeroValues sets whether zero values should be included in the patch.
 //
 // This is useful when you want to set a field to zero.
-func WithIncludeZeroValues() PatchOpt {
+func WithIncludeZeroValues(includeZeroValues bool) PatchOpt {
 	return func(s *SQLPatch) {
-		s.includeZeroValues = true
+		s.includeZeroValues = includeZeroValues
 	}
 }
 
 // WithIncludeNilValues sets whether nil values should be included in the patch.
 //
 // This is useful when you want to set a field to nil.
-func WithIncludeNilValues() PatchOpt {
+func WithIncludeNilValues(includeNilValues bool) PatchOpt {
 	return func(s *SQLPatch) {
-		s.includeNilValues = true
+		s.includeNilValues = includeNilValues
 	}
 }
 
