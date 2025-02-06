@@ -367,8 +367,8 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_fail_noFields() {
 	// This will return a patch object with no fields
 	patch := NewSQLPatch(obj)
 
-	s.Equal(make([]string, 0), patch.fields)
-	s.Equal(make([]any, 0), patch.args)
+	s.Equal([]string{}, patch.fields)
+	s.Equal([]any{}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeZeroValue() {
@@ -982,10 +982,10 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleJoin() {
 	mw.On("Where").Return("age = ?", []any{18})
 
 	mj := NewMockJoiner(s.T())
-	mj.On("Join").Return("JOIN table2 ON table1.id = table2.id", make([]any, 0))
+	mj.On("Join").Return("JOIN table2 ON table1.id = table2.id", []any{})
 
 	mj2 := NewMockJoiner(s.T())
-	mj2.On("Join").Return("JOIN table3 ON table1.id = table3.id", make([]any, 0))
+	mj2.On("Join").Return("JOIN table3 ON table1.id = table3.id", []any{})
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
@@ -1015,7 +1015,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_withJoinAndWhere() {
 	mw.On("Where").Return("age = ?", []any{18})
 
 	mj := NewMockJoiner(s.T())
-	mj.On("Join").Return("JOIN table2 ON table1.id = table2.id", make([]any, 0))
+	mj.On("Join").Return("JOIN table2 ON table1.id = table2.id", []any{})
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
@@ -1044,10 +1044,10 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_withJoinAndWhereAndJoin() {
 	mw.On("Where").Return("age = ?", []any{18})
 
 	mj := NewMockJoiner(s.T())
-	mj.On("Join").Return("JOIN table2 ON table1.id = table2.id", make([]any, 0))
+	mj.On("Join").Return("JOIN table2 ON table1.id = table2.id", []any{})
 
 	mj2 := NewMockJoiner(s.T())
-	mj2.On("Join").Return("JOIN table3 ON table1.id = table3.id", make([]any, 0))
+	mj2.On("Join").Return("JOIN table3 ON table1.id = table3.id", []any{})
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),

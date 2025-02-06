@@ -12,6 +12,12 @@ linters:
     - iface
     - thelper
     - tparallel
+issues:
+  exclude-rules:
+    - path: (.+)_test.go
+      linters:
+        - revive
+      text: "^(enforce-slice-style|enforce-map-style)"
 linters-settings:
   revive:
     # Default: false
