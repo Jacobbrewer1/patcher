@@ -47,8 +47,8 @@ func main() {
 		person,
 		patcher.WithTable("people"),
 		patcher.WithWhere(condition),
-		patcher.WithIncludeZeroValues(),
-		patcher.WithIncludeNilValues(),
+		patcher.WithIncludeZeroValues(true),
+		patcher.WithIncludeNilValues(true),
 		patcher.WithIgnoredFields("ignoredbylist"),
 		patcher.WithIgnoredFieldsFunc(func(field *reflect.StructField) bool {
 			return strings.ToLower(field.Name) == "ignoredbyfunc"

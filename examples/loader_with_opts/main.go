@@ -50,8 +50,8 @@ func main() {
 
 	// The patcher.LoadDiff function will apply the changes from n to s.
 	if err := patcher.LoadDiff(&s, &n,
-		patcher.WithIncludeZeroValues(),
-		patcher.WithIncludeNilValues(),
+		patcher.WithIncludeZeroValues(true),
+		patcher.WithIncludeNilValues(true),
 		patcher.WithIgnoredFields("ignoredField", "IgNoReDfIeLdTwO"),
 		patcher.WithIgnoredFieldsFunc(func(field *reflect.StructField) bool {
 			return strings.ToLower(field.Name) == "ignoredfieldbyfunc"
