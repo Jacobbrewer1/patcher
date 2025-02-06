@@ -20,7 +20,7 @@ var (
 //
 // This function is useful if you are inserting a patch into an existing object but require a new object to be returned with
 // all fields updated.
-func LoadDiff[T any](old *T, newT *T, opts ...PatchOpt) error {
+func LoadDiff[T any](old, newT *T, opts ...PatchOpt) error {
 	return newPatchDefaults(opts...).loadDiff(old, newT)
 }
 
@@ -74,12 +74,14 @@ func (s *SQLPatch) loadDiff(old, newT any) error {
 			continue
 		}
 
+		oldField := oElem.Type().Field(i)
+
 		// See if the field should be ignored.
-		if s.checkSkipField(oElem.Type().Field(i)) {
+		if s.checkSkipField(&oldField) {
 			continue
 		}
 
-		patcherOptsTag := oElem.Type().Field(i).Tag.Get(TagOptsName)
+		patcherOptsTag := oldField.Tag.Get(TagOptsName)
 
 		// Compare the old and new fields.
 		//
@@ -94,7 +96,7 @@ func (s *SQLPatch) loadDiff(old, newT any) error {
 	return nil
 }
 
-func (s *SQLPatch) checkSkipField(field reflect.StructField) bool {
+func (s *SQLPatch) checkSkipField(field *reflect.StructField) bool {
 	// The ignore fields tag takes precedence over the ignore fields list
 	if s.checkSkipTag(field) {
 		return true
@@ -103,7 +105,7 @@ func (s *SQLPatch) checkSkipField(field reflect.StructField) bool {
 	return s.ignoredFieldsCheck(field)
 }
 
-func (s *SQLPatch) checkSkipTag(field reflect.StructField) bool {
+func (s *SQLPatch) checkSkipTag(field *reflect.StructField) bool {
 	val, ok := field.Tag.Lookup(TagOptsName)
 	if !ok {
 		return false
@@ -113,11 +115,11 @@ func (s *SQLPatch) checkSkipTag(field reflect.StructField) bool {
 	return slices.Contains(tags, TagOptSkip)
 }
 
-func (s *SQLPatch) ignoredFieldsCheck(field reflect.StructField) bool {
+func (s *SQLPatch) ignoredFieldsCheck(field *reflect.StructField) bool {
 	return s.checkIgnoredFields(field.Name) || s.checkIgnoreFunc(field)
 }
 
-func (s *SQLPatch) checkIgnoreFunc(field reflect.StructField) bool {
+func (s *SQLPatch) checkIgnoreFunc(field *reflect.StructField) bool {
 	return s.ignoreFieldsFunc != nil && s.ignoreFieldsFunc(field)
 }
 

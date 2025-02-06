@@ -50,7 +50,7 @@ func main() {
 		patcher.WithIncludeZeroValues(),
 		patcher.WithIncludeNilValues(),
 		patcher.WithIgnoredFields("ignoredbylist"),
-		patcher.WithIgnoredFieldsFunc(func(field reflect.StructField) bool {
+		patcher.WithIgnoredFieldsFunc(func(field *reflect.StructField) bool {
 			return strings.ToLower(field.Name) == "ignoredbyfunc"
 		}),
 	)

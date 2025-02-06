@@ -68,11 +68,12 @@ func (s *SQLPatch) patchGen(resource any) {
 		patcherOptsTag := fType.Tag.Get(TagOptsName)
 
 		// Skip fields that are to be ignored
-		if s.checkSkipField(fType) {
+		switch {
+		case s.checkSkipField(&fType):
 			continue
-		} else if fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.shouldIncludeNil(patcherOptsTag)) {
+		case fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.shouldIncludeNil(patcherOptsTag)):
 			continue
-		} else if fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.shouldIncludeZero(patcherOptsTag)) {
+		case fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.shouldIncludeZero(patcherOptsTag)):
 			continue
 		}
 
@@ -134,7 +135,7 @@ func (s *SQLPatch) patchGen(resource any) {
 // GenerateSQL generates the SQL update statement and its arguments for the given resource.
 // It creates a new SQLPatch instance with the provided options, processes the resource's fields,
 // and constructs the SQL update statement along with the necessary arguments.
-func GenerateSQL(resource any, opts ...PatchOpt) (string, []any, error) {
+func GenerateSQL(resource any, opts ...PatchOpt) (sqlStr string, args []any, err error) {
 	return NewSQLPatch(resource, opts...).GenerateSQL()
 }
 
@@ -142,7 +143,7 @@ func GenerateSQL(resource any, opts ...PatchOpt) (string, []any, error) {
 // It validates the SQL generation process, builds the SQL update statement
 // with the table name, join clauses, set clauses, and where clauses,
 // and returns the final SQL string along with the arguments.
-func (s *SQLPatch) GenerateSQL() (string, []any, error) {
+func (s *SQLPatch) GenerateSQL() (sqlStr string, args []any, err error) {
 	if err := s.validateSQLGen(); err != nil {
 		return "", nil, fmt.Errorf("validate SQL generation: %w", err)
 	}
@@ -174,10 +175,11 @@ func (s *SQLPatch) GenerateSQL() (string, []any, error) {
 	sqlBuilder.WriteString(strings.TrimSpace(where) + "\n")
 	sqlBuilder.WriteString(")")
 
-	args := append(s.joinArgs, s.args...)
-	args = append(args, s.whereArgs...)
+	sqlArgs := s.joinArgs
+	sqlArgs = append(sqlArgs, s.args...)
+	sqlArgs = append(sqlArgs, s.whereArgs...)
 
-	return sqlBuilder.String(), args, nil
+	return sqlBuilder.String(), sqlArgs, nil
 }
 
 // PerformPatch executes the SQL update statement for the given resource.

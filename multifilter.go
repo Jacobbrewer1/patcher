@@ -15,11 +15,11 @@ type multiFilter struct {
 	whereArgs []any
 }
 
-func (m *multiFilter) Join() (string, []any) {
+func (m *multiFilter) Join() (sqlStr string, args []any) {
 	return m.joinSql.String(), m.joinArgs
 }
 
-func (m *multiFilter) Where() (string, []any) {
+func (m *multiFilter) Where() (sqlStr string, args []any) {
 	return m.whereSql.String(), m.whereArgs
 }
 
