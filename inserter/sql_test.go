@@ -88,7 +88,7 @@ func (s *newBatchSuite) TestNewBatch_Success_IncludePK() {
 		&temp{ID: 5, Name: "test5", unexported: "test"},
 	}
 
-	b := NewBatch(resources, WithTable("temp"), WithTagName("db"), WithIncludePrimaryKey())
+	b := NewBatch(resources, WithTable("temp"), WithTagName("db"), WithIncludePrimaryKey(true))
 
 	s.Require().Len(b.Fields(), 2)
 	s.Require().Len(b.Args(), 10)
