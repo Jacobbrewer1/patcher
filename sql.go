@@ -60,6 +60,11 @@ func (s *SQLPatch) patchGen(resource any) {
 			continue
 		}
 
+		// Skip fields with unsupported types
+		if !isValidType(fVal) {
+			continue
+		}
+
 		tags := strings.Split(tag, TagOptSeparator)
 		if len(tags) > 1 {
 			tag = tags[0]
@@ -114,6 +119,18 @@ func (s *SQLPatch) patchGen(resource any) {
 		}
 
 		s.args = append(s.args, val.Interface())
+	}
+}
+
+// isValidType checks if the given value is of a type that can be stored as a database field.
+func isValidType(val reflect.Value) bool {
+	switch val.Kind() {
+	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
+		reflect.Float32, reflect.Float64, reflect.String, reflect.Struct, reflect.Ptr:
+		return true
+	default:
+		return false
 	}
 }
 

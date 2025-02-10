@@ -200,12 +200,12 @@ func (s *newSQLPatchSuite) TestPatchGen_AllTypes() {
 	expectedFields := []string{
 		"IntVal = ?", "Int8Val = ?", "Int16Val = ?", "Int32Val = ?", "Int64Val = ?",
 		"UintVal = ?", "Uint8Val = ?", "Uint16Val = ?", "Uint32Val = ?", "Uint64Val = ?", "UintptrVal = ?",
-		"Float32Val = ?", "Float64Val = ?", "Complex64Val = ?", "Complex128Val = ?", "StringVal = ?", "BoolVal = ?",
+		"Float32Val = ?", "Float64Val = ?", "StringVal = ?", "BoolVal = ?",
 	}
 	expectedArgs := []any{
 		1, int8(2), int16(3), int32(4), int64(5),
 		uint(6), uint8(7), uint16(8), uint32(9), uint64(10), uintptr(11),
-		float32(12.34), 56.78, complex64(1 + 2i), complex(3, 4), "test", true,
+		float32(12.34), 56.78, "test", true,
 	}
 
 	s.Equal(expectedFields, patch.fields)
@@ -603,6 +603,31 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IgnoredFields() {
 
 	s.Equal([]string{"name = ?"}, patch.fields)
 	s.Equal([]any{""}, patch.args)
+}
+
+func (s *newSQLPatchSuite) TestNewSQLPatch_Failure_FuncArg() {
+	type testObj struct {
+		Id       *int   `db:"id"`
+		Name     string `db:"name"`
+		Runnable func() `db:"func"`
+	}
+
+	obj := testObj{
+		Id:   ptr(73),
+		Name: "Test Name",
+		Runnable: func() {
+			fmt.Println("Hello")
+		},
+	}
+
+	p := new(SQLPatch)
+	s.NotPanics(func() {
+		p = NewSQLPatch(obj)
+	})
+	s.NotNil(p)
+
+	s.Equal([]string{"id = ?", "name = ?"}, p.fields)
+	s.Equal([]any{73, "Test Name"}, p.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IgnoredFieldsFunc() {
