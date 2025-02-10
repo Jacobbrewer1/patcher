@@ -198,9 +198,9 @@ func (s *newSQLPatchSuite) TestPatchGen_AllTypes() {
 	patch := NewSQLPatch(obj)
 
 	expectedFields := []string{
-		"IntVal = ?", "Int8Val = ?", "Int16Val = ?", "Int32Val = ?", "Int64Val = ?",
-		"UintVal = ?", "Uint8Val = ?", "Uint16Val = ?", "Uint32Val = ?", "Uint64Val = ?", "UintptrVal = ?",
-		"Float32Val = ?", "Float64Val = ?", "StringVal = ?", "BoolVal = ?",
+		"intval = ?", "int8val = ?", "int16val = ?", "int32val = ?", "int64val = ?",
+		"uintval = ?", "uint8val = ?", "uint16val = ?", "uint32val = ?", "uint64val = ?", "uintptrval = ?",
+		"float32val = ?", "float64val = ?", "stringval = ?", "boolval = ?",
 	}
 	expectedArgs := []any{
 		1, int8(2), int16(3), int32(4), int64(5),
@@ -314,7 +314,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_noDbTag() {
 
 	patch := NewSQLPatch(obj)
 
-	s.Equal([]string{"Id = ?", "Name = ?"}, patch.fields)
+	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
 	s.Equal([]any{1, "test"}, patch.args)
 }
 

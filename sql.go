@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"slices"
 	"strings"
 )
 
@@ -32,16 +31,8 @@ func NewSQLPatch(resource any, opts ...PatchOpt) *SQLPatch {
 // It processes the fields of the struct, applying the necessary tags and options,
 // and prepares the SQL update statement components (fields and arguments).
 func (s *SQLPatch) patchGen(resource any) {
-	// If the resource is a pointer, we need to dereference it to get the value
-	if reflect.TypeOf(resource).Kind() == reflect.Ptr {
-		resource = reflect.ValueOf(resource).Elem().Interface()
-	}
-
-	// Ensure that the resource is a struct
-	if reflect.TypeOf(resource).Kind() != reflect.Struct {
-		// This is intentionally a panic as this is a programming error and should be fixed by the developer
-		panic("resource is not a struct")
-	}
+	resource = dereferenceIfPointer(resource)
+	ensureStruct(resource)
 
 	rType := reflect.TypeOf(resource)
 	rVal := reflect.ValueOf(resource)
@@ -53,52 +44,17 @@ func (s *SQLPatch) patchGen(resource any) {
 	for i := 0; i < n; i++ {
 		fType := rType.Field(i)
 		fVal := rVal.Field(i)
-		tag := fType.Tag.Get(s.tagName)
+		tag := getTag(&fType, s.tagName)
 
-		// Skip unexported fields
-		if !fType.IsExported() {
+		if s.shouldSkipField(&fType, fVal) {
 			continue
-		}
-
-		// Skip fields with unsupported types
-		if !isValidType(fVal) {
-			continue
-		}
-
-		tags := strings.Split(tag, TagOptSeparator)
-		if len(tags) > 1 {
-			tag = tags[0]
-		}
-
-		patcherOptsTag := fType.Tag.Get(TagOptsName)
-
-		// Skip fields that are to be ignored
-		switch {
-		case s.checkSkipField(&fType):
-			continue
-		case fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.shouldIncludeNil(patcherOptsTag)):
-			continue
-		case fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.shouldIncludeZero(patcherOptsTag)):
-			continue
-		}
-
-		if patcherOptsTag != "" {
-			patcherOpts := strings.Split(patcherOptsTag, TagOptSeparator)
-			if slices.Contains(patcherOpts, TagOptSkip) {
-				continue
-			}
-		}
-
-		// If no tag is set, use the field name
-		if tag == "" {
-			tag = fType.Name
 		}
 
 		addField := func() {
 			s.fields = append(s.fields, tag+" = ?")
 		}
 
-		if fVal.Kind() == reflect.Ptr && fVal.IsNil() && s.shouldIncludeNil(patcherOptsTag) {
+		if fVal.Kind() == reflect.Ptr && fVal.IsNil() && s.shouldIncludeNil(fType.Tag.Get(TagOptsName)) {
 			s.args = append(s.args, nil)
 			addField()
 			continue
@@ -107,19 +63,42 @@ func (s *SQLPatch) patchGen(resource any) {
 		}
 
 		addField()
-
-		val := fVal
-		if fVal.Kind() == reflect.Ptr {
-			val = fVal.Elem()
-		}
-
-		// Check if the val is a type of comparable
-		if !val.CanInterface() {
-			continue
-		}
-
-		s.args = append(s.args, val.Interface())
+		s.args = append(s.args, getValue(fVal))
 	}
+}
+
+func dereferenceIfPointer(resource any) any {
+	if reflect.TypeOf(resource).Kind() == reflect.Ptr {
+		return reflect.ValueOf(resource).Elem().Interface()
+	}
+	return resource
+}
+
+func ensureStruct(resource any) {
+	if reflect.TypeOf(resource).Kind() != reflect.Struct {
+		// Intentionally panic here as this should never happen. This is a programming error.
+		panic("resource is not a struct")
+	}
+}
+
+func getTag(fType *reflect.StructField, tagName string) string {
+	tag := fType.Tag.Get(tagName)
+	if tag == "" {
+		tag = strings.ToLower(fType.Name)
+	}
+
+	tags := strings.Split(tag, TagOptSeparator)
+	if len(tags) > 1 {
+		return tags[0]
+	}
+	return tag
+}
+
+func getValue(fVal reflect.Value) any {
+	if fVal.Kind() == reflect.Ptr {
+		return fVal.Elem().Interface()
+	}
+	return fVal.Interface()
 }
 
 // isValidType checks if the given value is of a type that can be stored as a database field.

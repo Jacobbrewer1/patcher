@@ -177,3 +177,24 @@ func (s *SQLPatch) shouldOmitEmpty(tag string) bool {
 
 	return false
 }
+
+func (s *SQLPatch) shouldSkipField(fType *reflect.StructField, fVal reflect.Value) bool {
+	if !fType.IsExported() || !isValidType(fVal) || s.checkSkipField(fType) {
+		return true
+	}
+
+	patcherOptsTag := fType.Tag.Get(TagOptsName)
+	if fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.shouldIncludeNil(patcherOptsTag)) {
+		return true
+	}
+	if fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.shouldIncludeZero(patcherOptsTag)) {
+		return true
+	}
+	if patcherOptsTag != "" {
+		patcherOpts := strings.Split(patcherOptsTag, TagOptSeparator)
+		if slices.Contains(patcherOpts, TagOptSkip) {
+			return true
+		}
+	}
+	return false
+}
