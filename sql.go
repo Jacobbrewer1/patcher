@@ -45,25 +45,23 @@ func (s *SQLPatch) patchGen(resource any) {
 		fType := rType.Field(i)
 		fVal := rVal.Field(i)
 		tag := getTag(&fType, s.tagName)
+		optsTag := fType.Tag.Get(TagOptsName)
 
 		if s.shouldSkipField(&fType, fVal) {
 			continue
 		}
 
-		addField := func() {
-			s.fields = append(s.fields, tag+" = ?")
+		var arg any = nil
+		if fVal.Kind() == reflect.Ptr && fVal.IsNil() {
+			if !s.shouldIncludeNil(optsTag) {
+				continue
+			}
+		} else {
+			arg = getValue(fVal)
 		}
 
-		if fVal.Kind() == reflect.Ptr && fVal.IsNil() && s.shouldIncludeNil(fType.Tag.Get(TagOptsName)) {
-			s.args = append(s.args, nil)
-			addField()
-			continue
-		} else if fVal.Kind() == reflect.Ptr && fVal.IsNil() {
-			continue
-		}
-
-		addField()
-		s.args = append(s.args, getValue(fVal))
+		s.fields = append(s.fields, tag+" = ?")
+		s.args = append(s.args, arg)
 	}
 }
 
