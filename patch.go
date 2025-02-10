@@ -198,3 +198,34 @@ func (s *SQLPatch) shouldSkipField(fType *reflect.StructField, fVal reflect.Valu
 	}
 	return false
 }
+
+func (s *SQLPatch) checkSkipField(field *reflect.StructField) bool {
+	// The ignore fields tag takes precedence over the ignore fields list
+	if s.checkSkipTag(field) {
+		return true
+	}
+
+	return s.ignoredFieldsCheck(field)
+}
+
+func (s *SQLPatch) checkSkipTag(field *reflect.StructField) bool {
+	val, ok := field.Tag.Lookup(TagOptsName)
+	if !ok {
+		return false
+	}
+
+	tags := strings.Split(val, TagOptSeparator)
+	return slices.Contains(tags, TagOptSkip)
+}
+
+func (s *SQLPatch) ignoredFieldsCheck(field *reflect.StructField) bool {
+	return s.checkIgnoredFields(field.Name) || s.checkIgnoreFunc(field)
+}
+
+func (s *SQLPatch) checkIgnoreFunc(field *reflect.StructField) bool {
+	return s.ignoreFieldsFunc != nil && s.ignoreFieldsFunc(field)
+}
+
+func (s *SQLPatch) checkIgnoredFields(field string) bool {
+	return len(s.ignoreFields) > 0 && slices.Contains(s.ignoreFields, field)
+}
