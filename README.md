@@ -56,8 +56,8 @@ you.
     * You can pass a struct that implements the `WhereTyper` interface to use `OR` in the where clause. Patcher will
       default to `AND` if the `WhereTyper` interface is not implemented.
 * `WithJoin(joinClause Joiner)`: Add join clauses to the SQL query.
-* `includeZeroValues`: Set to true to include zero values in the diff. (Only for NewDiffSQLPatch)
-* `includeNilValues`: Set to true to include nil values in the diff. (Only for NewDiffSQLPatch)
+* `includeZeroValues`: Set to true to include zero values in the Patch.
+* `includeNilValues`: Set to true to include nil values in the Patch.
 
 ### Basic Examples
 

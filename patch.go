@@ -177,3 +177,55 @@ func (s *SQLPatch) shouldOmitEmpty(tag string) bool {
 
 	return false
 }
+
+func (s *SQLPatch) shouldSkipField(fType *reflect.StructField, fVal reflect.Value) bool {
+	if !fType.IsExported() || !isValidType(fVal) || s.checkSkipField(fType) {
+		return true
+	}
+
+	patcherOptsTag := fType.Tag.Get(TagOptsName)
+	if fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.shouldIncludeNil(patcherOptsTag)) {
+		return true
+	}
+	if fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.shouldIncludeZero(patcherOptsTag)) {
+		return true
+	}
+	if patcherOptsTag != "" {
+		patcherOpts := strings.Split(patcherOptsTag, TagOptSeparator)
+		if slices.Contains(patcherOpts, TagOptSkip) {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *SQLPatch) checkSkipField(field *reflect.StructField) bool {
+	// The ignore fields tag takes precedence over the ignore fields list
+	if s.checkSkipTag(field) {
+		return true
+	}
+
+	return s.ignoredFieldsCheck(field)
+}
+
+func (s *SQLPatch) checkSkipTag(field *reflect.StructField) bool {
+	val, ok := field.Tag.Lookup(TagOptsName)
+	if !ok {
+		return false
+	}
+
+	tags := strings.Split(val, TagOptSeparator)
+	return slices.Contains(tags, TagOptSkip)
+}
+
+func (s *SQLPatch) ignoredFieldsCheck(field *reflect.StructField) bool {
+	return s.checkIgnoredFields(field.Name) || s.checkIgnoreFunc(field)
+}
+
+func (s *SQLPatch) checkIgnoreFunc(field *reflect.StructField) bool {
+	return s.ignoreFieldsFunc != nil && s.ignoreFieldsFunc(field)
+}
+
+func (s *SQLPatch) checkIgnoredFields(field string) bool {
+	return len(s.ignoreFields) > 0 && slices.Contains(s.ignoreFields, field)
+}

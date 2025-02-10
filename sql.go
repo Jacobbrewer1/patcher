@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"slices"
 	"strings"
 )
 
@@ -32,16 +31,8 @@ func NewSQLPatch(resource any, opts ...PatchOpt) *SQLPatch {
 // It processes the fields of the struct, applying the necessary tags and options,
 // and prepares the SQL update statement components (fields and arguments).
 func (s *SQLPatch) patchGen(resource any) {
-	// If the resource is a pointer, we need to dereference it to get the value
-	if reflect.TypeOf(resource).Kind() == reflect.Ptr {
-		resource = reflect.ValueOf(resource).Elem().Interface()
-	}
-
-	// Ensure that the resource is a struct
-	if reflect.TypeOf(resource).Kind() != reflect.Struct {
-		// This is intentionally a panic as this is a programming error and should be fixed by the developer
-		panic("resource is not a struct")
-	}
+	resource = dereferenceIfPointer(resource)
+	ensureStruct(resource)
 
 	rType := reflect.TypeOf(resource)
 	rVal := reflect.ValueOf(resource)
@@ -50,85 +41,27 @@ func (s *SQLPatch) patchGen(resource any) {
 	s.fields = make([]string, 0, n)
 	s.args = make([]any, 0, n)
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		fType := rType.Field(i)
 		fVal := rVal.Field(i)
-		tag := fType.Tag.Get(s.tagName)
+		tag := getTag(&fType, s.tagName)
+		optsTag := fType.Tag.Get(TagOptsName)
 
-		// Skip unexported fields
-		if !fType.IsExported() {
+		if s.shouldSkipField(&fType, fVal) {
 			continue
 		}
 
-		tags := strings.Split(tag, TagOptSeparator)
-		if len(tags) > 1 {
-			tag = tags[0]
-		}
-
-		patcherOptsTag := fType.Tag.Get(TagOptsName)
-
-		// Skip fields that are to be ignored
-		switch {
-		case s.checkSkipField(&fType):
-			continue
-		case fVal.Kind() == reflect.Ptr && (fVal.IsNil() && !s.shouldIncludeNil(patcherOptsTag)):
-			continue
-		case fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.shouldIncludeZero(patcherOptsTag)):
-			continue
-		}
-
-		if patcherOptsTag != "" {
-			patcherOpts := strings.Split(patcherOptsTag, TagOptSeparator)
-			if slices.Contains(patcherOpts, TagOptSkip) {
+		var arg any = nil
+		if fVal.Kind() == reflect.Ptr && fVal.IsNil() {
+			if !s.shouldIncludeNil(optsTag) {
 				continue
 			}
+		} else {
+			arg = getValue(fVal)
 		}
 
-		// If no tag is set, use the field name
-		if tag == "" {
-			tag = fType.Name
-		}
-
-		addField := func() {
-			s.fields = append(s.fields, tag+" = ?")
-		}
-
-		if fVal.Kind() == reflect.Ptr && fVal.IsNil() && s.shouldIncludeNil(patcherOptsTag) {
-			s.args = append(s.args, nil)
-			addField()
-			continue
-		} else if fVal.Kind() == reflect.Ptr && fVal.IsNil() {
-			continue
-		}
-
-		addField()
-
-		val := fVal
-		if fVal.Kind() == reflect.Ptr {
-			val = fVal.Elem()
-		}
-
-		switch val.Kind() {
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			s.args = append(s.args, val.Int())
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-			s.args = append(s.args, val.Uint())
-		case reflect.Float32, reflect.Float64:
-			s.args = append(s.args, val.Float())
-		case reflect.Complex64, reflect.Complex128:
-			s.args = append(s.args, val.Complex())
-		case reflect.String:
-			s.args = append(s.args, val.String())
-		case reflect.Bool:
-			boolArg := 0
-			if val.Bool() {
-				boolArg = 1
-			}
-			s.args = append(s.args, boolArg)
-		default:
-			// This is intentionally a panic as this is a programming error and should be fixed by the developer
-			panic(fmt.Sprintf("unsupported type: %s", val.Kind()))
-		}
+		s.fields = append(s.fields, tag+" = ?")
+		s.args = append(s.args, arg)
 	}
 }
 

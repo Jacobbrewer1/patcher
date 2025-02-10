@@ -33,7 +33,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success() {
 	patch := NewSQLPatch(obj)
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
-	s.Equal([]any{int64(1), "test"}, patch.args)
+	s.Equal([]any{1, "test"}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter() {
@@ -53,7 +53,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter() {
 	patch := NewSQLPatch(obj, WithWhere(mf))
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
-	s.Equal([]any{int64(1), "test"}, patch.args)
+	s.Equal([]any{1, "test"}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter_Joiner() {
@@ -73,7 +73,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter_Joiner() {
 	patch := NewSQLPatch(obj, WithJoin(mf))
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
-	s.Equal([]any{int64(1), "test"}, patch.args)
+	s.Equal([]any{1, "test"}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter_JoinerAndWhere() {
@@ -94,7 +94,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter_JoinerAndWhere() 
 	patch := NewSQLPatch(obj, WithJoin(mf), WithWhere(mf))
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
-	s.Equal([]any{int64(1), "test"}, patch.args)
+	s.Equal([]any{1, "test"}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_WhereString() {
@@ -111,7 +111,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_WhereString() {
 	patch := NewSQLPatch(obj, WithWhereStr("age = ?", 18))
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
-	s.Equal([]any{int64(1), "test"}, patch.args)
+	s.Equal([]any{1, "test"}, patch.args)
 
 	s.Equal("AND age = ?\n", patch.whereSql.String())
 	s.Equal([]any{18}, patch.whereArgs)
@@ -131,7 +131,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_JoinString() {
 	patch := NewSQLPatch(obj, WithJoinStr("JOIN table2 ON table1.id = table2.id"))
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
-	s.Equal([]any{int64(1), "test"}, patch.args)
+	s.Equal([]any{1, "test"}, patch.args)
 
 	s.Equal("JOIN table2 ON table1.id = table2.id\n", patch.joinSql.String())
 	s.Empty(patch.joinArgs)
@@ -151,7 +151,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Fields_Args_Getters() {
 	patch := NewSQLPatch(obj)
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.Fields())
-	s.Equal([]any{int64(1), "test"}, patch.Args())
+	s.Equal([]any{1, "test"}, patch.Args())
 }
 
 func (s *newSQLPatchSuite) TestPatchGen_AllTypes() {
@@ -198,14 +198,14 @@ func (s *newSQLPatchSuite) TestPatchGen_AllTypes() {
 	patch := NewSQLPatch(obj)
 
 	expectedFields := []string{
-		"IntVal = ?", "Int8Val = ?", "Int16Val = ?", "Int32Val = ?", "Int64Val = ?",
-		"UintVal = ?", "Uint8Val = ?", "Uint16Val = ?", "Uint32Val = ?", "Uint64Val = ?", "UintptrVal = ?",
-		"Float32Val = ?", "Float64Val = ?", "Complex64Val = ?", "Complex128Val = ?", "StringVal = ?", "BoolVal = ?",
+		"intval = ?", "int8val = ?", "int16val = ?", "int32val = ?", "int64val = ?",
+		"uintval = ?", "uint8val = ?", "uint16val = ?", "uint32val = ?", "uint64val = ?", "uintptrval = ?",
+		"float32val = ?", "float64val = ?", "stringval = ?", "boolval = ?",
 	}
 	expectedArgs := []any{
-		int64(1), int64(2), int64(3), int64(4), int64(5),
-		uint64(6), uint64(7), uint64(8), uint64(9), uint64(10), uint64(11),
-		12.34000015258789, 56.78, complex(1, 2), complex(3, 4), "test", 1,
+		1, int8(2), int16(3), int32(4), int64(5),
+		uint(6), uint8(7), uint16(8), uint32(9), uint64(10), uintptr(11),
+		float32(12.34), 56.78, "test", true,
 	}
 
 	s.Equal(expectedFields, patch.fields)
@@ -226,7 +226,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultipleTags() {
 	patch := NewSQLPatch(obj)
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
-	s.Equal([]any{int64(1), "test"}, patch.args)
+	s.Equal([]any{1, "test"}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_DifferentTag() {
@@ -243,7 +243,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_DifferentTag() {
 	patch := NewSQLPatch(obj, WithTagName("tagged"))
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
-	s.Equal([]any{int64(1), "test"}, patch.args)
+	s.Equal([]any{1, "test"}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Struct_opt_IncludeNilFields() {
@@ -260,7 +260,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Struct_opt_IncludeNilFields()
 	patch := NewSQLPatch(obj)
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
-	s.Equal([]any{int64(1), nil}, patch.args)
+	s.Equal([]any{1, nil}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Struct_opt_IncludeZeroFields() {
@@ -277,7 +277,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Struct_opt_IncludeZeroFields(
 	patch := NewSQLPatch(obj)
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
-	s.Equal([]any{int64(1), ""}, patch.args)
+	s.Equal([]any{1, ""}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Skip() {
@@ -298,7 +298,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Skip() {
 	patch := NewSQLPatch(obj)
 
 	s.Equal([]string{"deleted = ?", "address = ?"}, patch.fields)
-	s.Equal([]any{1, "1234 Main St"}, patch.args)
+	s.Equal([]any{true, "1234 Main St"}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_noDbTag() {
@@ -314,8 +314,8 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_noDbTag() {
 
 	patch := NewSQLPatch(obj)
 
-	s.Equal([]string{"Id = ?", "Name = ?"}, patch.fields)
-	s.Equal([]any{int64(1), "test"}, patch.args)
+	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
+	s.Equal([]any{1, "test"}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_noPointer() {
@@ -348,7 +348,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_PointedObj() {
 	patch := NewSQLPatch(obj)
 
 	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
-	s.Equal([]any{int64(1), "test"}, patch.args)
+	s.Equal([]any{1, "test"}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_fail_notStruct() {
@@ -373,13 +373,13 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_fail_noFields() {
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeZeroValue() {
 	type testObj struct {
-		Id          int    `db:"id"`
+		Id          int64  `db:"id"`
 		Name        string `db:"name"`
 		Description string `db:"description"`
 	}
 
 	obj := testObj{
-		Id:          73,
+		Id:          int64(73),
 		Name:        "test",
 		Description: "",
 	}
@@ -406,7 +406,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeZeroValue_Pointer() {
 	patch := NewSQLPatch(obj, WithIncludeZeroValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
-	s.Equal([]any{int64(73), "test", ""}, patch.args)
+	s.Equal([]any{73, "test", ""}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeZeroValue_PointerNil() {
@@ -483,7 +483,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_PointerWithVa
 	patch := NewSQLPatch(obj, WithIncludeNilValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
-	s.Equal([]any{int64(73), "test", nil}, patch.args)
+	s.Equal([]any{73, "test", nil}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_PointerWithZeroValue() {
@@ -502,7 +502,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_PointerWithZe
 	patch := NewSQLPatch(obj, WithIncludeNilValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
-	s.Equal([]any{int64(0), "test", nil}, patch.args)
+	s.Equal([]any{0, "test", nil}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_PointerWithZeroValueAndNil() {
@@ -521,7 +521,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_PointerWithZe
 	patch := NewSQLPatch(obj, WithIncludeNilValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
-	s.Equal([]any{int64(0), nil, nil}, patch.args)
+	s.Equal([]any{0, nil, nil}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_PointerWithZeroValueAndNilAndValue() {
@@ -540,7 +540,7 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_PointerWithZe
 	patch := NewSQLPatch(obj, WithIncludeNilValues(true))
 
 	s.Equal([]string{"id = ?", "name = ?", "description = ?"}, patch.fields)
-	s.Equal([]any{int64(0), nil, "desc"}, patch.args)
+	s.Equal([]any{0, nil, "desc"}, patch.args)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IncludeNilValue_IncludeZeroValue() {
@@ -605,6 +605,31 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IgnoredFields() {
 	s.Equal([]any{""}, patch.args)
 }
 
+func (s *newSQLPatchSuite) TestNewSQLPatch_Failure_FuncArg() {
+	type testObj struct {
+		Id       *int   `db:"id"`
+		Name     string `db:"name"`
+		Runnable func() `db:"func"`
+	}
+
+	obj := testObj{
+		Id:   ptr(73),
+		Name: "Test Name",
+		Runnable: func() {
+			fmt.Println("Hello")
+		},
+	}
+
+	p := new(SQLPatch)
+	s.NotPanics(func() {
+		p = NewSQLPatch(obj)
+	})
+	s.NotNil(p)
+
+	s.Equal([]string{"id = ?", "name = ?"}, p.fields)
+	s.Equal([]any{73, "Test Name"}, p.args)
+}
+
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_IgnoredFieldsFunc() {
 	type testObj struct {
 		Id          *int    `db:"id"`
@@ -657,7 +682,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18}, args)
+	s.Equal([]any{1, "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -689,7 +714,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_WhereAndJoin() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18}, args)
+	s.Equal([]any{1, "test", 18}, args)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_WhereString() {
@@ -709,7 +734,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_WhereString() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18}, args)
+	s.Equal([]any{1, "test", 18}, args)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_JoinString() {
@@ -733,7 +758,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_JoinString() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18}, args)
+	s.Equal([]any{1, "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -758,7 +783,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_NoWhereArgs() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage > 18\n)", sqlStr)
-	s.Equal([]any{int64(1), "test"}, args)
+	s.Equal([]any{1, "test"}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -783,7 +808,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_Stuct_opt_IncludeNilFields() 
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), nil, 18}, args)
+	s.Equal([]any{1, nil, 18}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -808,7 +833,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_Struct_opt_IncludeZeroFields(
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "", 18}, args)
+	s.Equal([]any{1, "", 18}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -837,7 +862,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleWhere() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nAND name = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18, "john"}, args)
+	s.Equal([]any{1, "test", 18, "john"}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -869,7 +894,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_orWhere() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nOR name = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18, "john"}, args)
+	s.Equal([]any{1, "test", 18, "john"}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -903,7 +928,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_andOrWhere() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nOR name = ?\nAND id = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18, "john", 1}, args)
+	s.Equal([]any{1, "test", 18, "john", 1}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -933,7 +958,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_invalidWhereType() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nAND name = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18, "john"}, args)
+	s.Equal([]any{1, "test", 18, "john"}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -962,7 +987,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_withJoin() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18}, args)
+	s.Equal([]any{1, "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -995,7 +1020,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleJoin() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nJOIN table3 ON table1.id = table3.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18}, args)
+	s.Equal([]any{1, "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -1024,7 +1049,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_withJoinAndWhere() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18}, args)
+	s.Equal([]any{1, "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -1057,7 +1082,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_withJoinAndWhereAndJoin() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nJOIN table3 ON table1.id = table3.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
-	s.Equal([]any{int64(1), "test", 18}, args)
+	s.Equal([]any{1, "test", 18}, args)
 
 	mw.AssertExpectations(s.T())
 }
@@ -1085,7 +1110,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesZeroValues() {
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
-	s.Equal([]any{int64(73), "test", "", 73}, args)
+	s.Equal([]any{73, "test", "", 73}, args)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesZeroValues_Pointer() {
@@ -1111,7 +1136,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesZeroValues_Pointer() 
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
-	s.Equal([]any{int64(73), "test", "", 73}, args)
+	s.Equal([]any{73, "test", "", 73}, args)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesZeroValues_PointerNil() {
@@ -1215,7 +1240,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_PointerWith
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
-	s.Equal([]any{int64(73), "test", nil, 1}, args)
+	s.Equal([]any{73, "test", nil, 1}, args)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_PointerWithZeroValue() {
@@ -1241,7 +1266,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_PointerWith
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
-	s.Equal([]any{int64(0), "test", nil, 1}, args)
+	s.Equal([]any{0, "test", nil, 1}, args)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_PointerWithZeroValueAndNil() {
@@ -1267,7 +1292,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_PointerWith
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
-	s.Equal([]any{int64(0), nil, nil, 1}, args)
+	s.Equal([]any{0, nil, nil, 1}, args)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_IncludesZeroValues() {
@@ -1348,7 +1373,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_IncludesZer
 	)
 	s.NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
-	s.Equal([]any{int64(73), "", nil, 1}, args)
+	s.Equal([]any{73, "", nil, 1}, args)
 }
 
 type NewDiffSQLPatchSuite struct {
@@ -1380,7 +1405,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success() {
 
 	s.NotNil(patch)
 	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
-	s.Equal([]any{int64(2), "test2"}, patch.args)
+	s.Equal([]any{2, "test2"}, patch.args)
 }
 
 func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_StructOpt_IncludeNilFields() {
@@ -1404,7 +1429,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_StructOpt_IncludeNilF
 
 	s.NotNil(patch)
 	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
-	s.Equal([]any{int64(2), nil}, patch.args)
+	s.Equal([]any{2, nil}, patch.args)
 }
 
 func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_StructOpt_IncludeZeroFields() {
@@ -1428,7 +1453,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_StructOpt_IncludeZero
 
 	s.NotNil(patch)
 	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
-	s.Equal([]any{int64(2), ""}, patch.args)
+	s.Equal([]any{2, ""}, patch.args)
 }
 
 func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_singleFieldUpdated() {
@@ -1476,75 +1501,6 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_noChange() {
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2)
 	s.Equal(ErrNoChanges, err)
-	s.Nil(patch)
-}
-
-func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_ignoreNoChanges() {
-	type testObj struct {
-		Id   *int    `db:"id"`
-		Name *string `db:"name"`
-	}
-
-	obj := testObj{
-		Id:   ptr(1),
-		Name: ptr("test"),
-	}
-
-	obj2 := testObj{
-		Id:   ptr(1),
-		Name: ptr("test"),
-	}
-
-	patch, err := NewDiffSQLPatch(&obj, &obj2)
-	s.NoError(IgnoreNoChangesErr(err))
-	s.Nil(patch)
-}
-
-func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_ignoreNoChanges_wrapped() {
-	type testObj struct {
-		Id   *int    `db:"id"`
-		Name *string `db:"name"`
-	}
-
-	obj := testObj{
-		Id:   ptr(1),
-		Name: ptr("test"),
-	}
-
-	obj2 := testObj{
-		Id:   ptr(1),
-		Name: ptr("test"),
-	}
-
-	patch, err := NewDiffSQLPatch(&obj, &obj2)
-	if err != nil {
-		err = IgnoreNoChangesErr(fmt.Errorf("wrapped: %w", err))
-	}
-	s.NoError(err)
-	s.Nil(patch)
-}
-
-func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_ignoreNoChanges_wrapped_normal() {
-	type testObj struct {
-		Id   *int    `db:"id"`
-		Name *string `db:"name"`
-	}
-
-	obj := testObj{
-		Id:   ptr(1),
-		Name: ptr("test"),
-	}
-
-	obj2 := testObj{
-		Id:   ptr(1),
-		Name: ptr("test"),
-	}
-
-	patch, err := NewDiffSQLPatch(&obj, &obj2)
-	if err != nil {
-		err = IgnoreNoChangesErr(fmt.Errorf("wrapped: %w", errors.New("test error")))
-	}
-	s.Error(err)
 	s.Nil(patch)
 }
 
