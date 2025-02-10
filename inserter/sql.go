@@ -76,7 +76,7 @@ func (b *SQLBatch) getFieldValue(v reflect.Value, f *reflect.StructField) any {
 	return v.Interface()
 }
 
-func (b *SQLBatch) GenerateSQL() (string, []any, error) {
+func (b *SQLBatch) GenerateSQL() (sqlStr string, args []any, err error) {
 	if err := b.validateSQLGen(); err != nil {
 		return "", nil, err
 	}
