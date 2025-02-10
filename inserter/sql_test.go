@@ -408,7 +408,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_WithPointedFields() {
 
 	s.Equal("INSERT INTO temp (id, name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
 
-	expectedArgs := []any{1, "test", any(nil), "test2", 3, "test3", 4, "test4", 5, "test5"}
+	expectedArgs := []any{ptr(1), ptr("test"), nil, ptr("test2"), ptr(3), ptr("test3"), ptr(4), ptr("test4"), ptr(5), ptr("test5")}
 	s.Require().Equal(expectedArgs, args)
 }
 
@@ -432,7 +432,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_WithPointedFields_noDbTag() {
 
 	s.Equal("INSERT INTO temp (ID, Name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
 
-	expectedArgs := []any{1, "test", any(nil), "test2", 3, "test3", 4, "test4", 5, "test5"}
+	expectedArgs := []any{ptr(1), ptr("test"), any(nil), ptr("test2"), ptr(3), ptr("test3"), ptr(4), ptr("test4"), ptr(5), ptr("test5")}
 	s.Require().Equal(expectedArgs, args)
 }
 

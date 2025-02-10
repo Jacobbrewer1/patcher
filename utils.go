@@ -53,8 +53,8 @@ func getValue(fVal reflect.Value) any {
 	return fVal.Interface()
 }
 
-// isValidType checks if the given value is of a type that can be stored as a database field.
-func isValidType(val reflect.Value) bool {
+// IsValidType checks if the given value is of a type that can be stored as a database field.
+func IsValidType(val reflect.Value) bool {
 	switch val.Kind() {
 	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
