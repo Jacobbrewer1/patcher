@@ -179,7 +179,7 @@ func (s *SQLPatch) shouldOmitEmpty(tag string) bool {
 }
 
 func (s *SQLPatch) shouldSkipField(fType *reflect.StructField, fVal reflect.Value) bool {
-	if !fType.IsExported() || !isValidType(fVal) || s.checkSkipField(fType) {
+	if !fType.IsExported() || !IsValidType(fVal) || s.checkSkipField(fType) {
 		return true
 	}
 
