@@ -12,6 +12,7 @@ linters:
     - iface
     - thelper
     - tparallel
+    - intrange
 issues:
   exclude-rules:
     - path: (.+)_test.go

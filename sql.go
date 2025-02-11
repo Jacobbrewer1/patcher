@@ -179,7 +179,7 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 	oldCopyElem := reflect.ValueOf(oldCopy).Elem()
 
 	// For each field in the old object, compare it against the copy and if the fields are the same, set them to zero or nil.
-	for i := 0; i < reflect.ValueOf(old).Elem().NumField(); i++ {
+	for i := range reflect.ValueOf(old).Elem().NumField() {
 		oldField := oldElem.Field(i)
 		copyField := oldCopyElem.Field(i)
 
