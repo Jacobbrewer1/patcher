@@ -190,12 +190,7 @@ func (s *SQLPatch) shouldSkipField(fType *reflect.StructField, fVal reflect.Valu
 	if fVal.Kind() != reflect.Ptr && (fVal.IsZero() && !s.shouldIncludeZero(patcherOptsTag)) {
 		return true
 	}
-	if patcherOptsTag != "" {
-		patcherOpts := strings.Split(patcherOptsTag, TagOptSeparator)
-		if slices.Contains(patcherOpts, TagOptSkip) {
-			return true
-		}
-	}
+
 	return false
 }
 
