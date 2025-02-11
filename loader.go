@@ -47,7 +47,7 @@ func (s *SQLPatch) loadDiff(old, newT any) error {
 
 		// Handle embedded structs (Anonymous fields)
 		if oldField.Anonymous {
-			if err := s.handleEmbeddedStruct(oField, nField); err != nil {
+			if err := s.handleEmbeddedStruct(oField, nField, oldField.Tag.Get(s.tagName)); err != nil {
 				return err
 			}
 			continue
@@ -81,14 +81,17 @@ func (s *SQLPatch) loadDiff(old, newT any) error {
 	return nil
 }
 
-func (s *SQLPatch) handleEmbeddedStruct(oField, nField reflect.Value) error {
+func (s *SQLPatch) handleEmbeddedStruct(oField, nField reflect.Value, tag string) error {
 	if oField.Kind() != reflect.Ptr {
 		return s.loadDiff(oField.Addr().Interface(), nField.Addr().Interface())
 	}
 
-	if !oField.IsNil() && !nField.IsNil() {
+	switch {
+	case !oField.IsNil() && !nField.IsNil():
 		return s.loadDiff(oField.Interface(), nField.Interface())
-	} else if nField.IsValid() && !nField.IsNil() {
+	case nField.IsValid() && !nField.IsNil():
+		fallthrough
+	case nField.IsNil() && s.shouldIncludeNil(tag):
 		oField.Set(nField)
 	}
 

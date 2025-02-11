@@ -319,6 +319,142 @@ func (s *loadDiffSuite) TestLoadDiff_Success_InheritedStruct_NotPointed() {
 	s.Equal("Some description", old.Description)
 }
 
+func (s *loadDiffSuite) TestLoadDiff_Success_InheritedStruct_Pointed() {
+	type TestEmbed struct {
+		Description string
+	}
+
+	type testStruct struct {
+		*TestEmbed
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		TestEmbed: &TestEmbed{
+			Description: "Some description",
+		},
+		Name: "John Smith",
+		Age:  26,
+	}
+
+	err := s.patch.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John Smith", old.Name)
+	s.Equal(26, old.Age)
+	s.Equal("Some description", old.Description)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_DeeplyInheritedStruct_Pointed() {
+	type TestEmbed struct {
+		Description string
+	}
+
+	type TestEmbed2 struct {
+		*TestEmbed
+	}
+
+	type testStruct struct {
+		*TestEmbed2
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		TestEmbed2: &TestEmbed2{
+			TestEmbed: &TestEmbed{
+				Description: "Some description",
+			},
+		},
+		Name: "John Smith",
+		Age:  26,
+	}
+
+	err := s.patch.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John Smith", old.Name)
+	s.Equal(26, old.Age)
+	s.Equal("Some description", old.Description)
+}
+
+func (s *loadDiffSuite) TestLoadDiff_Success_DeeplyInheritedStruct_Pointed_SetNil() {
+	type TestEmbed struct {
+		Description string
+	}
+
+	type TestEmbed2 struct {
+		*TestEmbed
+	}
+
+	type testStruct struct {
+		*TestEmbed2
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		TestEmbed2: &TestEmbed2{
+			TestEmbed: &TestEmbed{
+				Description: "Some description",
+			},
+		},
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		TestEmbed2: nil,
+		Name:       "John Smith",
+		Age:        26,
+	}
+
+	s.patch.includeNilValues = true
+	err := s.patch.loadDiff(&old, &n)
+	s.NoError(err)
+	s.Equal("John Smith", old.Name)
+	s.Equal(26, old.Age)
+	s.Equal((*TestEmbed2)(nil), old.TestEmbed2)
+}
+
+func (s *loadDiffSuite) TestHandleEmbeddedStruct_ValidNonNilField() {
+	type Embedded struct {
+		Description string
+	}
+
+	type testStruct struct {
+		*Embedded
+		Name string
+		Age  int
+	}
+
+	old := testStruct{
+		Name: "John",
+		Age:  25,
+	}
+
+	n := testStruct{
+		Embedded: &Embedded{
+			Description: "Some description",
+		},
+		Name: "John Smith",
+		Age:  26,
+	}
+
+	err := s.patch.handleEmbeddedStruct(reflect.ValueOf(&old).Elem().FieldByName("Embedded"), reflect.ValueOf(&n).Elem().FieldByName("Embedded"), "")
+	s.NoError(err)
+	s.Equal("Some description", old.Description)
+}
+
 func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStructWithNewValue() {
 	type testStruct struct {
 		Name    string
