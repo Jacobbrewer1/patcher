@@ -89,9 +89,8 @@ func (s *SQLPatch) handleEmbeddedStruct(oField, nField reflect.Value, tag string
 	switch {
 	case !oField.IsNil() && !nField.IsNil():
 		return s.loadDiff(oField.Interface(), nField.Interface())
-	case nField.IsValid() && !nField.IsNil():
-		fallthrough
-	case nField.IsNil() && s.shouldIncludeNil(tag):
+	case nField.IsValid() && !nField.IsNil(),
+		nField.IsNil() && s.shouldIncludeNil(tag):
 		oField.Set(nField)
 	}
 
