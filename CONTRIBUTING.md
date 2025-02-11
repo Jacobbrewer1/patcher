@@ -45,7 +45,7 @@ Use clear and concise commit messages. A good format is:
 ```
 feat: add new profile feature for EstateEase
 fix: resolve pagination issue in property list
-chore: # TODO
+chore: a change that is not a new feature or a bug fix
 ```
 
 ### Reviewing and Merging PRs
