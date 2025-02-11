@@ -7,14 +7,6 @@ body:
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report! Please provide the following information to help us resolve the issue quickly.
-  - type: input
-    id: bug-title
-    attributes:
-      label: Bug Title
-      description: A brief summary of the bug.
-      placeholder: Brief summary of the bug
-    validations:
-      required: true
   - type: textarea
     id: what-happened
     attributes:
@@ -36,7 +28,10 @@ body:
     attributes:
       label: Steps to reproduce
       description: Provide detailed steps to reproduce the issue.
-      placeholder: 1. Go to '...'\n2. Click on '...'\n3. Scroll down to '...'\n4. See error
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
     validations:
       required: true
   - type: textarea

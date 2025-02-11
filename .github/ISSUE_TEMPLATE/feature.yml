@@ -7,14 +7,6 @@ body:
     attributes:
       value: |
         Thanks for taking the time to fill out this feature request! Please provide the following information to help us understand your suggestion.
-  - type: input
-    id: feature-title
-    attributes:
-      label: Feature Title
-      description: A brief summary of the feature.
-      placeholder: Brief summary of the feature
-    validations:
-      required: true
   - type: textarea
     id: feature-description
     attributes:
