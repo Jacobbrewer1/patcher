@@ -191,14 +191,17 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 			continue
 		}
 
-		if reflect.DeepEqual(oldField.Interface(), copyField.Interface()) {
-			// Field is the same, set it to zero or nil. Add it to be ignored in the patch
-			if patch.ignoreFields == nil {
-				patch.ignoreFields = make([]string, 0)
-			}
-			patch.ignoreFields = append(patch.ignoreFields, oldElem.Type().Field(i).Name)
+		if !reflect.DeepEqual(oldField.Interface(), copyField.Interface()) {
 			continue
 		}
+
+		// Field is the same, set it to zero or nil. Add it to be ignored in the patch
+		if patch.ignoreFields == nil {
+			patch.ignoreFields = make([]string, 0)
+		}
+		patch.ignoreFields = append(patch.ignoreFields, oldElem.Type().Field(i).Name)
+		continue
+
 	}
 
 	patch.patchGen(old)
