@@ -5,7 +5,7 @@ import "strings"
 type MultiFilter interface {
 	Joiner
 	Wherer
-	Add(where any)
+	Add(filter any)
 }
 
 type multiFilter struct {
