@@ -34,30 +34,30 @@ func (s *SQLPatch) patchGen(resource any) {
 	resource = dereferenceIfPointer(resource)
 	ensureStruct(resource)
 
-	rType := reflect.TypeOf(resource)
-	rVal := reflect.ValueOf(resource)
-	n := rType.NumField()
+	typeOf := reflect.TypeOf(resource)
+	valueOf := reflect.ValueOf(resource)
+	numField := typeOf.NumField()
 
-	s.fields = make([]string, 0, n)
-	s.args = make([]any, 0, n)
+	s.fields = make([]string, 0, numField)
+	s.args = make([]any, 0, numField)
 
-	for i := range n {
-		fType := rType.Field(i)
-		fVal := rVal.Field(i)
-		tag := getTag(&fType, s.tagName)
-		optsTag := fType.Tag.Get(TagOptsName)
+	for i := range numField {
+		structField := typeOf.Field(i)
+		value := valueOf.Field(i)
+		tag := getTag(&structField, s.tagName)
+		optsTag := structField.Tag.Get(TagOptsName)
 
-		if s.shouldSkipField(&fType, fVal) {
+		if s.shouldSkipField(&structField, value) {
 			continue
 		}
 
 		var arg any = nil
-		if fVal.Kind() == reflect.Ptr && fVal.IsNil() {
+		if value.Kind() == reflect.Ptr && value.IsNil() {
 			if !s.shouldIncludeNil(optsTag) {
 				continue
 			}
 		} else {
-			arg = getValue(fVal)
+			arg = getValue(value)
 		}
 
 		s.fields = append(s.fields, tag+" = ?")
