@@ -201,10 +201,8 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 		}
 		patch.ignoreFields = append(patch.ignoreFields, oldElem.Type().Field(i).Name)
 		continue
-
 	}
 
 	patch.patchGen(old)
-
 	return patch, nil
 }
