@@ -9,9 +9,9 @@ type MockMultiFilter struct {
 	mock.Mock
 }
 
-// Add provides a mock function with given fields: where
-func (_m *MockMultiFilter) Add(where interface{}) {
-	_m.Called(where)
+// Add provides a mock function with given fields: filter
+func (_m *MockMultiFilter) Add(filter interface{}) {
+	_m.Called(filter)
 }
 
 // Join provides a mock function with no fields
