@@ -69,7 +69,10 @@ func (b *SQLBatch) genBatch(resources []any) {
 func (b *SQLBatch) getFieldValue(v reflect.Value, f *reflect.StructField) any {
 	if f.Type.Kind() == reflect.Ptr && v.IsNil() {
 		return nil
+	} else if f.Type.Kind() == reflect.Ptr {
+		return v.Elem().Interface()
 	}
+
 	return v.Interface()
 }
 

@@ -38,8 +38,8 @@ func (s *newBatchSuite) TestNewBatch_Success() {
 
 	b := NewBatch(resources, WithTable("temp"), WithTagName("db"))
 
-	s.Require().Len(b.Fields(), 2)
-	s.Require().Len(b.Args(), 10)
+	s.Len(b.Fields(), 2)
+	s.Len(b.Args(), 10)
 }
 
 func (s *newBatchSuite) TestNewBatch_Success_IgnorePK() {
@@ -59,8 +59,8 @@ func (s *newBatchSuite) TestNewBatch_Success_IgnorePK() {
 
 	b := NewBatch(resources, WithTable("temp"), WithTagName("db"))
 
-	s.Require().Len(b.Fields(), 1)
-	s.Require().Len(b.Args(), 5)
+	s.Len(b.Fields(), 1)
+	s.Len(b.Args(), 5)
 
 	s.NotContains(b.Fields(), "id")
 }
@@ -82,8 +82,8 @@ func (s *newBatchSuite) TestNewBatch_Success_IncludePK() {
 
 	b := NewBatch(resources, WithTable("temp"), WithTagName("db"), WithIncludePrimaryKey(true))
 
-	s.Require().Len(b.Fields(), 2)
-	s.Require().Len(b.Args(), 10)
+	s.Len(b.Fields(), 2)
+	s.Len(b.Args(), 10)
 
 	s.Contains(b.Fields(), "id")
 }
@@ -105,8 +105,8 @@ func (s *newBatchSuite) TestNewBatch_Success_WithPointedFields() {
 
 	b := NewBatch(resources, WithTable("temp"), WithTagName("db"))
 
-	s.Require().Len(b.Fields(), 2)
-	s.Require().Len(b.Args(), 10)
+	s.Len(b.Fields(), 2)
+	s.Len(b.Args(), 10)
 }
 
 func (s *newBatchSuite) TestNewBatch_noDbTag() {
@@ -126,8 +126,8 @@ func (s *newBatchSuite) TestNewBatch_noDbTag() {
 
 	b := NewBatch(resources, WithTable("temp"))
 
-	s.Require().Len(b.Fields(), 2)
-	s.Require().Len(b.Args(), 10)
+	s.Len(b.Fields(), 2)
+	s.Len(b.Args(), 10)
 }
 
 func (s *newBatchSuite) TestNewBatch_notPointer() {
@@ -147,8 +147,8 @@ func (s *newBatchSuite) TestNewBatch_notPointer() {
 
 	b := NewBatch(resources, WithTable("temp"), WithTagName("db"))
 
-	s.Require().Len(b.Fields(), 2)
-	s.Require().Len(b.Args(), 10)
+	s.Len(b.Fields(), 2)
+	s.Len(b.Args(), 10)
 }
 
 func (s *newBatchSuite) TestNewBatch_notStruct() {
@@ -162,8 +162,8 @@ func (s *newBatchSuite) TestNewBatch_notStruct() {
 
 	b := NewBatch(resources, WithTable("temp"), WithTagName("db"))
 
-	s.Require().Len(b.Fields(), 0)
-	s.Require().Len(b.Args(), 0)
+	s.Len(b.Fields(), 0)
+	s.Len(b.Args(), 0)
 }
 
 func (s *newBatchSuite) TestNewBatch_noFields() {
@@ -181,15 +181,15 @@ func (s *newBatchSuite) TestNewBatch_noFields() {
 
 	b := NewBatch(resources, WithTable("temp"), WithTagName("db"))
 
-	s.Require().Len(b.Fields(), 0)
-	s.Require().Len(b.Args(), 0)
+	s.Len(b.Fields(), 0)
+	s.Len(b.Args(), 0)
 }
 
 func (s *newBatchSuite) TestNewBatch_noResources() {
 	b := NewBatch(nil, WithTable("temp"), WithTagName("db"))
 
-	s.Require().Len(b.Fields(), 0)
-	s.Require().Len(b.Args(), 0)
+	s.Len(b.Fields(), 0)
+	s.Len(b.Args(), 0)
 }
 
 func (s *newBatchSuite) TestNewBatch_noTable() {
@@ -209,15 +209,15 @@ func (s *newBatchSuite) TestNewBatch_noTable() {
 
 	b := NewBatch(resources, WithTagName("db"))
 
-	s.Require().Len(b.Fields(), 2)
-	s.Require().Len(b.Args(), 10)
+	s.Len(b.Fields(), 2)
+	s.Len(b.Args(), 10)
 }
 
 func (s *newBatchSuite) TestNewBatch_noTable_noResources() {
 	b := NewBatch(nil, WithTagName("db"))
 
-	s.Require().Len(b.Fields(), 0)
-	s.Require().Len(b.Args(), 0)
+	s.Len(b.Fields(), 0)
+	s.Len(b.Args(), 0)
 }
 
 type generateSQLSuite struct {
@@ -244,10 +244,10 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 	}
 
 	sql, args, err := NewBatch(resources, WithTable("temp"), WithTagName("db")).GenerateSQL()
-	s.Require().NoError(err)
+	s.NoError(err)
 
-	s.Require().Equal("INSERT INTO temp (id, name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
-	s.Require().Len(args, 10)
+	s.Equal("INSERT INTO temp (id, name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
+	s.Len(args, 10)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_noDbTag() {
@@ -266,10 +266,10 @@ func (s *generateSQLSuite) TestGenerateSQL_noDbTag() {
 	}
 
 	sql, args, err := NewBatch(resources, WithTable("temp")).GenerateSQL()
-	s.Require().NoError(err)
+	s.NoError(err)
 
-	s.Require().Equal("INSERT INTO temp (ID, Name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
-	s.Require().Len(args, 10)
+	s.Equal("INSERT INTO temp (ID, Name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
+	s.Len(args, 10)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_notPointer() {
@@ -288,10 +288,10 @@ func (s *generateSQLSuite) TestGenerateSQL_notPointer() {
 	}
 
 	sql, args, err := NewBatch(resources, WithTable("temp"), WithTagName("db")).GenerateSQL()
-	s.Require().NoError(err)
+	s.NoError(err)
 
-	s.Require().Equal("INSERT INTO temp (id, name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
-	s.Require().Len(args, 10)
+	s.Equal("INSERT INTO temp (id, name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
+	s.Len(args, 10)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_notStruct() {
@@ -304,10 +304,10 @@ func (s *generateSQLSuite) TestGenerateSQL_notStruct() {
 	}
 
 	sql, args, err := NewBatch(resources, WithTable("temp"), WithTagName("db")).GenerateSQL()
-	s.Require().Equal(ErrNoFields, err)
+	s.Equal(ErrNoFields, err)
 
-	s.Require().Equal("", sql)
-	s.Require().Len(args, 0)
+	s.Equal("", sql)
+	s.Len(args, 0)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_noFields() {
@@ -324,18 +324,18 @@ func (s *generateSQLSuite) TestGenerateSQL_noFields() {
 	}
 
 	sql, args, err := NewBatch(resources, WithTable("temp"), WithTagName("db")).GenerateSQL()
-	s.Require().Equal(ErrNoFields, err)
+	s.Equal(ErrNoFields, err)
 
-	s.Require().Equal("", sql)
-	s.Require().Len(args, 0)
+	s.Equal("", sql)
+	s.Len(args, 0)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_noResources() {
 	sql, args, err := NewBatch(nil, WithTable("temp"), WithTagName("db")).GenerateSQL()
-	s.Require().Equal(ErrNoFields, err)
+	s.Equal(ErrNoFields, err)
 
-	s.Require().Equal("", sql)
-	s.Require().Len(args, 0)
+	s.Equal("", sql)
+	s.Len(args, 0)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_noTable() {
@@ -354,18 +354,18 @@ func (s *generateSQLSuite) TestGenerateSQL_noTable() {
 	}
 
 	sql, args, err := NewBatch(resources, WithTagName("db")).GenerateSQL()
-	s.Require().Equal(ErrNoTable, err)
+	s.Equal(ErrNoTable, err)
 
-	s.Require().Equal("", sql)
-	s.Require().Len(args, 0)
+	s.Equal("", sql)
+	s.Len(args, 0)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_noTable_noResources() {
 	sql, args, err := NewBatch(nil, WithTagName("db"), WithTable("temp")).GenerateSQL()
-	s.Require().Equal(ErrNoFields, err)
+	s.Equal(ErrNoFields, err)
 
-	s.Require().Equal("", sql)
-	s.Require().Len(args, 0)
+	s.Equal("", sql)
+	s.Len(args, 0)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_noTable_noFields() {
@@ -382,10 +382,10 @@ func (s *generateSQLSuite) TestGenerateSQL_noTable_noFields() {
 	}
 
 	sql, args, err := NewBatch(resources, WithTagName("db"), WithTable("temp")).GenerateSQL()
-	s.Require().Equal(ErrNoFields, err)
+	s.Equal(ErrNoFields, err)
 
-	s.Require().Equal("", sql)
-	s.Require().Len(args, 0)
+	s.Equal("", sql)
+	s.Len(args, 0)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_WithPointedFields() {
@@ -404,12 +404,12 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_WithPointedFields() {
 	}
 
 	sql, args, err := NewBatch(resources, WithTable("temp"), WithTagName("db")).GenerateSQL()
-	s.Require().NoError(err)
+	s.NoError(err)
 
 	s.Equal("INSERT INTO temp (id, name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
 
-	expectedArgs := []any{ptr(1), ptr("test"), nil, ptr("test2"), ptr(3), ptr("test3"), ptr(4), ptr("test4"), ptr(5), ptr("test5")}
-	s.Require().Equal(expectedArgs, args)
+	expectedArgs := []any{1, "test", nil, "test2", 3, "test3", 4, "test4", 5, "test5"}
+	s.Equal(expectedArgs, args)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_WithPointedFields_noDbTag() {
@@ -428,12 +428,12 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_WithPointedFields_noDbTag() {
 	}
 
 	sql, args, err := NewBatch(resources, WithTable("temp")).GenerateSQL()
-	s.Require().NoError(err)
+	s.NoError(err)
 
 	s.Equal("INSERT INTO temp (ID, Name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
 
-	expectedArgs := []any{ptr(1), ptr("test"), any(nil), ptr("test2"), ptr(3), ptr("test3"), ptr(4), ptr("test4"), ptr(5), ptr("test5")}
-	s.Require().Equal(expectedArgs, args)
+	expectedArgs := []any{1, "test", nil, "test2", 3, "test3", 4, "test4", 5, "test5"}
+	s.Equal(expectedArgs, args)
 }
 
 func (s *generateSQLSuite) TestGenerateSQL_Success_IgnoredFields() {
@@ -454,7 +454,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IgnoredFields() {
 	b := NewBatch(resources, WithTable("temp"), WithTagName("db"), WithIgnoreFields("unexported"))
 
 	sql, args, err := b.GenerateSQL()
-	s.Require().NoError(err)
+	s.NoError(err)
 
 	s.Equal("INSERT INTO temp (id, name) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)", sql)
 	s.Len(args, 10)
@@ -483,7 +483,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IgnoredFieldsFunc() {
 	b := NewBatch(resources, WithTable("temp"), WithTagName("db"), WithIgnoreFieldsFunc(mif.Execute))
 
 	sql, args, err := b.GenerateSQL()
-	s.Require().NoError(err)
+	s.NoError(err)
 
 	s.Equal("INSERT INTO temp (name) VALUES (?), (?), (?), (?), (?)", sql)
 	s.Len(args, 5)
