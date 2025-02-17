@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
-	"slices"
 	"strings"
 
 	"github.com/jacobbrewer1/patcher"
@@ -37,12 +36,10 @@ func (b *SQLBatch) genBatch(resources []any) {
 		}
 
 		for i := range t.NumField() {
-			if !patcher.IsValidType(v.Field(i)) {
-				continue
-			}
-
 			f := t.Field(i)
-			if !f.IsExported() || b.checkSkipField(&f) {
+			fVal := v.Field(i)
+
+			if !patcher.IsValidType(fVal) || !f.IsExported() || b.checkSkipField(&f) {
 				continue
 			}
 
@@ -57,7 +54,7 @@ func (b *SQLBatch) genBatch(resources []any) {
 				tag = strings.Split(tag, patcher.TagOptSeparator)[0]
 			}
 
-			b.args = append(b.args, b.getFieldValue(v.Field(i), &f))
+			b.args = append(b.args, b.getFieldValue(fVal, &f))
 
 			if _, ok := uniqueFields[tag]; ok {
 				continue
@@ -88,9 +85,8 @@ func (b *SQLBatch) GenerateSQL() (sqlStr string, args []any, err error) {
 	sqlBuilder.WriteString(strings.Join(b.fields, ", "))
 	sqlBuilder.WriteString(") VALUES ")
 
-	placeholder := strings.Repeat("?, ", len(b.fields))
-	placeholder = "(" + placeholder[:len(placeholder)-2] + "), "
-	placeholders := strings.Repeat(placeholder, len(b.args)/len(b.fields))
+	placeholder := "(" + strings.Repeat("?, ", len(b.fields)-1) + "?)"
+	placeholders := strings.Repeat(placeholder+", ", len(b.args)/len(b.fields))
 	sqlBuilder.WriteString(placeholders[:len(placeholders)-2])
 
 	return sqlBuilder.String(), b.args, nil
@@ -107,39 +103,4 @@ func (b *SQLBatch) Perform() (sql.Result, error) {
 	}
 
 	return b.db.Exec(sqlStr, args...)
-}
-
-func (b *SQLBatch) checkSkipField(field *reflect.StructField) bool {
-	return b.checkSkipTag(field) || b.checkPrimaryKey(field) || b.ignoredFieldsCheck(field)
-}
-
-func (b *SQLBatch) checkSkipTag(field *reflect.StructField) bool {
-	val, ok := field.Tag.Lookup(patcher.TagOptsName)
-	if !ok {
-		return false
-	}
-	return slices.Contains(strings.Split(val, patcher.TagOptSeparator), patcher.TagOptSkip)
-}
-
-func (b *SQLBatch) checkPrimaryKey(field *reflect.StructField) bool {
-	if b.includePrimaryKey {
-		return false
-	}
-	val, ok := field.Tag.Lookup(patcher.DefaultDbTagName)
-	if !ok {
-		return false
-	}
-	return slices.Contains(strings.Split(val, patcher.TagOptSeparator), patcher.DBTagPrimaryKey)
-}
-
-func (b *SQLBatch) ignoredFieldsCheck(field *reflect.StructField) bool {
-	return b.checkIgnoredFields(field.Name) || b.checkIgnoreFunc(field)
-}
-
-func (b *SQLBatch) checkIgnoreFunc(field *reflect.StructField) bool {
-	return b.ignoreFieldsFunc != nil && b.ignoreFieldsFunc(field)
-}
-
-func (b *SQLBatch) checkIgnoredFields(field string) bool {
-	return len(b.ignoreFields) > 0 && slices.Contains(b.ignoreFields, field)
 }

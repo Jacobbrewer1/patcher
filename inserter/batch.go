@@ -3,6 +3,9 @@ package inserter
 import (
 	"database/sql"
 	"errors"
+	"reflect"
+	"slices"
+	"strings"
 
 	"github.com/jacobbrewer1/patcher"
 )
@@ -84,30 +87,64 @@ func (b *SQLBatch) Args() []any {
 }
 
 func (b *SQLBatch) validateSQLGen() error {
-	if b.table == "" {
+	switch {
+	case b.table == "":
 		return ErrNoTable
-	}
-	if len(b.fields) == 0 {
+	case len(b.fields) == 0:
 		return ErrNoFields
-	}
-	if len(b.args) == 0 {
+	case len(b.args) == 0:
 		return ErrNoArgs
+	default:
+		return nil
 	}
-	return nil
 }
 
 func (b *SQLBatch) validateSQLInsert() error {
-	if b.db == nil {
+	switch {
+	case b.db == nil:
 		return ErrNoDatabaseConnection
-	}
-	if b.table == "" {
+	case b.table == "":
 		return ErrNoTable
-	}
-	if len(b.fields) == 0 {
+	case len(b.fields) == 0:
 		return ErrNoFields
-	}
-	if len(b.args) == 0 {
+	case len(b.args) == 0:
 		return ErrNoArgs
+	default:
+		return nil
 	}
-	return nil
+}
+
+func (b *SQLBatch) checkSkipField(field *reflect.StructField) bool {
+	return b.checkSkipTag(field) || b.checkPrimaryKey(field) || b.ignoredFieldsCheck(field)
+}
+
+func (b *SQLBatch) checkSkipTag(field *reflect.StructField) bool {
+	val, ok := field.Tag.Lookup(patcher.TagOptsName)
+	if !ok {
+		return false
+	}
+	return slices.Contains(strings.Split(val, patcher.TagOptSeparator), patcher.TagOptSkip)
+}
+
+func (b *SQLBatch) checkPrimaryKey(field *reflect.StructField) bool {
+	if b.includePrimaryKey {
+		return false
+	}
+	val, ok := field.Tag.Lookup(patcher.DefaultDbTagName)
+	if !ok {
+		return false
+	}
+	return slices.Contains(strings.Split(val, patcher.TagOptSeparator), patcher.DBTagPrimaryKey)
+}
+
+func (b *SQLBatch) ignoredFieldsCheck(field *reflect.StructField) bool {
+	return b.checkIgnoredFields(field.Name) || b.checkIgnoreFunc(field)
+}
+
+func (b *SQLBatch) checkIgnoreFunc(field *reflect.StructField) bool {
+	return b.ignoreFieldsFunc != nil && b.ignoreFieldsFunc(field)
+}
+
+func (b *SQLBatch) checkIgnoredFields(field string) bool {
+	return len(b.ignoreFields) > 0 && slices.Contains(b.ignoreFields, field)
 }
