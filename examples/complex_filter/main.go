@@ -14,31 +14,23 @@ type Person struct {
 	Email *string `db:"email"`
 }
 
-type PersonWhere struct {
-	ID *int `db:"id"`
+type PersonFilter struct {
+	ID    *int    `db:"id"`
+	Email *string `db:"email"`
 }
 
-func NewPersonWhere(id int) patcher.Wherer {
-	return &PersonWhere{
-		ID: &id,
-	}
-}
-
-func (p *PersonWhere) Where() (string, []interface{}) {
-	return "id = ?", []interface{}{*p.ID}
-}
-
-type PersonContactJoiner struct {
-	Email *string
-}
-
-func NewPersonContactJoiner(email string) patcher.Joiner {
-	return &PersonContactJoiner{
+func NewPersonFilter(id int, email string) patcher.Filter {
+	return &PersonFilter{
+		ID:    &id,
 		Email: &email,
 	}
 }
 
-func (p *PersonContactJoiner) Join() (string, []any) {
+func (p *PersonFilter) Where() (string, []interface{}) {
+	return "id = ?", []interface{}{*p.ID}
+}
+
+func (p *PersonFilter) Join() (string, []any) {
 	return "JOIN contacts c ON c.person_id = p.id AND c.email = ?", []any{*p.Email}
 }
 
@@ -50,14 +42,12 @@ func main() {
 		panic(err)
 	}
 
-	condition := NewPersonWhere(1)
-	joiner := NewPersonContactJoiner(*person.Email)
+	condition := NewPersonFilter(1, *person.Email)
 
 	sqlStr, args, err := patcher.GenerateSQL(
 		person,
 		patcher.WithTable("people"),
-		patcher.WithWhere(condition),
-		patcher.WithJoin(joiner),
+		patcher.WithFilter(condition),
 	)
 	if err != nil {
 		panic(err)

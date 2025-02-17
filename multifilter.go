@@ -2,9 +2,13 @@ package patcher
 
 import "strings"
 
-type MultiFilter interface {
+type Filter interface {
 	Joiner
 	Wherer
+}
+
+type MultiFilter interface {
+	Filter
 	Add(filter any)
 }
 
