@@ -43,7 +43,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
 }
@@ -65,7 +65,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_StructOpt_IncludeNilField() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Nil(old.Age)
 }
@@ -87,7 +87,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_StructOpt_IncludeZeroField() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(0, old.Age)
 }
@@ -109,7 +109,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_NoStructOpts() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(25, old.Age)
 }
@@ -131,7 +131,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Pointed_Fields() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(25, old.Age)
 }
@@ -153,7 +153,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_ZeroValue() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(25, old.Age)
 }
@@ -172,7 +172,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_NoNewValue() {
 	n := testStruct{}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
 }
@@ -193,7 +193,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_OneNewField() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(26, old.Age)
 }
@@ -218,7 +218,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
 	s.Equal("Sarah", old.Partner.Name)
@@ -249,7 +249,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct_Reverse() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
 	s.Equal("Sarah Thompson", old.Partner.Name)
@@ -281,7 +281,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStruct_NotPointed() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
 	s.Equal("Sarah", old.Partner.Name)
@@ -313,7 +313,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_InheritedStruct_NotPointed() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
 	s.Equal("Some description", old.Description)
@@ -344,7 +344,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_InheritedStruct_Pointed() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
 	s.Equal("Some description", old.Description)
@@ -381,7 +381,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_DeeplyInheritedStruct_Pointed() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
 	s.Equal("Some description", old.Description)
@@ -420,7 +420,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_DeeplyInheritedStruct_Pointed_SetNi
 
 	s.patch.includeNilValues = true
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
 	s.Equal((*TestEmbed2)(nil), old.TestEmbed2)
@@ -451,7 +451,7 @@ func (s *loadDiffSuite) TestHandleEmbeddedStruct_ValidNonNilField() {
 	}
 
 	err := s.patch.handleEmbeddedStruct(reflect.ValueOf(&old).Elem().FieldByName("Embedded"), reflect.ValueOf(&n).Elem().FieldByName("Embedded"), "")
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("Some description", old.Description)
 }
 
@@ -479,7 +479,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedStructWithNewValue() {
 	n.Partner.Age = 25
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(25, old.Age)
 	s.Equal("Sarah Brewer", old.Partner.Name)
@@ -516,7 +516,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_EmbeddedInheritedStruct() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(26, old.Age)
 	s.Equal("Sarah", old.Partner.Name)
@@ -540,7 +540,7 @@ func (s *loadDiffSuite) TestLoadDiff_FailureNotPointer() {
 	}
 
 	err := s.patch.loadDiff(old, n)
-	s.Error(err)
+	s.Require().Error(err)
 	s.Equal(ErrInvalidType, err)
 }
 
@@ -566,7 +566,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_NilOldField() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
 	s.Equal("Sarah", old.Partner.Name)
@@ -588,7 +588,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Slice() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{"tag3"}, old.Tags) // New slice overwrites old one
 }
 
@@ -621,7 +621,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_DeeplyNestedStruct() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("New Value", old.Inner.InnerMost.Value)
 }
 
@@ -643,7 +643,7 @@ func (s *loadDiffSuite) TestLoadDiff_Failure_UnexportedField() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal(26, old.Age)
 	s.Equal("OldName", old.name) // Name should remain unchanged because it's unexported
 }
@@ -665,7 +665,7 @@ func (s *loadDiffSuite) TestLoadDiff_Failure_UnsupportedType() {
 	}
 
 	err := s.patch.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.NotNil(old.Updates) // Channel should not be nil as it started as a non-nil channel
 }
@@ -690,7 +690,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Include_Zeros() {
 	}
 
 	err := l.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(0, old.Age)
 }
@@ -715,7 +715,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Include_Zeros_false() {
 	}
 
 	err := l.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John Smith", old.Name)
 	s.Equal(25, old.Age)
 }
@@ -744,7 +744,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Include_Nil() {
 	}
 
 	err := l.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
 	s.Nil(old.Partner)
@@ -774,7 +774,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Include_Nil_false() {
 	}
 
 	err := l.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(25, old.Age)
 	s.Equal("Sarah", old.Partner.Name)
@@ -801,7 +801,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFields() {
 	}
 
 	err := l.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(26, old.Age)
 }
@@ -828,7 +828,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFunc() {
 	}
 
 	err := l.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(26, old.Age)
 }
@@ -856,7 +856,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_IgnoreFieldsFuncAndIgnoreFields() {
 	}
 
 	err := l.loadDiff(&old, &n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("John", old.Name)
 	s.Equal(26, old.Age)
 }
@@ -885,7 +885,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Blank_Except_Id() {
 	}
 
 	err := l.loadDiff(old, n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal(17345, old.ID)
 	s.Equal("", old.Name)
 	s.Equal(25, *old.Age)
@@ -918,7 +918,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Skip_Priority_Check() {
 	}
 
 	err := l.loadDiff(old, n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal(17345, old.ID)
 	s.Equal("some text", old.Name)
 	s.Equal(25, *old.Age)
@@ -948,7 +948,7 @@ func (s *loadDiffSuite) TestLoadDiff_DefaultBehaviour() {
 	}
 
 	err := LoadDiff(old, n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal(17345, old.ID)
 	s.Equal("John Smith", old.Name)
 	s.Equal(25, *old.Age)
@@ -981,7 +981,7 @@ func (s *loadDiffSuite) TestLoadDiff_IgnoreTags() {
 	}
 
 	err := LoadDiff(old, n)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal(17345, old.ID)
 	s.Equal("some text", old.Name)
 	s.Equal(25, *old.Age)
