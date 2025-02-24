@@ -2,7 +2,6 @@ package patcher
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"reflect"
 	"testing"
@@ -680,7 +679,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 		WithTable("test_table"),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18}, args)
 
@@ -712,7 +711,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_WhereAndJoin() {
 		WithTable("test_table"),
 		WithFilter(new(testFilter)),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18}, args)
 }
@@ -732,7 +731,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_WhereString() {
 		WithTable("test_table"),
 		WithWhereStr("age = ?", 18),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18}, args)
 }
@@ -756,7 +755,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_JoinString() {
 		WithJoinStr("JOIN table2 ON table1.id = table2.id"),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18}, args)
 
@@ -781,7 +780,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_NoWhereArgs() {
 		WithTable("test_table"),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage > 18\n)", sqlStr)
 	s.Equal([]any{1, "test"}, args)
 
@@ -806,7 +805,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_Stuct_opt_IncludeNilFields() 
 		WithTable("test_table"),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{1, nil, 18}, args)
 
@@ -831,7 +830,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_Struct_opt_IncludeZeroFields(
 		WithTable("test_table"),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{1, "", 18}, args)
 
@@ -860,7 +859,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleWhere() {
 		WithWhere(mw),
 		WithWhere(mw2),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nAND name = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18, "john"}, args)
 
@@ -892,7 +891,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_orWhere() {
 		WithWhere(mw),
 		WithWhere(mw2),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nOR name = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18, "john"}, args)
 
@@ -926,7 +925,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_andOrWhere() {
 		WithWhere(mw2),
 		WithWhere(mw3),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nOR name = ?\nAND id = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18, "john", 1}, args)
 
@@ -956,7 +955,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_invalidWhereType() {
 		WithWhere(mw),
 		WithWhere(mw2),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\nAND name = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18, "john"}, args)
 
@@ -985,7 +984,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_withJoin() {
 		WithWhere(mw),
 		WithJoin(mj),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18}, args)
 
@@ -1018,7 +1017,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_multipleJoin() {
 		WithJoin(mj),
 		WithJoin(mj2),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nJOIN table3 ON table1.id = table3.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18}, args)
 
@@ -1047,7 +1046,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_withJoinAndWhere() {
 		WithWhere(mw),
 		WithJoin(mj),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18}, args)
 
@@ -1080,7 +1079,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_withJoinAndWhereAndJoin() {
 		WithJoin(mj),
 		WithJoin(mj2),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nJOIN table2 ON table1.id = table2.id\nJOIN table3 ON table1.id = table3.id\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{1, "test", 18}, args)
 
@@ -1108,7 +1107,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesZeroValues() {
 		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{73, "test", "", 73}, args)
 }
@@ -1134,7 +1133,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesZeroValues_Pointer() 
 		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{73, "test", "", 73}, args)
 }
@@ -1160,7 +1159,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesZeroValues_PointerNil
 		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
-	s.True(errors.Is(err, ErrNoFields))
+	s.Require().ErrorIs(err, ErrNoFields)
 	s.Empty(sqlStr)
 	s.Empty(args)
 }
@@ -1186,7 +1185,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues() {
 		WithIncludeNilValues(true),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{nil, nil, nil, 1}, args)
 }
@@ -1212,7 +1211,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_Pointer() {
 		WithIncludeNilValues(true),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{nil, nil, nil, 1}, args)
 }
@@ -1238,7 +1237,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_PointerWith
 		WithIncludeNilValues(true),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{73, "test", nil, 1}, args)
 }
@@ -1264,7 +1263,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_PointerWith
 		WithIncludeNilValues(true),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{0, "test", nil, 1}, args)
 }
@@ -1290,7 +1289,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_PointerWith
 		WithIncludeNilValues(true),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{0, nil, nil, 1}, args)
 }
@@ -1317,7 +1316,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_IncludesZer
 		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{nil, "", nil, 1}, args)
 }
@@ -1344,7 +1343,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_IncludesZer
 		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{nil, "", nil, 1}, args)
 }
@@ -1371,7 +1370,7 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_IncludesZer
 		WithIncludeZeroValues(true),
 		WithWhere(mw),
 	)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal("UPDATE test_table\nSET id = ?, name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{73, "", nil, 1}, args)
 }
@@ -1401,7 +1400,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success() {
 	}
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.NotNil(patch)
 	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
@@ -1425,7 +1424,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_StructOpt_IncludeNilF
 	}
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.NotNil(patch)
 	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
@@ -1449,7 +1448,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_StructOpt_IncludeZero
 	}
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.NotNil(patch)
 	s.Equal([]string{"id = ?", "name = ?"}, patch.fields)
@@ -1476,7 +1475,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_singleFieldUpdated() 
 	}
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.NotNil(patch)
 	s.Equal([]string{"name = ?"}, patch.fields)
@@ -1531,10 +1530,10 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen() {
 	mw.On("Where").Return("age = ?", []any{18})
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw))
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.Equal("UPDATE test_table\nSET name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{"test2", 18}, args)
@@ -1563,10 +1562,10 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_ValueField() {
 	mw.On("Where").Return("age = ?", []any{18})
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw))
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.Equal("UPDATE test_table\nSET name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{"test2", 18}, args)
@@ -1595,10 +1594,10 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_ValueFieldUpda
 	mw.On("Where").Return("age = ?", []any{18})
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw))
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.Equal("UPDATE test_table\nSET name = ?, desc = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
 	s.Equal([]any{"test2", "desc2", 18}, args)
@@ -1627,10 +1626,10 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeZeroVal
 	mw.On("Where").Return("id = ?", []any{73})
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeZeroValues(true))
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.Equal("UPDATE test_table\nSET name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{"test2", "", 73}, args)
@@ -1662,10 +1661,10 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeZeroVal
 	mw.On("Where").Return("id = ?", []any{73})
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeZeroValues(true))
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.Equal("UPDATE test_table\nSET name = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{"test2", "", 73}, args)
@@ -1694,7 +1693,7 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeZeroVal
 	mw.On("Where").Return("id = ?", []any{1})
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeZeroValues(true))
-	s.True(errors.Is(err, ErrNoChanges))
+	s.Require().ErrorIs(err, ErrNoChanges)
 	s.Nil(patch)
 }
 
@@ -1721,10 +1720,10 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeNilValu
 	mw.On("Where").Return("id = ?", []any{1})
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues(true))
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.Equal("UPDATE test_table\nSET id = ?, description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{nil, nil, 1}, args)
@@ -1753,10 +1752,10 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeNilValu
 	mw.On("Where").Return("id = ?", []any{1})
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues(true))
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.Equal("UPDATE test_table\nSET description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{nil, 1}, args)
@@ -1785,10 +1784,10 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeNilValu
 	mw.On("Where").Return("id = ?", []any{1})
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues(true))
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.Equal("UPDATE test_table\nSET description = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{"", 1}, args)
@@ -1820,10 +1819,10 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeNilValu
 	mw.On("Where").Return("id = ?", []any{1})
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw), WithIncludeNilValues(true), WithIncludeZeroValues(true))
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.Equal("UPDATE test_table\nSET description = ?, addr = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{"", nil, 1}, args)

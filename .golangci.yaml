@@ -13,6 +13,7 @@ linters:
     - thelper
     - tparallel
     - intrange
+    - testifylint
 issues:
   exclude-rules:
     - path: (.+)_test.go
@@ -142,3 +143,5 @@ linters-settings:
     enable:
       - identical # Identifies interfaces in the same package that have identical method sets.
       - unused # Identifies interfaces that are not used anywhere in the same package where the interface is defined.
+  testifylint:
+    enable-all: true
