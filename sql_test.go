@@ -47,12 +47,15 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Filter_Where() {
 	}
 
 	mf := NewMockFilter(s.T())
-	mf.On("Where").Return("where", []any{"arg1", "arg2"})
+	mf.On("Where").Return("test_where = ? and arg2_val = ?", []any{"arg1", "arg2"})
 
 	patch := NewSQLPatch(obj, WithWhere(mf))
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
 	s.Equal([]any{1, "test"}, patch.args)
+
+	s.Equal("AND test_where = ? and arg2_val = ?\n", patch.whereSql.String())
+	s.Equal([]any{"arg1", "arg2"}, patch.whereArgs)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Filter_Join() {
@@ -67,12 +70,15 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Filter_Join() {
 	}
 
 	mf := NewMockFilter(s.T())
-	mf.On("Join").Return("JOIN table2 ON table1.id = table2.id", nil)
+	mf.On("Join").Return("JOIN table2 ON table1.id = table2.id and arg2_val = ?", []any{"arg1"})
 
 	patch := NewSQLPatch(obj, WithJoin(mf))
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
 	s.Equal([]any{1, "test"}, patch.args)
+
+	s.Equal("JOIN table2 ON table1.id = table2.id and arg2_val = ?\n", patch.joinSql.String())
+	s.Equal([]any{"arg1"}, patch.joinArgs)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Filter_JoinerAndWhere() {
@@ -87,13 +93,19 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Filter_JoinerAndWhere() {
 	}
 
 	mf := NewMockFilter(s.T())
-	mf.On("Join").Return("JOIN table2 ON table1.id = table2.id", nil)
+	mf.On("Join").Return("JOIN table2 ON table1.id = table2.id and arg2_val = ?", []any{"arg1"})
 	mf.On("Where").Return("where", []any{"arg1", "arg2"})
 
 	patch := NewSQLPatch(obj, WithFilter(mf))
 
 	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
 	s.Equal([]any{1, "test"}, patch.args)
+
+	s.Equal("JOIN table2 ON table1.id = table2.id and arg2_val = ?\n", patch.joinSql.String())
+	s.Equal([]any{"arg1"}, patch.joinArgs)
+
+	s.Equal("AND where\n", patch.whereSql.String())
+	s.Equal([]any{"arg1", "arg2"}, patch.whereArgs)
 }
 
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_MultiFilter() {
