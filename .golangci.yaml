@@ -14,6 +14,7 @@ linters:
     - tparallel
     - intrange
     - testifylint
+    - perfsprint
 issues:
   exclude-rules:
     - path: (.+)_test.go
