@@ -35,6 +35,24 @@ func (s *newSQLPatchSuite) TestNewSQLPatch_Success() {
 	s.Equal([]any{1, "test"}, patch.args)
 }
 
+func (s *newSQLPatchSuite) TestNewSQLPatch_Success_NoTableProvided() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	patch := NewSQLPatch(obj)
+
+	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
+	s.Equal([]any{1, "test"}, patch.args)
+	s.Equal("test_obj", patch.table)
+}
+
 func (s *newSQLPatchSuite) TestNewSQLPatch_Success_Filter_Where() {
 	type testObj struct {
 		Id   *int    `db:"id_tag"`
@@ -750,6 +768,30 @@ func (s *generateSQLSuite) TestGenerateSQL_Success() {
 
 	sqlStr, args, err := GenerateSQL(obj,
 		WithTable("test_table"),
+		WithWhere(mw),
+	)
+	s.Require().NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
+	s.Equal([]any{1, "test", 18}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_NoTableProvided() {
+	type testTable struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testTable{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	sqlStr, args, err := GenerateSQL(obj,
 		WithWhere(mw),
 	)
 	s.Require().NoError(err)
@@ -1603,6 +1645,35 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen() {
 	mw.On("Where").Return("age = ?", []any{18})
 
 	patch, err := NewDiffSQLPatch(&obj, &obj2, WithTable("test_table"), WithWhere(mw))
+	s.Require().NoError(err)
+
+	sqlStr, args, err := patch.GenerateSQL()
+	s.Require().NoError(err)
+
+	s.Equal("UPDATE test_table\nSET name = ?\nWHERE (1=1)\nAND (\nage = ?\n)", sqlStr)
+	s.Equal([]any{"test2", 18}, args)
+}
+
+func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_NoTableProvided() {
+	type testTable struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testTable{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	obj2 := testTable{
+		Id:   ptr(1),
+		Name: ptr("test2"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	patch, err := NewDiffSQLPatch(&obj, &obj2, WithWhere(mw))
 	s.Require().NoError(err)
 
 	sqlStr, args, err := patch.GenerateSQL()

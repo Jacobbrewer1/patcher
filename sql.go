@@ -31,6 +31,10 @@ func NewSQLPatch(resource any, opts ...PatchOpt) *SQLPatch {
 // It processes the fields of the struct, applying the necessary tags and options,
 // and prepares the SQL update statement components (fields and arguments).
 func (s *SQLPatch) patchGen(resource any) {
+	if s.table == "" {
+		s.table = getTableName(resource)
+	}
+
 	resource = dereferenceIfPointer(resource)
 	ensureStruct(resource)
 
