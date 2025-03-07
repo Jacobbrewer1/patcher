@@ -20,7 +20,7 @@ func isPointerToStruct[T any](t T) bool {
 }
 
 func dereferenceIfPointer(resource any) any {
-	if reflect.TypeOf(resource).Kind() == reflect.Ptr {
+	if reflect.TypeOf(resource).Kind() == reflect.Ptr && !reflect.ValueOf(resource).IsNil() {
 		return reflect.ValueOf(resource).Elem().Interface()
 	}
 	return resource
@@ -47,7 +47,9 @@ func getTag(fType *reflect.StructField, tagName string) string {
 }
 
 func getValue(fVal reflect.Value) any {
-	if fVal.Kind() == reflect.Ptr {
+	if fVal.Kind() == reflect.Ptr && fVal.IsNil() {
+		return nil
+	} else if fVal.Kind() == reflect.Ptr {
 		return fVal.Elem().Interface()
 	}
 	return fVal.Interface()
@@ -63,4 +65,23 @@ func IsValidType(val reflect.Value) bool {
 	default:
 		return false
 	}
+}
+
+func getTableName(resource any) string {
+	typeOf := reflect.TypeOf(resource)
+	if typeOf.Kind() == reflect.Ptr {
+		typeOf = typeOf.Elem()
+	}
+	return toSnakeCase(typeOf.Name())
+}
+
+func toSnakeCase(s string) string {
+	result := make([]rune, 0, len(s)*2)
+	for i, r := range s {
+		if i > 0 && 'A' <= r && r <= 'Z' {
+			result = append(result, '_')
+		}
+		result = append(result, r)
+	}
+	return strings.ToLower(string(result))
 }

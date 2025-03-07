@@ -29,14 +29,14 @@ jobs:
     name: Golangci-lint
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       # Sets up golang
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ vars.GO_VERSION }}
+          go-version-file: 'go.mod'
           cache-dependency-path: "**/*.sum"
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
@@ -54,7 +54,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ vars.GO_VERSION }}
+          go-version-file: 'go.mod'
           cache-dependency-path: "**/*.sum"
 
       - name: Make
@@ -83,7 +83,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ vars.GO_VERSION }}
+          go-version-file: 'go.mod'
           cache-dependency-path: "**/*.sum"
 
       - name: "Run Code Generation"
