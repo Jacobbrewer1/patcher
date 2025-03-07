@@ -8,6 +8,8 @@ import (
 )
 
 func TestIsPointerToStruct(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		value    any
@@ -21,6 +23,7 @@ func TestIsPointerToStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			actual := isPointerToStruct(tt.value)
 			require.Equal(t, tt.expected, actual)
 		})
@@ -28,6 +31,8 @@ func TestIsPointerToStruct(t *testing.T) {
 }
 
 func TestDereferenceIfPointer(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		resource any
@@ -40,6 +45,7 @@ func TestDereferenceIfPointer(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			actual := dereferenceIfPointer(tt.resource)
 			require.Equal(t, tt.expected, actual)
 		})
@@ -47,6 +53,7 @@ func TestDereferenceIfPointer(t *testing.T) {
 }
 
 func TestEnsureStruct(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name        string
 		resource    any
@@ -59,6 +66,7 @@ func TestEnsureStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if tt.shouldPanic {
 				require.Panics(t, func() { ensureStruct(tt.resource) })
 			} else {
@@ -69,6 +77,8 @@ func TestEnsureStruct(t *testing.T) {
 }
 
 func TestGetTag(t *testing.T) {
+	t.Parallel()
+
 	type TestStruct struct {
 		Field1 string `custom:"field1_tag"`
 		Field2 string
@@ -86,6 +96,7 @@ func TestGetTag(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			f, _ := reflect.TypeOf(TestStruct{}).FieldByName(tt.field)
 			actual := getTag(&f, tt.tagName)
 			require.Equal(t, tt.expected, actual)
@@ -94,6 +105,8 @@ func TestGetTag(t *testing.T) {
 }
 
 func TestGetValue(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		value    any
@@ -106,6 +119,7 @@ func TestGetValue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			val := reflect.ValueOf(tt.value)
 			actual := getValue(val)
 			require.Equal(t, tt.expected, actual)
