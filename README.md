@@ -50,10 +50,11 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
-	"log"
+	"errors"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -80,7 +81,7 @@ func updateUser(db *sql.DB, user User) error {
 	}
 
 	if len(updates) == 0 {
-		return fmt.Errorf("no fields to update")
+		return errors.New("no fields to update")
 	}
 
 	query += " " + strings.Join(updates, ", ") + " WHERE id = ?"
@@ -99,7 +100,12 @@ func patchHandler(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	vars := mux.Vars(r)
-	userID := vars["id"]
+	userIDStr := vars["id"]
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	user := User{ID: userID}
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -112,14 +118,22 @@ func patchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintln(w, "User updated successfully")
+	w.WriteHeader(http.StatusOK)
 }
 
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/users/{id}", patchHandler).Methods("PATCH")
 
-	log.Fatal(http.ListenAndServe(":8080", r))
+	server := &http.Server{
+		Addr:              ":8080",
+		Handler:           r,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
+		panic(err)
+	}
 }
 
 ```
@@ -136,9 +150,9 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
+	"strconv"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -146,9 +160,9 @@ import (
 )
 
 type User struct {
-	ID    *int    `db:"id"`
-	Name  *string `db:"name"`
-	Email *string `db:"email"`
+	ID    *int    `db:"id" json:"id,omitempty"`
+	Name  *string `db:"name" json:"name,omitempty"`
+	Email *string `db:"email" json:"email,omitempty"`
 }
 
 type UserWhere struct {
@@ -157,6 +171,10 @@ type UserWhere struct {
 
 func NewUserWhere(id int) *UserWhere {
 	return &UserWhere{ID: &id}
+}
+
+func (u *UserWhere) Where() (sqlStr string, sqlArgs []any) {
+	return "id = ?", []any{*u.ID}
 }
 
 func patchHandler(w http.ResponseWriter, r *http.Request) {
@@ -168,8 +186,12 @@ func patchHandler(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	vars := mux.Vars(r)
-	id := vars["id"]
-	parsedID := int(id)
+	idStr := vars["id"]
+	parsedID, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	user := new(User)
 	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
@@ -196,14 +218,22 @@ func patchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintln(w, "User updated successfully")
+	w.WriteHeader(http.StatusOK)
 }
 
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/users/{id}", patchHandler).Methods("PATCH")
 
-	log.Fatal(http.ListenAndServe(":8080", r))
+	server := &http.Server{
+		Addr:              ":8080",
+		Handler:           r,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
+		panic(err)
+	}
 }
 
 ```
