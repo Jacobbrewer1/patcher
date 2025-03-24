@@ -3,14 +3,12 @@ module github.com/jacobbrewer1/patcher
 go 1.24
 
 require (
-	github.com/go-sql-driver/mysql v1.9.1
 	github.com/gorilla/mux v1.8.1
 	github.com/stretchr/testify v1.10.0
 	github.com/vektra/mockery/v2 v2.53.3
 )
 
 require (
-	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/chigopher/pathlib v0.19.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
