@@ -37,8 +37,180 @@ you.
 * **Easy Integration**: It is easy to integrate into existing projects and can be used with any Go project that needs to
   generate SQL queries from structs.
 * **Open Source**: It is open-source and available under the Apache 2.0 license.
-* **Comprehensive Documentation**: It has comprehensive documentation and examples to help you get started quickly and
-  understand how to use the library effectively.
+
+### Demonstration
+
+Here is a simple example of how Patcher would compare to an example of not using Patcher.
+
+#### Without Patcher
+
+```go
+package main
+
+import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"strings"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
+)
+
+type User struct {
+	ID    int     `json:"id"`
+	Name  *string `json:"name"`
+	Email *string `json:"email"`
+}
+
+func updateUser(db *sql.DB, user User) error {
+	query := "UPDATE users SET"
+	var updates []string
+	var args []any
+
+	if user.Name != nil {
+		updates = append(updates, "name = ?")
+		args = append(args, *user.Name)
+	}
+	if user.Email != nil {
+		updates = append(updates, "email = ?")
+		args = append(args, *user.Email)
+	}
+
+	if len(updates) == 0 {
+		return fmt.Errorf("no fields to update")
+	}
+
+	query += " " + strings.Join(updates, ", ") + " WHERE id = ?"
+	args = append(args, user.ID)
+
+	_, err := db.Exec(query, args...)
+	return err
+}
+
+func patchHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "user:password@tcp(localhost:3306)/dbname")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	vars := mux.Vars(r)
+	userID := vars["id"]
+
+	user := User{ID: userID}
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := updateUser(db, user); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(w, "User updated successfully")
+}
+
+func main() {
+	r := mux.NewRouter()
+	r.HandleFunc("/users/{id}", patchHandler).Methods("PATCH")
+
+	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
+```
+
+As demonstrated above, without Patcher, you would need to manually write the SQL update query and handle each field. If
+a new field is added to the struct, you would need to update the query manually, which can be error-prone (e.g., missing
+or forgetting to update a field) and time-consuming.
+
+#### With Patcher
+
+```go
+package main
+
+import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
+	"github.com/jacobbrewer1/patcher"
+)
+
+type User struct {
+	ID    *int    `db:"id"`
+	Name  *string `db:"name"`
+	Email *string `db:"email"`
+}
+
+type UserWhere struct {
+	ID *int `db:"id"`
+}
+
+func NewUserWhere(id int) *UserWhere {
+	return &UserWhere{ID: &id}
+}
+
+func patchHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "user:password@tcp(localhost:3306)/dbname")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+	parsedID := int(id)
+
+	user := new(User)
+	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user.ID = &parsedID
+	condition := NewUserWhere(parsedID)
+
+	sqlStr, args, err := patcher.GenerateSQL(
+		user,
+		patcher.WithTable("users"),
+		patcher.WithWhere(condition),
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, execErr := db.Exec(sqlStr, args...)
+	if execErr != nil {
+		http.Error(w, execErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(w, "User updated successfully")
+}
+
+func main() {
+	r := mux.NewRouter()
+	r.HandleFunc("/users/{id}", patchHandler).Methods("PATCH")
+
+	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
+```
+
+With Patcher, you can generate the SQL update query automatically from the struct fields, reducing the need to write and
+maintain the query manually. If a new field is added to the struct, Patcher will automatically include it in the update
+query, simplifying the code and reducing the risk of errors.
 
 ## Usage
 
@@ -335,7 +507,3 @@ To run tests, use the following command:
 ```sh
 go test ./...
 ```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
