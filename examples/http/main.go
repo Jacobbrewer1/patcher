@@ -4,16 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jacobbrewer1/patcher"
 )
 
 type Person struct {
-	Name   string   `db:"name"`
-	Age    int      `db:"age"`
-	Height *float64 `db:"height"`
+	Name   string   `db:"name" json:"name,omitempty"`
+	Age    int      `db:"age" json:"age,omitempty"`
+	Height *float64 `db:"height" json:"height,omitempty"`
 }
 
 type PersonWhere struct {
@@ -26,7 +28,7 @@ func NewPersonWhere(id int) *PersonWhere {
 	}
 }
 
-func (p *PersonWhere) Where() (string, []any) {
+func (p *PersonWhere) Where() (sqlStr string, sqlArgs []any) {
 	return "id = ?", []any{p.ID}
 }
 
@@ -35,8 +37,15 @@ func main() {
 
 	r.HandleFunc("/people/{id}", patch).Methods(http.MethodPatch)
 
-	if err := http.ListenAndServe(":8080", r); err != nil {
-		panic(err)
+	svr := &http.Server{
+		Addr:              ":8080",
+		Handler:           r,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+
+	if err := svr.ListenAndServe(); err != nil { // nolint:revive // Traditional error handling
+		fmt.Println("error starting server:", err)
+		os.Exit(1)
 	}
 }
 

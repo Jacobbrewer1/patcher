@@ -8,10 +8,10 @@ import (
 )
 
 type Person struct {
-	ID    *int    `db:"id"`
-	Name  *string `db:"name"`
-	Age   *int    `db:"age"`
-	Email *string `db:"email"`
+	ID    *int    `db:"id" json:"id,omitempty"`
+	Name  *string `db:"name" json:"name,omitempty"`
+	Age   *int    `db:"age" json:"age,omitempty"`
+	Email *string `db:"email" json:"email,omitempty"`
 }
 
 type PersonWhere struct {
@@ -24,8 +24,8 @@ func NewPersonWhere(id int) patcher.Wherer {
 	}
 }
 
-func (p *PersonWhere) Where() (string, []interface{}) {
-	return "id = ?", []interface{}{*p.ID}
+func (p *PersonWhere) Where() (sqlStr string, sqlArgs []any) {
+	return "id = ?", []any{*p.ID}
 }
 
 type PersonContactJoiner struct {
@@ -38,7 +38,7 @@ func NewPersonContactJoiner(email string) patcher.Joiner {
 	}
 }
 
-func (p *PersonContactJoiner) Join() (string, []any) {
+func (p *PersonContactJoiner) Join() (sqlStr string, sqlArgs []any) {
 	return "JOIN contacts c ON c.person_id = p.id AND c.email = ?", []any{*p.Email}
 }
 

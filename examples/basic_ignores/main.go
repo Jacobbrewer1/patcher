@@ -23,7 +23,7 @@ func NewPersonWhere(id int) *PersonWhere {
 	}
 }
 
-func (p *PersonWhere) Where() (string, []any) {
+func (p *PersonWhere) Where() (sqlStr string, sqlArgs []any) {
 	return "id = ?", []any{*p.ID}
 }
 

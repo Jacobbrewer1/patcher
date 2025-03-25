@@ -8,10 +8,10 @@ import (
 )
 
 type Person struct {
-	ID    *int    `db:"id"`
-	Name  *string `db:"name"`
-	Age   *int    `db:"age"`
-	Email *string `db:"email"`
+	ID    *int    `db:"id" json:"id,omitempty"`
+	Name  *string `db:"name" json:"name,omitempty"`
+	Age   *int    `db:"age" json:"age,omitempty"`
+	Email *string `db:"email" json:"email,omitempty"`
 }
 
 type PersonFilter struct {
@@ -26,11 +26,11 @@ func NewPersonFilter(id int, email string) patcher.Filter {
 	}
 }
 
-func (p *PersonFilter) Where() (string, []interface{}) {
-	return "id = ?", []interface{}{*p.ID}
+func (p *PersonFilter) Where() (sqlStr string, sqlArgs []any) {
+	return "id = ?", []any{*p.ID}
 }
 
-func (p *PersonFilter) Join() (string, []any) {
+func (p *PersonFilter) Join() (sqlStr string, sqlArgs []any) {
 	return "JOIN contacts c ON c.person_id = p.id AND c.email = ?", []any{*p.Email}
 }
 

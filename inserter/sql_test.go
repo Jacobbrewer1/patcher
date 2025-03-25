@@ -306,7 +306,7 @@ func (s *generateSQLSuite) TestGenerateSQL_notStruct() {
 	sql, args, err := NewBatch(resources, WithTable("temp"), WithTagName("db")).GenerateSQL()
 	s.Equal(ErrNoFields, err)
 
-	s.Equal("", sql)
+	s.Empty(sql)
 	s.Require().Empty(args)
 }
 
@@ -326,7 +326,7 @@ func (s *generateSQLSuite) TestGenerateSQL_noFields() {
 	sql, args, err := NewBatch(resources, WithTable("temp"), WithTagName("db")).GenerateSQL()
 	s.Equal(ErrNoFields, err)
 
-	s.Equal("", sql)
+	s.Empty(sql)
 	s.Require().Empty(args)
 }
 
@@ -334,7 +334,7 @@ func (s *generateSQLSuite) TestGenerateSQL_noResources() {
 	sql, args, err := NewBatch(nil, WithTable("temp"), WithTagName("db")).GenerateSQL()
 	s.Equal(ErrNoFields, err)
 
-	s.Equal("", sql)
+	s.Empty(sql)
 	s.Empty(args)
 }
 
@@ -356,7 +356,7 @@ func (s *generateSQLSuite) TestGenerateSQL_noTable() {
 	sql, args, err := NewBatch(resources, WithTagName("db")).GenerateSQL()
 	s.Equal(ErrNoTable, err)
 
-	s.Equal("", sql)
+	s.Empty(sql)
 	s.Empty(args)
 }
 
@@ -364,7 +364,7 @@ func (s *generateSQLSuite) TestGenerateSQL_noTable_noResources() {
 	sql, args, err := NewBatch(nil, WithTagName("db"), WithTable("temp")).GenerateSQL()
 	s.Equal(ErrNoFields, err)
 
-	s.Equal("", sql)
+	s.Empty(sql)
 	s.Empty(args)
 }
 
@@ -384,7 +384,7 @@ func (s *generateSQLSuite) TestGenerateSQL_noTable_noFields() {
 	sql, args, err := NewBatch(resources, WithTagName("db"), WithTable("temp")).GenerateSQL()
 	s.Equal(ErrNoFields, err)
 
-	s.Equal("", sql)
+	s.Empty(sql)
 	s.Empty(args)
 }
 

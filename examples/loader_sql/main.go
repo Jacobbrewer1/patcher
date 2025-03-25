@@ -21,7 +21,7 @@ func NewSomeWhere(id int) *SomeWhere {
 	return &SomeWhere{id: id}
 }
 
-func (s *SomeWhere) Where() (string, []any) {
+func (s *SomeWhere) Where() (sqlStr string, sqlArgs []any) {
 	return "id = ?", []any{s.id}
 }
 

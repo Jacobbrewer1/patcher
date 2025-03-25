@@ -887,7 +887,7 @@ func (s *loadDiffSuite) TestLoadDiff_Success_Blank_Except_Id() {
 	err := l.loadDiff(old, n)
 	s.Require().NoError(err)
 	s.Equal(17345, old.ID)
-	s.Equal("", old.Name)
+	s.Empty(old.Name)
 	s.Equal(25, *old.Age)
 }
 
