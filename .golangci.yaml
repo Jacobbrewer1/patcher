@@ -1,149 +1,132 @@
+version: "2"
 linters:
   enable:
-    - revive
-    - sloglint
-    - godox
-    - gosec
-    - musttag
-    - nilnil
+    - forcetypeassert
     - goconst
     - gocritic
-    - gofmt
+    - godox
+    - gosec
     - iface
+    - intrange
+    - musttag
+    - nilnil
+    - perfsprint
+    - revive
+    - sloglint
+    - testifylint
     - thelper
     - tparallel
-    - intrange
-    - testifylint
-    - perfsprint
-    - forcetypeassert
-issues:
-  exclude-rules:
-    - path: (.+)_test.go
-      linters:
-        - revive
-      text: "^(enforce-slice-style|enforce-map-style)"
-linters-settings:
-  revive:
-    # Default: false
-    ignore-generated-header: true
-    # Default: 0.8
-    confidence: 0.1
+  settings:
+    goconst:
+      ignore-strings: ""
+      ignore-calls: true
+    gocritic:
+      enable-all: true
+    iface:
+      enable:
+        - identical
+        - unused
+    nilnil:
+      detect-opposite: true
+      checked-types:
+        - chan
+        - func
+        - iface
+        - map
+        - ptr
+        - uintptr
+        - unsafeptr
+    revive:
+      confidence: 0.1
+      rules:
+        - name: context-as-argument
+          arguments:
+            - allowTypesBefore: '*testing.T'
+          severity: error
+          disabled: false
+          exclude:
+            - ""
+        - name: early-return
+          arguments:
+            - preserveScope
+            - allowJump
+          severity: error
+          disabled: false
+          exclude:
+            - ""
+        - name: enforce-map-style
+          arguments:
+            - make
+          severity: error
+          disabled: false
+          exclude:
+            - ""
+        - name: enforce-slice-style
+          arguments:
+            - make
+          severity: error
+          disabled: false
+          exclude:
+            - ""
+        - name: filename-format
+          arguments:
+            - ^[_a-z][_a-z0-9]*.go$
+          severity: error
+          disabled: false
+          exclude:
+            - ""
+        - name: optimize-operands-order
+          severity: error
+          disabled: false
+          exclude:
+            - ""
+    sloglint:
+      attr-only: true
+      static-msg: true
+      no-raw-keys: true
+      key-naming-case: snake
+      forbidden-keys:
+        - time
+        - level
+        - msg
+        - source
+        - foo
+      args-on-sep-lines: true
+    testifylint:
+      enable-all: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
-      # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#context-as-argument
-      - name: context-as-argument
-        severity: error
-        disabled: false
-        exclude: [ "" ]
-        arguments:
-          - allowTypesBefore: "*testing.T"
-      # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#early-return
-      - name: early-return
-        severity: error
-        disabled: false
-        exclude: [ "" ]
-        arguments:
-          - "preserveScope"
-          - "allowJump"
-      # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#enforce-map-style
-      - name: enforce-map-style
-        severity: error
-        disabled: false
-        exclude: [ "" ]
-        arguments:
-          - "make"
-      # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#enforce-slice-style
-      - name: enforce-slice-style
-        severity: error
-        disabled: false
-        exclude: [ "" ]
-        arguments:
-          - "make"
-      # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#filename-format
-      - name: filename-format
-        severity: error
-        disabled: false
-        exclude: [ "" ]
-        arguments:
-          - "^[_a-z][_a-z0-9]*.go$"
-      # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#optimize-operands-order
-      - name: optimize-operands-order
-        severity: error
-        disabled: false
-        exclude: [ "" ]
-  sloglint:
-    # Enforce using attributes only (overrides no-mixed-args, incompatible with kv-only).
-    # https://github.com/go-simpler/sloglint?tab=readme-ov-file#attributes-only
-    # Default: false
-    attr-only: true
-    # Enforce using static values for log messages.
-    # https://github.com/go-simpler/sloglint?tab=readme-ov-file#static-messages
-    # Default: false
-    static-msg: true
-    # Enforce using constants instead of raw keys.
-    # https://github.com/go-simpler/sloglint?tab=readme-ov-file#no-raw-keys
-    # Default: false
-    no-raw-keys: true
-    # Enforce a single key naming convention.
-    # Values: snake, kebab, camel, pascal
-    # https://github.com/go-simpler/sloglint?tab=readme-ov-file#key-naming-convention
-    # Default: ""
-    key-naming-case: snake
-    # Enforce not using specific keys.
-    # https://github.com/go-simpler/sloglint?tab=readme-ov-file#forbidden-keys
-    # Default: []
-    forbidden-keys:
-      - time
-      - level
-      - msg
-      - source
-      - foo
-    # Enforce putting arguments on separate lines.
-    # https://github.com/go-simpler/sloglint?tab=readme-ov-file#arguments-on-separate-lines
-    # Default: false
-    args-on-sep-lines: true
-  goconst:
-    # Ignore test files.
-    # Default: false
-    ignore-tests: true
-    # Ignore when constant is not used as function argument.
-    # Default: true
-    ignore-calls: true
-    # Exclude strings matching the given regular expression.
-    # Default: ""
-    ignore-strings: ''
-  nilnil:
-    # In addition, detect opposite situation (simultaneous return of non-nil error and valid value).
-    # Default: false
-    detect-opposite: true
-    # List of return types to check.
-    # Default: ["chan", "func", "iface", "map", "ptr", "uintptr", "unsafeptr"]
-    checked-types:
-      - chan
-      - func
-      - iface
-      - map
-      - ptr
-      - uintptr
-      - unsafeptr
-  gocritic:
-    enable-all: true
-  gofmt:
-    # Simplify code: gofmt with `-s` option.
-    # Default: true
-    simplify: false
-    # Apply the rewrite rules to the source before reformatting.
-    # https://pkg.go.dev/cmd/gofmt
-    # Default: []
-    rewrite-rules:
-      - pattern: 'interface{}'
-        replacement: 'any'
-      - pattern: 'a[b:len(a)]'
-        replacement: 'a[b:]'
-  iface:
-    # List of analyzers.
-    # Default: ["identical"]
-    enable:
-      - identical # Identifies interfaces in the same package that have identical method sets.
-      - unused # Identifies interfaces that are not used anywhere in the same package where the interface is defined.
-  testifylint:
-    enable-all: true
+      - linters:
+          - revive
+        path: (.+)_test.go
+        text: ^(enforce-slice-style|enforce-map-style)
+      - linters:
+          - goconst
+        path: (.+)_test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+  settings:
+    gofmt:
+      simplify: false
+      rewrite-rules:
+        - pattern: interface{}
+          replacement: any
+        - pattern: a[b:len(a)]
+          replacement: a[b:]
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

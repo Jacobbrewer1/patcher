@@ -8,8 +8,8 @@ import (
 )
 
 type Person struct {
-	ID   *int    `db:"-"`
-	Name *string `db:"name"`
+	ID   *int    `db:"-" json:"id,omitempty"`
+	Name *string `db:"name" json:"name,omitempty"`
 }
 
 type PersonWhere struct {
@@ -22,7 +22,7 @@ func NewPersonWhere(id int) *PersonWhere {
 	}
 }
 
-func (p *PersonWhere) Where() (string, []any) {
+func (p *PersonWhere) Where() (sqlStr string, sqlArgs []any) {
 	return "id = ?", []any{*p.ID}
 }
 

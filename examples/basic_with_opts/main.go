@@ -10,13 +10,13 @@ import (
 )
 
 type Person struct {
-	ID                *int    `db:"id"`
-	Name              *string `db:"name"`
-	IgnoredByTag      string  `db:"-"`
-	IncludedZeroValue string  `db:"includedZeroValue"`
-	IncludedNilValue  string  `db:"includedNilValue"`
-	IgnoredByFunc     string  `db:"ignoredFieldByFunc"`
-	IgnoredByList     string  `db:"ignoredFieldByList"`
+	ID                *int    `db:"id" json:"id,omitempty"`
+	Name              *string `db:"name" json:"name,omitempty"`
+	IgnoredByTag      string  `db:"-" json:"ignored_by_tag,omitempty"`
+	IncludedZeroValue string  `db:"includedZeroValue" json:"included_zero_value,omitempty"`
+	IncludedNilValue  string  `db:"includedNilValue" json:"included_nil_value,omitempty"`
+	IgnoredByFunc     string  `db:"ignoredFieldByFunc" json:"ignored_by_func,omitempty"`
+	IgnoredByList     string  `db:"ignoredFieldByList" json:"ignored_by_list,omitempty"`
 }
 
 type PersonWhere struct {
@@ -29,7 +29,7 @@ func NewPersonWhere(id int) *PersonWhere {
 	}
 }
 
-func (p *PersonWhere) Where() (string, []any) {
+func (p *PersonWhere) Where() (sqlStr string, sqlArgs []any) {
 	return "id = ?", []any{*p.ID}
 }
 
@@ -51,7 +51,7 @@ func main() {
 		patcher.WithIncludeNilValues(true),
 		patcher.WithIgnoredFields("ignoredbylist"),
 		patcher.WithIgnoredFieldsFunc(func(field *reflect.StructField) bool {
-			return strings.ToLower(field.Name) == "ignoredbyfunc"
+			return strings.EqualFold(field.Name, "ignoredbyfunc")
 		}),
 	)
 	if err != nil {

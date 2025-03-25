@@ -11,8 +11,8 @@ type ExampleFilter struct {
 	Value any
 }
 
-func (e ExampleFilter) Where() (string, []any) {
-	return fmt.Sprintf("%s = ?", e.Field), []any{e.Value}
+func (e ExampleFilter) Where() (sqlStr string, sqlArgs []any) {
+	return e.Field + " = ?", []any{e.Value}
 }
 
 func main() {
