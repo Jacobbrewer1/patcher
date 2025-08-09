@@ -35,3 +35,7 @@ go.work.sum
 
 # Ignore all tar files
 **/*.tar
+
+# vendor directory
+vendor/
+vendor
