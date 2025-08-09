@@ -125,3 +125,17 @@ func WithIgnoredFieldsFunc(f IgnoreFieldsFunc) PatchOpt {
 		s.ignoreFieldsFunc = f
 	}
 }
+
+// WithLimit sets the limit for the SQL query.
+func WithLimit(limit int) PatchOpt {
+	return func(s *SQLPatch) {
+		s.limit = limit
+	}
+}
+
+// WithOffset sets the offset for the SQL query.
+func WithOffset(offset int) PatchOpt {
+	return func(s *SQLPatch) {
+		s.offset = offset
+	}
+}

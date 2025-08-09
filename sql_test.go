@@ -1490,6 +1490,85 @@ func (s *generateSQLSuite) TestGenerateSQL_Success_IncludesNilValues_IncludesZer
 	s.Equal([]any{73, "", nil, 1}, args)
 }
 
+func (s *generateSQLSuite) TestGenerateSQL_Success_WithLimit() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+		WithLimit(10),
+	)
+	s.Require().NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)\nLIMIT 10", sqlStr)
+	s.Equal([]any{1, "test", 18}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_WithOffset() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+		WithOffset(10),
+	)
+	s.Require().NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)\nOFFSET 10", sqlStr)
+	s.Equal([]any{1, "test", 18}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *generateSQLSuite) TestGenerateSQL_Success_WithLimitAndOffset() {
+	type testObj struct {
+		Id   *int    `db:"id"`
+		Name *string `db:"name"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("age = ?", []any{18})
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+		WithLimit(10),
+		WithOffset(5),
+	)
+	s.Require().NoError(err)
+	s.Equal("UPDATE test_table\nSET id = ?, name = ?\nWHERE (1=1)\nAND (\nage = ?\n)\nLIMIT 10\nOFFSET 5", sqlStr)
+	s.Equal([]any{1, "test", 18}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
 type NewDiffSQLPatchSuite struct {
 	suite.Suite
 }

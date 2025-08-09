@@ -110,13 +110,21 @@ func (s *SQLPatch) GenerateSQL() (sqlStr string, args []any, err error) {
 	}
 
 	sqlBuilder.WriteString(strings.TrimSpace(where) + "\n")
-	sqlBuilder.WriteString(")")
+	sqlBuilder.WriteString(")\n")
+
+	if s.limit > 0 {
+		sqlBuilder.WriteString(fmt.Sprintf("LIMIT %d\n", s.limit))
+	}
+
+	if s.offset > 0 {
+		sqlBuilder.WriteString(fmt.Sprintf("OFFSET %d\n", s.offset))
+	}
 
 	sqlArgs := s.joinArgs
 	sqlArgs = append(sqlArgs, s.args...)
 	sqlArgs = append(sqlArgs, s.whereArgs...)
 
-	return sqlBuilder.String(), sqlArgs, nil
+	return strings.TrimSpace(sqlBuilder.String()), sqlArgs, nil
 }
 
 // PerformPatch executes the SQL update statement for the given resource.

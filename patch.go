@@ -68,6 +68,12 @@ type SQLPatch struct {
 	//
 	// This func should return true is the field is to be ignored
 	ignoreFieldsFunc IgnoreFieldsFunc
+
+	// limit is the limit for the SQL query
+	limit int
+
+	// offset is the offset for the SQL query
+	offset int
 }
 
 // newPatchDefaults creates a new SQLPatch with default options.
@@ -87,6 +93,8 @@ func newPatchDefaults(opts ...PatchOpt) *SQLPatch {
 		includeNilValues:  false,
 		ignoreFields:      nil,
 		ignoreFieldsFunc:  nil,
+		limit:             0,
+		offset:            0,
 	}
 
 	for _, opt := range opts {
