@@ -220,7 +220,7 @@ func (s *SQLPatch) convertParameterPlaceholders(sqlStr string) string {
 		// Convert ? placeholders to $1, $2, $3, etc.
 		placeholderIndex := 1
 		result := strings.Builder{}
-		
+
 		for _, char := range sqlStr {
 			if char == '?' {
 				result.WriteString(fmt.Sprintf("$%d", placeholderIndex))
@@ -229,10 +229,10 @@ func (s *SQLPatch) convertParameterPlaceholders(sqlStr string) string {
 				result.WriteRune(char)
 			}
 		}
-		
+
 		return result.String()
 	}
-	
+
 	// For MySQL and SQLite, return unchanged (they use ?)
 	return sqlStr
 }

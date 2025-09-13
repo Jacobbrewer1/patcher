@@ -2141,14 +2141,14 @@ func (s *postgreSQLDialectSuite) TestGenerateSQL_PostgreSQL_ComplexTypes() {
 	)
 
 	s.Require().NoError(err)
-	
+
 	// Verify parameter placeholder conversion
 	s.Contains(sqlStr, "name = $1")
 	s.Contains(sqlStr, "active = $2")
 	s.Contains(sqlStr, "score = $3")
 	s.Contains(sqlStr, "balance = $4")
 	s.Contains(sqlStr, "id = $5 AND active = $6")
-	
+
 	s.Equal([]any{"Alice", true, 100, 99.99, 42, true}, args)
 
 	mw.AssertExpectations(s.T())
@@ -2183,12 +2183,12 @@ func (s *postgreSQLDialectSuite) TestGenerateSQL_PostgreSQL_HighParameterCount()
 
 	// Complex WHERE clause with multiple conditions
 	mw := NewMockWherer(s.T())
-	mw.On("Where").Return("account_id = ? AND created_at > ? AND status IN (?, ?) AND region = ?", 
+	mw.On("Where").Return("account_id = ? AND created_at > ? AND status IN (?, ?) AND region = ?",
 		[]any{456, "2023-01-01", "active", "verified", "north"})
 
 	// Complex JOIN clause with parameters
 	mj := NewMockJoiner(s.T())
-	mj.On("Join").Return("JOIN accounts a ON users.account_id = a.id AND a.type = ? AND a.tier >= ? LEFT JOIN addresses addr ON users.id = addr.user_id AND addr.is_primary = ?", 
+	mj.On("Join").Return("JOIN accounts a ON users.account_id = a.id AND a.type = ? AND a.tier >= ? LEFT JOIN addresses addr ON users.id = addr.user_id AND addr.is_primary = ?",
 		[]any{"premium", 5, true})
 
 	sqlStr, args, err := GenerateSQL(obj,
@@ -2199,15 +2199,15 @@ func (s *postgreSQLDialectSuite) TestGenerateSQL_PostgreSQL_HighParameterCount()
 	)
 
 	s.Require().NoError(err)
-	
+
 	// Verify parameter placeholder conversion for all parameters
 	// Expected: JOIN params (3) + SET params (9) + WHERE params (5) = 17 total parameters
-	
+
 	// Check JOIN parameters ($1, $2, $3)
 	s.Contains(sqlStr, "a.type = $1")
-	s.Contains(sqlStr, "a.tier >= $2") 
+	s.Contains(sqlStr, "a.tier >= $2")
 	s.Contains(sqlStr, "addr.is_primary = $3")
-	
+
 	// Check SET parameters ($4 through $12)
 	s.Contains(sqlStr, "first_name = $4")
 	s.Contains(sqlStr, "last_name = $5")
@@ -2218,18 +2218,18 @@ func (s *postgreSQLDialectSuite) TestGenerateSQL_PostgreSQL_HighParameterCount()
 	s.Contains(sqlStr, "country = $10")
 	s.Contains(sqlStr, "city = $11")
 	s.Contains(sqlStr, "phone_number = $12")
-	
+
 	// Check WHERE parameters ($13 through $17)
 	s.Contains(sqlStr, "account_id = $13")
 	s.Contains(sqlStr, "created_at > $14")
 	s.Contains(sqlStr, "status IN ($15, $16)")
 	s.Contains(sqlStr, "region = $17")
-	
+
 	// Verify all arguments are preserved in correct order
 	expectedArgs := []any{
 		// JOIN args first
 		"premium", 5, true,
-		// SET args 
+		// SET args
 		"John", "Doe", "john.doe@example.com", 30, true, 1234.56, "USA", "New York", "+1-555-123-4567",
 		// WHERE args
 		456, "2023-01-01", "active", "verified", "north",
