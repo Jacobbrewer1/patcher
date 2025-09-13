@@ -2113,3 +2113,47 @@ func (s *postgreSQLDialectSuite) TestNewSQLPatch_PostgreSQL_Success() {
 	s.Equal([]any{1, "test"}, patch.args)
 	s.Equal(DialectPostgreSQL, patch.dialect)
 }
+
+func (s *postgreSQLDialectSuite) TestGenerateSQL_PostgreSQL_ComplexTypes() {
+	type complexObj struct {
+		ID      *int     `db:"id" patcher:"-"`
+		Name    *string  `db:"name"`
+		Active  *bool    `db:"active"`
+		Score   *int     `db:"score"`
+		Balance *float64 `db:"balance"`
+	}
+
+	obj := complexObj{
+		ID:      ptr(42),
+		Name:    ptrString("Alice"),
+		Active:  ptrBool(true),
+		Score:   ptr(100),
+		Balance: ptrFloat64(99.99),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("id = ? AND active = ?", []any{42, true})
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("users"),
+		WithWhere(mw),
+		WithDialect(DialectPostgreSQL),
+	)
+
+	s.Require().NoError(err)
+	
+	// Verify parameter placeholder conversion
+	s.Contains(sqlStr, "name = $1")
+	s.Contains(sqlStr, "active = $2")
+	s.Contains(sqlStr, "score = $3")
+	s.Contains(sqlStr, "balance = $4")
+	s.Contains(sqlStr, "id = $5 AND active = $6")
+	
+	s.Equal([]any{"Alice", true, 100, 99.99, 42, true}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func ptrString(s string) *string    { return &s }
+func ptrBool(b bool) *bool          { return &b }
+func ptrFloat64(f float64) *float64 { return &f }
