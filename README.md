@@ -258,6 +258,10 @@ query, simplifying the code and reducing the risk of errors.
     * You can pass a struct that implements the `WhereTyper` interface to use `OR` in the where clause. Patcher will
       default to `AND` if the `WhereTyper` interface is not implemented.
 * `WithJoin(joinClause Joiner)`: Add join clauses to the SQL query.
+* `WithDialect(dialect SQLDialect)`: Specify the SQL dialect for parameter placeholders.
+    * `DialectMySQL` (default): Uses `?` parameter placeholders
+    * `DialectSQLite`: Uses `?` parameter placeholders (same as MySQL)
+    * `DialectPostgreSQL`: Uses `$1, $2, $3` parameter placeholders
 * `includeZeroValues`: Set to true to include zero values in the Patch.
 * `includeNilValues`: Set to true to include nil values in the Patch.
 
@@ -501,6 +505,81 @@ approach.
 
 If you would like to use `OR` in the where clause, you can apply the `patcher.WhereTyper` interface to your where
 struct. Please take a look at the [example here](./examples/where_type).
+
+#### PostgreSQL Support
+
+Patcher supports PostgreSQL parameter placeholders (`$1, $2, $3`) by using the `WithDialect` option:
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/jacobbrewer1/patcher"
+)
+
+type User struct {
+	ID    *int    `db:"id" patcher:"-" json:"id,omitempty"`
+	Name  *string `db:"name" json:"name,omitempty"`
+	Email *string `db:"email" json:"email,omitempty"`
+}
+
+type UserWhere struct {
+	ID *int `db:"id"`
+}
+
+func NewUserWhere(id int) *UserWhere {
+	return &UserWhere{ID: &id}
+}
+
+func (u *UserWhere) Where() (sqlStr string, sqlArgs []any) {
+	return "id = ?", []any{*u.ID}
+}
+
+func main() {
+	const jsonStr = `{"id": 1, "name": "john", "email": "john@example.com"}`
+
+	user := new(User)
+	if err := json.Unmarshal([]byte(jsonStr), user); err != nil {
+		panic(err)
+	}
+
+	condition := NewUserWhere(*user.ID)
+
+	// Generate SQL for PostgreSQL
+	sqlStr, args, err := patcher.GenerateSQL(
+		user,
+		patcher.WithTable("users"),
+		patcher.WithWhere(condition),
+		patcher.WithDialect(patcher.DialectPostgreSQL),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(sqlStr)
+	fmt.Println(args)
+}
+```
+
+This will output:
+
+```sql
+UPDATE users
+SET name = $1, email = $2
+WHERE (1=1)
+AND (
+id = $3
+)
+```
+
+with the args:
+
+```
+["john", "john@example.com", 1]
+```
 
 ### Joins
 

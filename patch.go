@@ -8,6 +8,18 @@ import (
 	"strings"
 )
 
+// SQLDialect represents the SQL dialect to use for parameter placeholders
+type SQLDialect int
+
+const (
+	// DialectMySQL uses ? for parameter placeholders (default)
+	DialectMySQL SQLDialect = iota
+	// DialectSQLite uses ? for parameter placeholders (same as MySQL)
+	DialectSQLite
+	// DialectPostgreSQL uses $1, $2, $3 for parameter placeholders
+	DialectPostgreSQL
+)
+
 var (
 	// ErrNoDatabaseConnection is returned when no database connection is set
 	ErrNoDatabaseConnection = errors.New("no database connection set")
@@ -68,6 +80,9 @@ type SQLPatch struct {
 	//
 	// This func should return true is the field is to be ignored
 	ignoreFieldsFunc IgnoreFieldsFunc
+
+	// dialect is the SQL dialect to use for parameter placeholders
+	dialect SQLDialect
 }
 
 // newPatchDefaults creates a new SQLPatch with default options.

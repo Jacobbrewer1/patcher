@@ -1971,3 +1971,145 @@ func (s *NewDiffSQLPatchSuite) TestNewDiffSQLPatch_Success_SqlGen_IncludeNilValu
 	s.Equal("UPDATE test_table\nSET description = ?, addr = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
 	s.Equal([]any{"", nil, 1}, args)
 }
+
+type postgreSQLDialectSuite struct {
+	suite.Suite
+}
+
+func TestPostgreSQLDialectSuite(t *testing.T) {
+	suite.Run(t, new(postgreSQLDialectSuite))
+}
+
+func (s *postgreSQLDialectSuite) TestGenerateSQL_PostgreSQL_Success() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("id = ?", []any{1})
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+		WithDialect(DialectPostgreSQL),
+	)
+
+	s.Require().NoError(err)
+	s.Equal("UPDATE test_table\nSET id_tag = $1, name_tag = $2\nWHERE (1=1)\nAND (\nid = $3\n)", sqlStr)
+	s.Equal([]any{1, "test", 1}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *postgreSQLDialectSuite) TestGenerateSQL_MySQL_DefaultBehavior() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("id = ?", []any{1})
+
+	// Test default MySQL dialect (should use ? placeholders)
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+		WithDialect(DialectMySQL),
+	)
+
+	s.Require().NoError(err)
+	s.Equal("UPDATE test_table\nSET id_tag = ?, name_tag = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
+	s.Equal([]any{1, "test", 1}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *postgreSQLDialectSuite) TestGenerateSQL_SQLite_SameBehaviorAsMySQL() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("id = ?", []any{1})
+
+	// Test SQLite dialect (should use ? placeholders like MySQL)
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("test_table"),
+		WithWhere(mw),
+		WithDialect(DialectSQLite),
+	)
+
+	s.Require().NoError(err)
+	s.Equal("UPDATE test_table\nSET id_tag = ?, name_tag = ?\nWHERE (1=1)\nAND (\nid = ?\n)", sqlStr)
+	s.Equal([]any{1, "test", 1}, args)
+
+	mw.AssertExpectations(s.T())
+}
+
+func (s *postgreSQLDialectSuite) TestGenerateSQL_PostgreSQL_WithJoin() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("table1.id = ?", []any{1})
+
+	mj := NewMockJoiner(s.T())
+	mj.On("Join").Return("JOIN table2 ON table1.id = table2.user_id AND table2.active = ?", []any{true})
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("table1"),
+		WithWhere(mw),
+		WithJoin(mj),
+		WithDialect(DialectPostgreSQL),
+	)
+
+	s.Require().NoError(err)
+	s.Equal("UPDATE table1\nJOIN table2 ON table1.id = table2.user_id AND table2.active = $1\nSET id_tag = $2, name_tag = $3\nWHERE (1=1)\nAND (\ntable1.id = $4\n)", sqlStr)
+	s.Equal([]any{true, 1, "test", 1}, args)
+
+	mw.AssertExpectations(s.T())
+	mj.AssertExpectations(s.T())
+}
+
+func (s *postgreSQLDialectSuite) TestNewSQLPatch_PostgreSQL_Success() {
+	type testObj struct {
+		Id   *int    `db:"id_tag"`
+		Name *string `db:"name_tag"`
+	}
+
+	obj := testObj{
+		Id:   ptr(1),
+		Name: ptr("test"),
+	}
+
+	patch := NewSQLPatch(obj, WithDialect(DialectPostgreSQL))
+
+	// The internal fields should still use ? placeholders
+	s.Equal([]string{"id_tag = ?", "name_tag = ?"}, patch.fields)
+	s.Equal([]any{1, "test"}, patch.args)
+	s.Equal(DialectPostgreSQL, patch.dialect)
+}
