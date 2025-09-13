@@ -116,7 +116,10 @@ func (s *SQLPatch) GenerateSQL() (sqlStr string, args []any, err error) {
 	sqlArgs = append(sqlArgs, s.args...)
 	sqlArgs = append(sqlArgs, s.whereArgs...)
 
-	return sqlBuilder.String(), sqlArgs, nil
+	// Convert parameter placeholders based on dialect
+	finalSQL := s.convertParameterPlaceholders(sqlBuilder.String())
+
+	return finalSQL, sqlArgs, nil
 }
 
 // PerformPatch executes the SQL update statement for the given resource.
@@ -209,4 +212,27 @@ func NewDiffSQLPatch[T any](old, newT *T, opts ...PatchOpt) (*SQLPatch, error) {
 
 	patch.patchGen(old)
 	return patch, nil
+}
+
+// convertParameterPlaceholders converts SQL parameter placeholders based on the dialect
+func (s *SQLPatch) convertParameterPlaceholders(sqlStr string) string {
+	if s.dialect == DialectPostgreSQL {
+		// Convert ? placeholders to $1, $2, $3, etc.
+		placeholderIndex := 1
+		result := strings.Builder{}
+
+		for _, char := range sqlStr {
+			if char == '?' {
+				result.WriteString(fmt.Sprintf("$%d", placeholderIndex))
+				placeholderIndex++
+			} else {
+				result.WriteRune(char)
+			}
+		}
+
+		return result.String()
+	}
+
+	// For MySQL and SQLite, return unchanged (they use ?)
+	return sqlStr
 }

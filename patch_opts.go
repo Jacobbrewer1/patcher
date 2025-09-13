@@ -125,3 +125,12 @@ func WithIgnoredFieldsFunc(f IgnoreFieldsFunc) PatchOpt {
 		s.ignoreFieldsFunc = f
 	}
 }
+
+// WithDialect sets the SQL dialect to use for parameter placeholders.
+// Default is DialectMySQL which uses ? placeholders.
+// Use DialectPostgreSQL for $1, $2, $3 placeholders.
+func WithDialect(dialect SQLDialect) PatchOpt {
+	return func(s *SQLPatch) {
+		s.dialect = dialect
+	}
+}
