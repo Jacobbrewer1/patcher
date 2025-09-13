@@ -2154,6 +2154,93 @@ func (s *postgreSQLDialectSuite) TestGenerateSQL_PostgreSQL_ComplexTypes() {
 	mw.AssertExpectations(s.T())
 }
 
+func (s *postgreSQLDialectSuite) TestGenerateSQL_PostgreSQL_HighParameterCount() {
+	type userProfile struct {
+		ID          *int     `db:"id" patcher:"-"`
+		FirstName   *string  `db:"first_name"`
+		LastName    *string  `db:"last_name"`
+		Email       *string  `db:"email"`
+		Age         *int     `db:"age"`
+		IsActive    *bool    `db:"is_active"`
+		Balance     *float64 `db:"balance"`
+		Country     *string  `db:"country"`
+		City        *string  `db:"city"`
+		PhoneNumber *string  `db:"phone_number"`
+	}
+
+	obj := userProfile{
+		ID:          ptr(123),
+		FirstName:   ptrString("John"),
+		LastName:    ptrString("Doe"),
+		Email:       ptrString("john.doe@example.com"),
+		Age:         ptr(30),
+		IsActive:    ptrBool(true),
+		Balance:     ptrFloat64(1234.56),
+		Country:     ptrString("USA"),
+		City:        ptrString("New York"),
+		PhoneNumber: ptrString("+1-555-123-4567"),
+	}
+
+	// Complex WHERE clause with multiple conditions
+	mw := NewMockWherer(s.T())
+	mw.On("Where").Return("account_id = ? AND created_at > ? AND status IN (?, ?) AND region = ?", 
+		[]any{456, "2023-01-01", "active", "verified", "north"})
+
+	// Complex JOIN clause with parameters
+	mj := NewMockJoiner(s.T())
+	mj.On("Join").Return("JOIN accounts a ON users.account_id = a.id AND a.type = ? AND a.tier >= ? LEFT JOIN addresses addr ON users.id = addr.user_id AND addr.is_primary = ?", 
+		[]any{"premium", 5, true})
+
+	sqlStr, args, err := GenerateSQL(obj,
+		WithTable("users"),
+		WithWhere(mw),
+		WithJoin(mj),
+		WithDialect(DialectPostgreSQL),
+	)
+
+	s.Require().NoError(err)
+	
+	// Verify parameter placeholder conversion for all parameters
+	// Expected: JOIN params (3) + SET params (9) + WHERE params (5) = 17 total parameters
+	
+	// Check JOIN parameters ($1, $2, $3)
+	s.Contains(sqlStr, "a.type = $1")
+	s.Contains(sqlStr, "a.tier >= $2") 
+	s.Contains(sqlStr, "addr.is_primary = $3")
+	
+	// Check SET parameters ($4 through $12)
+	s.Contains(sqlStr, "first_name = $4")
+	s.Contains(sqlStr, "last_name = $5")
+	s.Contains(sqlStr, "email = $6")
+	s.Contains(sqlStr, "age = $7")
+	s.Contains(sqlStr, "is_active = $8")
+	s.Contains(sqlStr, "balance = $9")
+	s.Contains(sqlStr, "country = $10")
+	s.Contains(sqlStr, "city = $11")
+	s.Contains(sqlStr, "phone_number = $12")
+	
+	// Check WHERE parameters ($13 through $17)
+	s.Contains(sqlStr, "account_id = $13")
+	s.Contains(sqlStr, "created_at > $14")
+	s.Contains(sqlStr, "status IN ($15, $16)")
+	s.Contains(sqlStr, "region = $17")
+	
+	// Verify all arguments are preserved in correct order
+	expectedArgs := []any{
+		// JOIN args first
+		"premium", 5, true,
+		// SET args 
+		"John", "Doe", "john.doe@example.com", 30, true, 1234.56, "USA", "New York", "+1-555-123-4567",
+		// WHERE args
+		456, "2023-01-01", "active", "verified", "north",
+	}
+	s.Equal(expectedArgs, args)
+	s.Len(args, 17) // Confirm we have 17 total parameters
+
+	mw.AssertExpectations(s.T())
+	mj.AssertExpectations(s.T())
+}
+
 func ptrString(s string) *string    { return &s }
 func ptrBool(b bool) *bool          { return &b }
 func ptrFloat64(f float64) *float64 { return &f }
